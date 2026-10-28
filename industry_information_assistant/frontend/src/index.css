@@ -1,0 +1,49 @@
+/**
+ * Copyright © 2026 深圳市深维智见教育科技有限公司 版权所有
+ * 未经授权，禁止转售或仿制。
+ */
+
+:root {
+  background-color: #fff;
+  font-size: 14px;
+  line-height: 1.5;
+  font-family:
+    Inter,
+    Pingfang SC,
+    Microsoft Yahei,
+    sans-serif;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.scrollbar-style {
+  scrollbar-width: thin;
+}
+.scrollbar-style::-webkit-scrollbar {
+  width: 8px;
+}
+
+/* 隐藏浏览器最外层滚动条，普通页面仍可用滚轮滚动。 */
+html,
+body {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+/* 双栏研究页由各自内容区滚动，禁止浮层或缩放产生外层滚动。 */
+html:has(.com-page-layout.wide-right-mode),
+body:has(.com-page-layout.wide-right-mode) {
+  height: 100%;
+  overflow: hidden;
+  scrollbar-gutter: auto;
+}
