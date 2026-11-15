@@ -1,3 +1,4 @@
+# 项目配置：声明 Python 版本、运行与开发依赖，以及 pytest 设置。 
 [project]
 name = "projects"
 version = "0.1.0"
