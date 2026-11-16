@@ -1,0 +1,54 @@
+"""定义 Agent 版本及注册表，保存版本说明、运行入口和默认选项。"""
+
+from collections.abc import Awaitable, Callable
+from dataclasses import dataclass, field
+from typing import Any
+
+from app.agents.closedbook import run as closedbook_run
+from app.trace import Trace
+
+
+@dataclass(frozen=True)
+class Version:
+    """一个可重跑的 Agent 版本；运行器负责合并并复制选项。"""
+
+    id: str
+    label: str
+    description: str
+    run: Callable[[str, Trace, dict[str, Any]], Awaitable[str]]
+    options: dict[str, Any] = field(default_factory=dict)
+
+
+_VERSIONS: dict[str, Version] = {}
+
+
+def register(version: Version) -> None:
+    """登记版本，拒绝覆盖同名版本以保留对照入口。"""
+    if version.id in _VERSIONS:
+        raise ValueError(f"版本已存在：{version.id}")
+    _VERSIONS[version.id] = version
+
+
+def get_version(version_id: str) -> Version:
+    """根据稳定编号查找版本，未知编号给出明确错误。"""
+    try:
+        return _VERSIONS[version_id]
+    except KeyError:
+        raise ValueError(f"未知版本：{version_id}") from None
+
+
+def list_versions() -> list[dict[str, str]]:
+    """返回可供命令行和页面展示的版本说明。"""
+    return [
+        {"id": version.id, "label": version.label, "description": version.description}
+        for version in _VERSIONS.values()
+    ]
+
+
+register(Version(
+    id="v0-closedbook",
+    label="闭卷",
+    description="仅凭模型记忆作答，不提供搜索或阅读工具。",
+    run=closedbook_run,
+    options={"temperature": 0},
+))

@@ -6,12 +6,14 @@ from typing import Any
 from openai import APIConnectionError, APIStatusError, AsyncOpenAI, RateLimitError
 
 from app.config import settings
+from app.trace import Trace
 
 
 class LLM:
     """异步调用百炼聊天接口，并累计 prompt 与 completion token。"""
 
-    def __init__(self) -> None:
+    def __init__(self, trace: Trace | None = None) -> None:
+        self.trace = trace
         if not settings.api_key:
             raise ValueError("缺少 DASHSCOPE_API_KEY，请在本地 .env 中配置。")
 
@@ -50,6 +52,9 @@ class LLM:
                 if response.usage:
                     self.prompt_tokens += response.usage.prompt_tokens or 0
                     self.completion_tokens += response.usage.completion_tokens or 0
+                    if self.trace is not None:
+                        self.trace.prompt_tokens += response.usage.prompt_tokens or 0
+                        self.trace.completion_tokens += response.usage.completion_tokens or 0
                 return response
             except (APIConnectionError, RateLimitError):
                 if attempt == 2:

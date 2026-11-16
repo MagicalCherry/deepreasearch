@@ -1,0 +1,193 @@
+"""组织单题研究和批量评测，隔离题集标注，保存配置、逐题结果及续跑状态。"""
+
+import asyncio
+from copy import deepcopy
+import hashlib
+import json
+from pathlib import Path
+import re
+import subprocess
+from typing import Any
+
+from app.answer import normalize, parse
+from app.config import PROJECT_ROOT, settings
+from app.trace import Trace
+from app.versions import get_version
+
+
+DATASET_DIR = PROJECT_ROOT.parent / "MAS实操课程" / "01-项目任务书" / "验收题集"
+RUNS_DIR = PROJECT_ROOT / "runs"
+
+
+def load_questions(dataset: str) -> list[dict[str, str]]:
+    """只保留编号与题面，标注字段不离开数据加载边界。"""
+    if dataset not in {"smoke20", "dev100"}:
+        raise ValueError("当前仅支持 smoke20 和 dev100")
+    questions = []
+    for line in (DATASET_DIR / f"{dataset}.jsonl").read_text(encoding="utf-8-sig").splitlines():
+        if line.strip():
+            item = json.loads(line)
+            questions.append({"query_id": str(item["query_id"]), "query": item["query"]})
+    if len({item["query_id"] for item in questions}) != len(questions):
+        raise ValueError("题集中存在重复编号")
+    return questions
+
+
+def git_sha() -> str:
+    """记录代码提交号，不读取仓库配置或环境文件。"""
+    return subprocess.check_output(
+        ["git", "rev-parse", "HEAD"], cwd=PROJECT_ROOT, text=True,
+    ).strip()
+
+
+def write_json(path: Path, value: Any) -> None:
+    """先写临时文件再替换，防止中断留下半份状态或配置。"""
+    temporary = path.with_suffix(path.suffix + ".tmp")
+    temporary.write_text(json.dumps(value, ensure_ascii=False, indent=2), encoding="utf-8")
+    temporary.replace(path)
+
+
+async def research(question: str, version: str, trace: Trace, opts: dict | None = None) -> str:
+    """执行指定版本，统一输出答案与结束事件，保留并上抛运行错误。"""
+    try:
+        registered = get_version(version)
+        options = deepcopy(registered.options)
+        options.update(deepcopy(opts or {}))
+        async with asyncio.timeout(600):
+            response = normalize(await registered.run(question, trace, options))
+        trace.emit("answer", **parse(response))
+        trace.stop_reason = trace.stop_reason or "completed"
+        trace.emit(
+            "done", usage={"prompt_tokens": trace.prompt_tokens, "completion_tokens": trace.completion_tokens},
+            seconds=trace.seconds, n_search=trace.n_search, n_read=trace.n_read,
+        )
+        return response
+    except asyncio.CancelledError:
+        trace.stop_reason = "cancelled"
+        trace.emit("error", message="研究已取消")
+        raise
+    except Exception as exc:
+        trace.stop_reason = "timeout" if isinstance(exc, TimeoutError) else "error"
+        trace.emit("error", message=f"{type(exc).__name__}: {exc}")
+        raise
+
+
+def load_results(path: Path) -> dict[str, dict]:
+    """同一编号取最后一次尝试；仅修复中断造成的末行不完整记录。"""
+    records = {}
+    if not path.exists():
+        return records
+    with path.open("r+b") as stream:
+        while True:
+            offset = stream.tell()
+            line = stream.readline()
+            if not line:
+                break
+            if not line.strip():
+                continue
+            try:
+                record = json.loads(line)
+            except (ValueError, UnicodeDecodeError):
+                if not line.endswith(b"\n") and not stream.read(1):
+                    stream.truncate(offset)
+                    break
+                raise ValueError("results.jsonl 存在损坏的完整行，请先检查记录") from None
+            records[str(record["query_id"])] = record
+        # 合法的末行也可能缺换行，避免续写时两条记录黏连。
+        stream.seek(0, 2)
+        if stream.tell():
+            stream.seek(-1, 2)
+            if stream.read(1) != b"\n":
+                stream.write(b"\n")
+    return records
+
+
+async def run_eval(dataset: str, version: str, concurrency: int, run_id: str) -> dict:
+    """受限并发评测：完成即落盘，续跑跳过成功题并重试错误题。"""
+    if concurrency < 1:
+        raise ValueError("并发数必须大于0")
+    if not re.fullmatch(r"[A-Za-z0-9_-]+", run_id):
+        raise ValueError("run_id 只能包含字母、数字、下划线和短横线")
+    registered = get_version(version)
+    questions = load_questions(dataset)
+    config = {
+        "version": version, "model": settings.model, "dataset": dataset,
+        "concurrency": concurrency, "options": deepcopy(registered.options),
+        "git_sha": git_sha(), "max_tokens": settings.max_tokens,
+        "budget": {"seconds": 600, "n_search": 50},
+        "search": {"enabled": version != "v0-closedbook", "index": None,
+                   "parameters": None},
+        "questions_sha256": hashlib.sha256(json.dumps(questions, sort_keys=True).encode()).hexdigest(),
+    }
+    directory = RUNS_DIR / run_id
+    directory.mkdir(parents=True, exist_ok=True)
+    # 排他锁避免同一次运行被两个进程同时追加。
+    lock_path = directory / ".running.lock"
+    try:
+        lock = lock_path.open("x")
+    except FileExistsError:
+        raise ValueError("该运行已被锁定；确认旧进程已退出后再移除 .running.lock") from None
+    try:
+        config_path = directory / "config.json"
+        if config_path.exists():
+            if json.loads(config_path.read_text(encoding="utf-8")) != config:
+                raise ValueError("续跑配置或代码提交已改变，请使用新的 run_id")
+        else:
+            write_json(config_path, config)
+        results_path = directory / "results.jsonl"
+        records = load_results(results_path)
+        expected = {item["query_id"] for item in questions}
+
+        def save_status(state: str) -> dict:
+            selected = [item for key, item in records.items() if key in expected]
+            status = {
+                "run_id": run_id, "status": state, "total": len(questions),
+                "completed": sum(item.get("error") is None for item in selected),
+                "errors": sum(item.get("error") is not None for item in selected),
+            }
+            write_json(directory / "status.json", status)
+            return status
+
+        semaphore = asyncio.Semaphore(concurrency)
+
+        async def run_one(item: dict) -> None:
+            async with semaphore:
+                trace = Trace()
+                response, error = "", None
+                try:
+                    response = await research(item["query"], version, trace)
+                except Exception as exc:
+                    error = f"{type(exc).__name__}: {exc}"
+                record = {
+                    "query_id": item["query_id"], "response": response,
+                    "retrieved_docids": sorted(trace.retrieved),
+                    "n_search": trace.n_search, "n_read": trace.n_read,
+                    "prompt_tokens": trace.prompt_tokens, "completion_tokens": trace.completion_tokens,
+                    "seconds": trace.seconds, "error": error,
+                    "events": trace.events, "stop_reason": trace.stop_reason,
+                }
+                with results_path.open("a", encoding="utf-8") as stream:
+                    stream.write(json.dumps(record, ensure_ascii=False) + "\n")
+                    stream.flush()
+                records[item["query_id"]] = record
+                status = save_status("running")
+                print(f"完成 {status['completed']}/{status['total']}，运行错误 {status['errors']}", flush=True)
+
+        pending = [item for item in questions if item["query_id"] not in records
+                   or records[item["query_id"]].get("error") is not None]
+        save_status("running")
+        tasks = [asyncio.create_task(run_one(item)) for item in pending]
+        try:
+            await asyncio.gather(*tasks)
+        except BaseException:
+            for task in tasks:
+                task.cancel()
+            await asyncio.gather(*tasks, return_exceptions=True)
+            save_status("interrupted")
+            raise
+        return save_status("completed" if not any(
+            records[item["query_id"]].get("error") is not None for item in questions
+        ) else "completed_with_errors")
+    finally:
+        lock.close()
+        lock_path.unlink(missing_ok=True)
