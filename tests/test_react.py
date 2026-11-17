@@ -14,6 +14,10 @@ class FakeSearch:
         return {"results": [{"docid": "12", "title": "示例文档", "score": 1.2,
                              "snippet": "示例片段"}]}
 
+    async def document(self, docid, max_tokens=None):
+        return {"docid": docid, "title": "示例文档", "url": "https://example.org/doc",
+                "text": "示例正文 " * 100}
+
 
 class ScriptedLLM:
     """前若干轮请求搜索；收回工具或达到剧本轮次后返回答案。"""
@@ -70,3 +74,17 @@ async def test_react_withdraws_tools_after_three_calls():
     assert all(request.get("tools") for request in llm.requests[:3])
     assert not llm.requests[3].get("tools")
     assert "Exact Answer:" in response
+
+
+async def test_document_tool_records_read_and_limits_text():
+    import tiktoken
+
+    trace = Trace()
+    tools = Tools(search=FakeSearch(), trace=trace, document_tokens=20)
+    result = await tools.call("get_document", {"docid": "12"})
+
+    assert set(result) == {"docid", "url", "text"}
+    assert len(tiktoken.get_encoding("cl100k_base").encode(result["text"])) <= 20
+    assert trace.n_read == 1
+    assert trace.retrieved == {"12"}
+    assert trace.events[-1]["event"] == "read"

@@ -5,6 +5,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from app.agents.closedbook import run as closedbook_run
+from app.agents.single import run as single_run
 from app.trace import Trace
 
 
@@ -51,4 +52,13 @@ register(Version(
     description="仅凭模型记忆作答，不提供搜索或阅读工具。",
     run=closedbook_run,
     options={"temperature": 0},
+))
+
+register(Version(
+    id="v0-single",
+    label="单 Agent",
+    description="官方提示词的ReAct搜索基线，提供搜索和原文读取，最多30次工具调用。",
+    run=single_run,
+    options={"k": 5, "snippet_tokens": 512, "document_tokens": 8000,
+             "max_tool_calls": 30, "max_turns": 40},
 ))

@@ -27,7 +27,7 @@ class LLM:
 
     async def chat(
         self,
-        messages: list[dict[str, str]],
+        messages: list[dict[str, Any]],
         tools: list[dict[str, Any]] | None = None,
         json_mode: bool = False,
         **kwargs: Any,
