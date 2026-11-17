@@ -45,6 +45,10 @@ def test_dataset_boundary_discards_labels(tmp_path, monkeypatch):
 
 
 async def test_eval_resumes_success_and_retries_errors(tmp_path, monkeypatch):
+    async def fake_search_config(enabled):
+        return {"enabled": enabled, "index": "default", "parameters": {"k1": 0.9, "b": 0.4, "unit": "doc"}}
+
+    monkeypatch.setattr(runner, "search_config", fake_search_config)
     monkeypatch.setattr(runner, "RUNS_DIR", tmp_path)
     monkeypatch.setattr(runner, "git_sha", lambda: "test-commit")
     monkeypatch.setattr(runner, "load_questions", lambda _: [
@@ -70,6 +74,8 @@ async def test_eval_resumes_success_and_retries_errors(tmp_path, monkeypatch):
     assert records["1"]["events"][-1]["event"] == "done"
     config = json.loads((tmp_path / "test-run" / "config.json").read_text(encoding="utf-8"))
     assert config["git_sha"] == "test-commit"
+    assert config["search"]["index"] == "default"
+    assert config["search"]["parameters"]["k1"] == 0.9
     monkeypatch.setattr(runner, "git_sha", lambda: "different-commit")
     with pytest.raises(ValueError, match="续跑配置或代码提交已改变"):
         await runner.run_eval("smoke20", "fake", 1, "test-run")
@@ -80,3 +86,28 @@ def test_resume_repairs_incomplete_last_line(tmp_path):
     path.write_bytes(b'{"query_id":"1","error":null}\n{"query_id":')
     assert list(runner.load_results(path)) == ["1"]
     assert path.read_bytes() == b'{"query_id":"1","error":null}\n'
+
+
+@pytest.mark.parametrize("ready", [True, False])
+async def test_search_config_reads_service_and_closes_client(monkeypatch, ready):
+    closed = []
+
+    class FakeSearchClient:
+        async def health(self):
+            return {"status": "ok", "docs": 100195, "default_index": "custom",
+                    "indexes": [{"name": "custom", "status": "ready" if ready else "building",
+                                 "k1": 1.2, "b": 0.6, "unit": "doc"}]}
+
+        async def close(self):
+            closed.append(True)
+
+    monkeypatch.setattr(runner, "SearchClient", FakeSearchClient)
+    if ready:
+        config = await runner.search_config(enabled=False)
+        assert config["enabled"] is False
+        assert config["index"] == "custom"
+        assert config["parameters"] == {"k1": 1.2, "b": 0.6, "unit": "doc"}
+    else:
+        with pytest.raises(ValueError, match="索引未就绪"):
+            await runner.search_config(enabled=False)
+    assert closed == [True]

@@ -11,12 +11,32 @@ from typing import Any
 
 from app.answer import normalize, parse
 from app.config import PROJECT_ROOT, settings
+from app.search import SearchClient
 from app.trace import Trace
 from app.versions import get_version
 
 
 DATASET_DIR = PROJECT_ROOT.parent / "MAS实操课程" / "01-项目任务书" / "验收题集"
 RUNS_DIR = PROJECT_ROOT / "runs"
+
+
+async def search_config(enabled: bool) -> dict:
+    """从服务健康接口读取索引快照；记录配置不等于向模型提供检索工具。"""
+    client = SearchClient()
+    try:
+        health = await client.health()
+    finally:
+        await client.close()
+    name = health["default_index"]
+    index = next((item for item in health["indexes"] if item["name"] == name), None)
+    if health.get("status") != "ok" or index is None or index.get("status") != "ready":
+        raise ValueError("默认检索索引未就绪，无法保存评测配置")
+    return {
+        "enabled": enabled, "url": settings.search_url,
+        "index": name,
+        "parameters": {key: index[key] for key in ("k1", "b", "unit")},
+        "docs": health["docs"],
+    }
 
 
 def load_questions(dataset: str) -> list[dict[str, str]]:
@@ -115,8 +135,7 @@ async def run_eval(dataset: str, version: str, concurrency: int, run_id: str) ->
         "concurrency": concurrency, "options": deepcopy(registered.options),
         "git_sha": git_sha(), "max_tokens": settings.max_tokens,
         "budget": {"seconds": 600, "n_search": 50},
-        "search": {"enabled": version != "v0-closedbook", "index": None,
-                   "parameters": None},
+        "search": await search_config(enabled=version != "v0-closedbook"),
         "questions_sha256": hashlib.sha256(json.dumps(questions, sort_keys=True).encode()).hexdigest(),
     }
     directory = RUNS_DIR / run_id
