@@ -33,6 +33,7 @@ async def run(question: str, trace: Trace, opts: dict[str, Any]) -> str:
             search=search, trace=trace, k=opts.get("k", 5),
             snippet_tokens=opts.get("snippet_tokens", 512),
             document_tokens=opts.get("document_tokens", 8000),
+            recover_document_404=opts.get("recover_document_404", False),
         )
         return await react_loop(
             llm, [{"role": "user", "content": QUERY_TEMPLATE.format(Question=question)}],

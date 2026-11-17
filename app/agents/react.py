@@ -4,6 +4,7 @@ import json
 from typing import Any
 
 import tiktoken
+import httpx
 
 from app.trace import Trace
 
@@ -31,12 +32,14 @@ class Tools:
     """把本地检索客户端适配成模型工具，只返回实际服务提供的文档内容。"""
 
     def __init__(self, search: Any, trace: Trace, k: int = 5,
-                 snippet_tokens: int = 512, document_tokens: int = 8000) -> None:
+                 snippet_tokens: int = 512, document_tokens: int = 8000,
+                 recover_document_404: bool = False) -> None:
         self.search = search
         self.trace = trace
         self.k = k
         self.snippet_tokens = snippet_tokens
         self.document_tokens = document_tokens
+        self.recover_document_404 = recover_document_404
 
     @staticmethod
     def truncate(text: str, limit: int) -> str:
@@ -66,7 +69,18 @@ class Tools:
             docid = args.get("docid")
             if not isinstance(docid, str) or not docid.strip():
                 raise ValueError("get_document需要非空docid")
-            document = await self.search.document(docid, max_tokens=self.document_tokens)
+            try:
+                document = await self.search.document(docid, max_tokens=self.document_tokens)
+            except httpx.HTTPStatusError as exc:
+                if not self.recover_document_404 or exc.response.status_code != 404:
+                    raise
+                # 失败不计为成功阅读；工具回复随本轮调用继续占用原有预算。
+                return {"error": "document_not_found", "status_code": 404,
+                        "docid": docid, "message": (
+                            "The document service returned 404. No document was read. "
+                            "Use a docid from search results, not a title or URL. "
+                            "Search again if necessary."
+                        )}
             text = self.truncate(document["text"], self.document_tokens)
             self.trace.emit("read", docid=str(document["docid"]),
                             title=document.get("title", ""), span=f"前{self.document_tokens} token以内")
