@@ -21,7 +21,7 @@ from app.versions import get_version
 PAIRS = (
     ('s08-qwen37-closedbook-smoke20', 's08-qwen37-closedbook-dev100-reuse20'),
     ('s08-qwen37-single-smoke20', 's08-qwen37-single-dev100-reuse20'),
-    ('s08-qwen37-s4-smoke20-c8', 's08-qwen37-s4-dev100-reuse20'),
+    ('s08-qwen37-s4-smoke20', 's08-qwen37-s4-dev100-reuse20'),
 )
 
 
