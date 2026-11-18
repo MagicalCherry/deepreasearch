@@ -99,3 +99,5 @@ dr_version('v1.1', '约束规划', '按问题全部约束拆成三个子问题�
            planner='constraints')
 dr_version('v1.2', '检索式扩写', '继承约束规划，清理检索语法并扩写两个角度，用RRF合并结果。',
            expand=2)
+dr_version('v1.3', '假设驱动检索', '继承约束规划与检索扩写，提出候选并优先验证其未满足约束。',
+           analysis='hypothesis')

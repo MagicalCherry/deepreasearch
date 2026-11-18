@@ -29,3 +29,11 @@ def test_v12_adds_only_query_expansion_option():
     version = get_version('v1.2')
     assert version.options == {**previous, 'expand': 2}
     assert get_version('v1.1').options == previous
+
+
+def test_v13_adds_only_hypothesis_analysis_option():
+    """v1.3仅启用候选假设分析，继承v1.2检索扩写且不修改旧版选项。"""
+    previous = deepcopy(get_version('v1.2').options)
+    version = get_version('v1.3')
+    assert version.options == {**previous, 'analysis': 'hypothesis'}
+    assert get_version('v1.2').options == previous

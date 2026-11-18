@@ -1,10 +1,11 @@
 """按版本选项构造四角色；v1.1仅改变Chief规划，其他角色继承原样适配行为。"""
 
 from copy import deepcopy
+import json
 import re
 
 from app.agents import s4_port
-from .prompts import CONSTRAINT_PLANNING, PLANNING_SYSTEM, QUERY_EXPANSION
+from .prompts import CONSTRAINT_PLANNING, PLANNING_SYSTEM, QUERY_EXPANSION, HYPOTHESIS_ANALYSIS
 
 
 def clean_query(query):
@@ -77,6 +78,84 @@ class DRScout(s4_port.CorpusScout):
     def __init__(self, llm, trace, search, sources, opts):
         super().__init__(llm, trace, search, sources)
         self.opts = deepcopy(opts)
+        # 一个Scout实例的三个并发章节共享候选；不同题目使用不同实例，互不泄漏。
+        self.candidates = {}
+        self._constraints = []
+        self._question = ''
+
+    async def process(self, state):
+        self._constraints = deepcopy(state.get('_constraints', []))
+        self._question = state['query']
+        return await super().process(state)
+
+    async def _hypothesis_analysis(self, question, focus, results, limit):
+        documents = [{'title': r.get('title', ''), 'source_url': r.get('url', ''),
+                      'snippet': str(r.get('summary', ''))[:300]} for r in results[:limit]
+                     if isinstance(r, dict)]
+        response = await self.call_llm(
+            system_prompt='You analyze retrieved evidence and propose falsifiable candidate hypotheses. Return JSON only.',
+            user_prompt=HYPOTHESIS_ANALYSIS.format(
+                question=question, constraints=json.dumps(self._constraints, ensure_ascii=False),
+                focus=focus, candidates=json.dumps(list(self.candidates.values()), ensure_ascii=False),
+                documents=json.dumps(documents, ensure_ascii=False)),
+            json_mode=True, temperature=0.2,
+        )
+        parsed = self.parse_json_response(response)
+        if not isinstance(parsed, dict):
+            raise ValueError('候选分析未返回JSON对象')
+        return self._normalize_hypothesis_analysis(parsed)
+
+    def _normalize_hypothesis_analysis(self, parsed):
+        """过滤原角色按dict读取的列表，验证查询置前并复用两层追踪入口。"""
+        def objects(value):
+            return [x for x in value if isinstance(x, dict)] if isinstance(value, list) else []
+
+        result = deepcopy(parsed)
+        for key in ('candidates', 'extracted_facts', 'data_points', 'entities_discovered', 'hypothesis_evidence'):
+            result[key] = objects(result.get(key))
+        for fact in result['extracted_facts']:
+            fact['data_points'] = objects(fact.get('data_points'))
+        for entity in result['entities_discovered']:
+            if 'relations' in entity:
+                entity['relations'] = objects(entity['relations'])
+        verification = []
+        for candidate in result['candidates']:
+            name = candidate.get('name')
+            if not isinstance(name, str) or not name.strip():
+                continue
+            name = name.strip()
+            for key in ('satisfied_constraints', 'unmet_constraints'):
+                values = candidate.get(key, [])
+                candidate[key] = [x for x in values if isinstance(x, str)] if isinstance(values, list) else []
+            self.candidates[name] = candidate
+            query = clean_query(candidate.get('verification_query'))
+            if query and name.casefold() in query.casefold():
+                verification.append(query)
+        for key in ('follow_up_queries', 'further_tracing_queries'):
+            original = result.get(key, [])
+            original = original if isinstance(original, list) else []
+            queries = verification + [clean_query(x) for x in original]
+            result[key] = list(dict.fromkeys(x for x in queries if x))
+        insights = result.get('key_insights', [])
+        result['key_insights'] = [x for x in insights if isinstance(x, str)] if isinstance(insights, list) else []
+        result['source_tracing_queries'] = []
+        return result
+
+    async def _analyze_search_results(self, query, section, results, hypotheses=None):
+        if self.opts.get('analysis') != 'hypothesis':
+            return await super()._analyze_search_results(query, section, results, hypotheses)
+        if not results:
+            return None
+        return await self._hypothesis_analysis(query, section.get('description', ''), results, 15)
+
+    async def _analyze_deep_search_results(self, original_query, search_query, results,
+                                           search_type, hypotheses):
+        if self.opts.get('analysis') != 'hypothesis':
+            return await super()._analyze_deep_search_results(
+                original_query, search_query, results, search_type, hypotheses)
+        if not results:
+            return None
+        return await self._hypothesis_analysis(original_query, search_query, results, 6)
 
     async def _execute_search(self, query, count=10):
         if not self.opts.get('expand'):

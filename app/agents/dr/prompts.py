@@ -41,3 +41,31 @@ Avoid market commentary, instructions to a researcher, placeholders, quotation m
 operators and site filters. Return JSON only: {{"queries": ["first English keyword query", "second English keyword query"]}}.
 Original query: {query}
 """
+
+HYPOTHESIS_ANALYSIS = """Investigate the original factual question using ONLY the retrieved snippets below.
+Original question: {question}
+Explicit constraints: {constraints}
+Current subquestion or search: {focus}
+Previously proposed candidates (NOT established facts): {candidates}
+Retrieved documents:
+{documents}
+
+Extract only facts actually supported by the provided snippets and cite their exact source_url.
+If snippets lack an answer, say it remains unverified; do not fill gaps from memory.
+Propose named candidate entities where useful. For each candidate distinguish constraints supported
+by these documents from unmet, contradicted or still unknown constraints. Do not mark a candidate
+confirmed based only on plausibility. Generate one concrete ENGLISH verification query consisting
+of the candidate's full name plus keywords for a DIFFERENT unverified constraint.
+Never emit placeholders or researcher feedback sentences as search queries.
+Prioritize these verification queries over generic follow-up searches. Do not generate source tracing.
+Return JSON with this structure (all object-list elements must be objects, not strings):
+{{
+  "candidates": [{{"name":"full entity name", "satisfied_constraints":[],
+                    "unmet_constraints":[], "verification_query":"full entity name constraint keywords"}}],
+  "extracted_facts": [{{"content":"supported fact", "source_name":"title", "source_url":"exact retrieved URL", "credibility_score":0.5,"data_points":[]}}],
+  "data_points": [], "entities_discovered": [], "hypothesis_evidence": [],
+  "key_insights": [], "follow_up_queries": [], "further_tracing_queries": [],
+  "source_tracing_queries": []
+}}
+If there is no supported candidate or fact, return empty lists; do not invent one.
+"""
