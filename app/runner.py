@@ -4,6 +4,7 @@ import asyncio
 from copy import deepcopy
 import hashlib
 import json
+import os
 from pathlib import Path
 import re
 import subprocess
@@ -11,6 +12,7 @@ from typing import Any
 
 from app.answer import normalize, parse
 from app.config import PROJECT_ROOT, settings
+from app.llm import LLMError
 from app.search import SearchClient
 from app.trace import Trace
 from app.versions import get_version
@@ -87,7 +89,8 @@ async def research(question: str, version: str, trace: Trace, opts: dict | None 
         trace.emit("error", message="研究已取消")
         raise
     except Exception as exc:
-        trace.stop_reason = "timeout" if isinstance(exc, TimeoutError) else "error"
+        trace.stop_reason = (exc.kind if isinstance(exc, LLMError)
+                             else "timeout" if isinstance(exc, TimeoutError) else "error")
         trace.emit("error", message=f"{type(exc).__name__}: {exc}")
         raise
 
@@ -157,27 +160,43 @@ async def run_eval(dataset: str, version: str, concurrency: int, run_id: str) ->
         results_path = directory / "results.jsonl"
         records = load_results(results_path)
         expected = {item["query_id"] for item in questions}
+        stop_reason: str | None = None
+        tasks: list[asyncio.Task] = []
 
         def save_status(state: str) -> dict:
             selected = [item for key, item in records.items() if key in expected]
             status = {
                 "run_id": run_id, "status": state, "total": len(questions),
+                "pid": os.getpid(),
                 "completed": sum(item.get("error") is None for item in selected),
                 "errors": sum(item.get("error") is not None for item in selected),
             }
+            if stop_reason is not None:
+                status["reason"] = stop_reason
             write_json(directory / "status.json", status)
             return status
 
         semaphore = asyncio.Semaphore(concurrency)
 
         async def run_one(item: dict) -> None:
+            nonlocal stop_reason
             async with semaphore:
+                # 必须在获得并发位置后再检查，避免欠费后启动排队题目。
+                if stop_reason is not None:
+                    return
                 trace = Trace()
                 response, error = "", None
                 try:
                     response = await research(item["query"], version, trace)
                 except Exception as exc:
                     error = f"{type(exc).__name__}: {exc}"
+                    if isinstance(exc, LLMError) and exc.kind == "arrearage":
+                        # 在释放 semaphore 前封住入口，并通知在途任务取消。
+                        stop_reason = "arrearage"
+                        current = asyncio.current_task()
+                        for task in tasks:
+                            if task is not current and not task.done():
+                                task.cancel()
                 record = {
                     "query_id": item["query_id"], "response": response,
                     "retrieved_docids": sorted(trace.retrieved),
@@ -190,7 +209,7 @@ async def run_eval(dataset: str, version: str, concurrency: int, run_id: str) ->
                     stream.write(json.dumps(record, ensure_ascii=False) + "\n")
                     stream.flush()
                 records[item["query_id"]] = record
-                status = save_status("running")
+                status = save_status("stopped" if stop_reason else "running")
                 print(f"完成 {status['completed']}/{status['total']}，运行错误 {status['errors']}", flush=True)
 
         pending = [item for item in questions if item["query_id"] not in records
@@ -199,12 +218,18 @@ async def run_eval(dataset: str, version: str, concurrency: int, run_id: str) ->
         tasks = [asyncio.create_task(run_one(item)) for item in pending]
         try:
             await asyncio.gather(*tasks)
-        except BaseException:
+        except BaseException as exc:
             for task in tasks:
                 task.cancel()
             await asyncio.gather(*tasks, return_exceptions=True)
+            # 子任务因欠费被取消是正常停批；外部取消仍按中断上抛。
+            if (stop_reason == "arrearage" and isinstance(exc, asyncio.CancelledError)
+                    and not asyncio.current_task().cancelling()):
+                return save_status("stopped")
             save_status("interrupted")
             raise
+        if stop_reason is not None:
+            return save_status("stopped")
         return save_status("completed" if not any(
             records[item["query_id"]].get("error") is not None for item in questions
         ) else "completed_with_errors")
