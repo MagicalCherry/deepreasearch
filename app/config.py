@@ -22,6 +22,19 @@ os.environ["TIKTOKEN_CACHE_DIR"] = str(TIKTOKEN_CACHE_DIR)
 
 load_dotenv(ENV_FILE)
 
+# 低成本配置独立于密钥文件；original恢复环境文件中保存的原模型。
+MODEL_PROFILE = os.getenv("LLM_MODEL_PROFILE", "economy" if PROVIDER == "openrouter" else "original").strip().lower()
+if MODEL_PROFILE not in {"economy", "original"}:
+    raise ValueError("LLM_MODEL_PROFILE仅支持economy或original")
+if MODEL_PROFILE == "economy" and PROVIDER != "openrouter":
+    raise ValueError("economy配置使用OpenRouter，请设置LLM_PROVIDER=openrouter")
+MODEL = (
+    "qwen/qwen3.7-flash" if MODEL_PROFILE == "economy"
+    else os.getenv("OPENROUTER_MODEL", "qwen/qwen3.8-flash") if PROVIDER == "openrouter"
+    else os.getenv("LLM_MODEL", "qwen3.8-flash")
+)
+MODEL_OUTPUT_LIMIT = 65536 if MODEL in {"qwen/qwen3.7-flash", "qwen3.7-flash"} else 131072
+
 
 @dataclass(frozen=True)
 class Settings:
@@ -33,6 +46,7 @@ class Settings:
     max_tokens: int
     search_url: str
     provider: str = "dashscope"
+    model_profile: str = "original"
 
 
 settings = Settings(
@@ -42,9 +56,9 @@ settings = Settings(
         "https://openrouter.ai/api/v1" if PROVIDER == "openrouter"
         else "https://dashscope.aliyuncs.com/compatible-mode/v1",
     ),
-    model=os.getenv("OPENROUTER_MODEL", "qwen/qwen3.8-flash") if PROVIDER == "openrouter"
-        else os.getenv("LLM_MODEL", "qwen3.8-flash"),
-    max_tokens=131072,#qwen3.8-flash 最大输出长度
+    model=MODEL,
+    max_tokens=MODEL_OUTPUT_LIMIT,
     search_url=os.getenv("SEARCH_URL", "http://localhost:8765").rstrip("/"),
     provider=PROVIDER,
+    model_profile=MODEL_PROFILE,
 )

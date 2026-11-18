@@ -75,6 +75,8 @@ class LLM:
                            if settings.provider == "openrouter" else {"enable_thinking": False}),
             **kwargs,
         }
+        # 旧版本显式传入更大上限时也不能超过当前模型支持值；S4的16000保持不变。
+        request["max_tokens"] = min(request["max_tokens"], settings.max_tokens)
 
         if tools is not None:
             request["tools"] = tools
