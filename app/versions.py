@@ -62,3 +62,19 @@ register(Version(
     options={"k": 5, "snippet_tokens": 512, "document_tokens": 8000,
              "max_tool_calls": 30, "max_turns": 40, "recover_document_404": True},
 ))
+
+
+async def s4_run(question: str, trace: Trace, opts: dict[str, Any]) -> str:
+    """延迟导入接手系统，旧版本命令不因S4可选依赖缺失而无法启动。"""
+    from app.agents.s4_port import run
+    return await run(question, trace, opts)
+
+
+register(Version(
+    id="v1.0",
+    label="S4 原样多 Agent",
+    description="原始行业报告提示词与四角色流程，固定语料适配，最多三轮审核。",
+    run=s4_run,
+    options={"max_iterations": 3, "retries": 2,
+             "timeout_seconds": None, "max_search_calls": None},
+))

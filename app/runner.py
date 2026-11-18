@@ -90,7 +90,7 @@ async def research(question: str, version: str, trace: Trace, opts: dict | None 
         registered = get_version(version)
         options = deepcopy(registered.options)
         options.update(deepcopy(opts or {}))
-        async with asyncio.timeout(600):
+        async with asyncio.timeout(options.get("timeout_seconds", 600)):
             response = normalize(await registered.run(question, trace, options))
         trace.emit("answer", **parse(response))
         trace.stop_reason = trace.stop_reason or "completed"
@@ -153,7 +153,8 @@ async def run_eval(dataset: str, version: str, concurrency: int, run_id: str) ->
         "llm_provider": settings.provider, "llm_base_url": settings.base_url,
         "concurrency": concurrency, "options": deepcopy(registered.options),
         "git_sha": git_sha(), "max_tokens": settings.max_tokens,
-        "budget": {"seconds": 600, "n_search": 50},
+        "budget": {"seconds": registered.options.get("timeout_seconds", 600),
+                   "n_search": registered.options.get("max_search_calls", 50)},
         "search": await search_config(enabled=version != "v0-closedbook"),
         "questions_sha256": hashlib.sha256(json.dumps(questions, sort_keys=True).encode()).hexdigest(),
     }
