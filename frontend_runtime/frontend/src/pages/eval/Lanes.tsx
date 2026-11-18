@@ -7,7 +7,7 @@ import type { Ev } from './types'
 const ROLE_ORDER = (a: string) => (a === 'planner' ? 0 : a.startsWith('scout') || a === 'agent' ? 1 : a === 'writer' ? 2 : a === 'critic' ? 3 : 4)
 const AGENT_NAME: Record<string, string> = { planner: '规划', writer: '报告撰写', critic: '审核', agent: '单 Agent', answer: '最终作答', scout: '侦探阶段', 'scout-sup': '补充搜索' }
 export const agentName = (a: string) => AGENT_NAME[a] ?? (a.startsWith('scout-') ? `侦探 ${a.slice(6)}` : a)
-const KIND: Record<string, string> = { agent_start: '开始', plan: '计划', search: '搜索', read: '读文档', fact: '事实', verify: '核查', answer: '答案' }
+const KIND: Record<string, string> = { agent_start: '开始', plan: '计划', search: '搜索', read: '读文档', fact: '事实', verify: '审核状态', answer: '答案', stage_output: '阶段产出' }
 const roleOf = (a: string) => (a.startsWith('scout') || a === 'agent' ? 'scout' : a)
 
 export function lanesOf(events: Ev[]) {
@@ -91,8 +91,29 @@ export function EventCard({ e, queryId }: { e: Ev; queryId?: string }) {
         <div className="lane-ev__body">
           <b>{e.exact_answer}</b>
           <span className="eval-muted"> 置信度 {e.confidence}%</span>
+          <div style={{ whiteSpace: 'pre-wrap', marginTop: 12 }}>{e.explanation}</div>
+          {e.cited_docids?.length > 0 && <div style={{ marginTop: 8 }}>引用文档：{e.cited_docids.map((id: string) => <DocLink key={id} docid={id} queryId={queryId} />)}</div>}
         </div>
       )}
+      {e.event === 'stage_output' && e.kind === 'report' && <div className="lane-ev__body">
+        <b>报告正文（第 {Number(e.iteration ?? 0) + 1} 轮状态）</b>
+        <div style={{ whiteSpace: 'pre-wrap', marginTop: 12 }}>{e.content || '本次写作未生成报告正文。'}</div>
+        {Object.entries(e.sections ?? {}).map(([id, content]) => <details key={id}><summary>章节草稿：{id}</summary><div style={{ whiteSpace: 'pre-wrap' }}>{String(content)}</div></details>)}
+      </div>}
+      {e.event === 'stage_output' && e.kind === 'review' && <div className="lane-ev__body">
+        {!e.review ? <div>审核器未返回可解析的审核内容；不能据此认为报告没有问题。</div> : <>
+          <b>审核结论：{e.review.overall_assessment?.verdict ?? '未提供'}</b>
+          <div>质量评分：{e.review.overall_assessment?.quality_score ?? '未提供'}</div>
+          <div style={{ whiteSpace: 'pre-wrap' }}>{e.review.overall_assessment?.summary}</div>
+          {(e.review.issues ?? []).map((issue: any, i: number) => <div key={i} style={{ marginTop: 12 }}>
+            <b>问题 {i + 1}：{issue.issue_type}（{issue.severity}）</b>
+            <div>{issue.description}</div><div>修改建议：{issue.suggestion ?? '未提供'}</div>
+            {issue.search_query && <div>建议检索：{issue.search_query}</div>}
+          </div>)}
+          {(e.review.missing_aspects ?? []).length > 0 && <><b>遗漏内容</b><ul>{e.review.missing_aspects.map((x: any, i: number) => <li key={i}>{typeof x === 'string' ? x : JSON.stringify(x)}</li>)}</ul></>}
+          <details><summary>查看完整审核返回内容</summary><pre style={{ whiteSpace: 'pre-wrap' }}>{JSON.stringify(e.review, null, 2)}</pre></details>
+        </>}
+      </div>}
     </div>
   )
 }
@@ -100,11 +121,14 @@ export function EventCard({ e, queryId }: { e: Ev; queryId?: string }) {
 function LaneBody({ evs, queryId }: { evs: Ev[]; queryId?: string }) {
   const writer = evs.some((e) => e.agent === 'writer')
   const critic = evs.some((e) => e.agent === 'critic')
+  const missingReport = writer && !evs.some((e) => e.event === 'stage_output' && e.kind === 'report')
+  const missingReview = critic && !evs.some((e) => e.event === 'stage_output' && e.kind === 'review')
+  const visible = evs.filter((e) => !(e.event === 'agent_start' && (writer || critic || e.agent === 'answer')))
   return (
     <>
-      {writer && <div className="eval-muted" style={{ padding: '12px 16px' }}>这份运行记录未保存报告正文，无法展开查看。下方是已记录的阶段事件；最终答案请看“最终作答”。</div>}
-      {critic && <div className="eval-muted" style={{ padding: '12px 16px' }}>这份运行记录仅保存审核汇总，未保存完整审核意见或具体修改建议。</div>}
-      {evs.map((e, i) => (
+      {missingReport && <div style={{ padding: '16px' }}><b>历史报告正文缺失</b><p>当时后端没有将 Writer 的报告写入运行记录，因此本页无法展示。原问题不是报告内容。</p><p>已修复后续运行的内容记录；无需为补齐此页重新付费评测。</p></div>}
+      {missingReview && <div style={{ padding: '16px' }}><b>历史审核意见缺失</b><p>当时只记录了下方状态，未保存问题描述、修改建议或审核原文，无法判断具体打回原因。</p></div>}
+      {visible.map((e, i) => (
         <EventCard key={i} e={e} queryId={queryId} />
       ))}
     </>

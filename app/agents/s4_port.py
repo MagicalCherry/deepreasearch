@@ -82,6 +82,13 @@ class CorpusWriter(Traced, LeadWriter):
 class CorpusCritic(Traced, CriticMaster):
     """沿用原评论家的审核和路由条件。"""
 
+    async def _review_content(self, state: dict):
+        """保存原审核器实际返回的完整意见，不改变其判断、解析或路由。"""
+        result = await super()._review_content(state)
+        self.trace.emit("stage_output", agent="critic", kind="review",
+                        review=result, iteration=state.get("iteration"))
+        return result
+
 
 class CorpusScout(Traced, DeepScout):
     """只替换搜索后端和Web依赖；沿用摘要提取、去重、追踪及补搜逻辑。"""
@@ -162,7 +169,13 @@ async def _step(agent: Traced, state: dict, lane: str, role: str) -> dict:
     token = CURRENT_AGENT.set(lane)
     agent.trace.emit("agent_start", agent=lane, role=role, task=state["query"])
     try:
-        return await agent.process(state)
+        result = await agent.process(state)
+        if lane == "writer":
+            agent.trace.emit("stage_output", agent=lane, kind="report",
+                             content=result.get("final_report", ""),
+                             sections=result.get("draft_sections", {}),
+                             iteration=result.get("iteration"))
+        return result
     finally:
         CURRENT_AGENT.reset(token)
 

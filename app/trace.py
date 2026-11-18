@@ -8,7 +8,7 @@ from typing import Any
 
 EVENT_TYPES = frozenset({
     "agent_start", "plan", "search", "read", "fact", "verify",
-    "answer", "done", "error",
+    "answer", "done", "error", "stage_output",
 })
 
 
