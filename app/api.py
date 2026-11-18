@@ -1,4 +1,4 @@
-"""提供健康检查、版本列表、题集管理与研究 SSE，隔离评测标注并在断开时取消研究。"""
+"""提供健康检查、版本与题集管理、历史记录、文档转发和可取消的研究 SSE。"""
 
 import asyncio
 import json
@@ -6,6 +6,7 @@ import logging
 from time import monotonic
 
 import anyio
+import httpx
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
@@ -13,6 +14,8 @@ from pydantic import BaseModel, Field
 
 from app.llm import LLM
 from app import runner
+from app import history
+from app.history import process_alive
 from app.runner import research
 from app.search import SearchClient
 from app.trace import Trace
@@ -171,6 +174,69 @@ async def delete_dataset(name: str):
     except (ValueError, FileNotFoundError) as exc:
         raise HTTPException(status_code=404, detail="上传题集不存在") from exc
     return {"ok": True}
+
+
+@app.get("/api/runs")
+def list_runs():
+    """列出本项目真实运行，按进程存活状态适配前端字段。"""
+    if not runner.RUNS_DIR.exists():
+        return []
+    results = []
+    for directory in sorted(runner.RUNS_DIR.iterdir(), reverse=True):
+        if not directory.is_dir() or not (directory / "config.json").is_file():
+            continue
+        try:
+            results.append(history.run_info(directory.name, alive=process_alive))
+        except FileNotFoundError:
+            continue
+        except (ValueError, OSError):
+            logger.warning("运行记录无法读取 run_id=%s", directory.name)
+    return results
+
+
+@app.get("/api/runs/{run_id}")
+def get_run(run_id: str):
+    """返回单次运行的配置、状态、汇总，不改写磁盘状态。"""
+    try:
+        return history.run_info(run_id, alive=process_alive)
+    except FileNotFoundError as exc:
+        raise HTTPException(status_code=404, detail="运行不存在") from exc
+
+
+@app.get("/api/runs/{run_id}/items")
+def list_run_items(run_id: str):
+    """供列表和同题对照使用，尚未判分的题保留未知状态。"""
+    try:
+        return [history.item_summary(item) for item in history.run_items(run_id).values()]
+    except FileNotFoundError as exc:
+        raise HTTPException(status_code=404, detail="运行不存在") from exc
+
+
+@app.get("/api/runs/{run_id}/items/{query_id}")
+def get_run_item(run_id: str, query_id: str):
+    """返回单题原始响应、完整事件及对应判分，支持泳道回放。"""
+    try:
+        items = history.run_items(run_id)
+        if query_id not in items:
+            raise FileNotFoundError(query_id)
+        return items[query_id]
+    except FileNotFoundError as exc:
+        raise HTTPException(status_code=404, detail="运行或题目不存在") from exc
+
+
+@app.get("/api/documents/{docid}")
+async def get_document(docid: str):
+    """只通过本地检索服务读取文档原文，确保关闭客户端。"""
+    client = SearchClient()
+    try:
+        return await client.document(docid)
+    except httpx.HTTPStatusError as exc:
+        code = 404 if exc.response.status_code == 404 else 502
+        raise HTTPException(status_code=code, detail="文档不存在" if code == 404 else "检索服务响应异常") from exc
+    except httpx.RequestError as exc:
+        raise HTTPException(status_code=502, detail="检索服务连接失败") from exc
+    finally:
+        await client.close()
 
 
 @app.post("/api/research")
