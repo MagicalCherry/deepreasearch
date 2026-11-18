@@ -3,7 +3,9 @@
 import asyncio
 import json
 import logging
+from contextlib import asynccontextmanager
 from time import monotonic
+from uuid import uuid4
 
 import anyio
 import httpx
@@ -15,6 +17,7 @@ from pydantic import BaseModel, Field
 from app.llm import LLM
 from app import runner
 from app import history
+from app import jobs
 from app.history import process_alive
 from app.runner import research
 from app.search import SearchClient
@@ -23,7 +26,18 @@ from app.versions import get_version, list_versions
 
 
 logger = logging.getLogger("uvicorn.error")
-app = FastAPI(title="MAS 评测后端")
+
+
+@asynccontextmanager
+async def lifespan(application: FastAPI):
+    """服务退出时等待页面发起的后台任务清理完成。"""
+    try:
+        yield
+    finally:
+        await jobs.shutdown()
+
+
+app = FastAPI(title="MAS 评测后端", lifespan=lifespan)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:5183", "http://127.0.0.1:5183"],
@@ -39,6 +53,14 @@ class ResearchRequest(BaseModel):
     question: str = Field(min_length=1)
     version: str
     query_id: str | None = None
+
+
+class RunRequest(BaseModel):
+    """页面评测参数，不接受答案标签或模型凭证。"""
+
+    dataset: str
+    version: str
+    concurrency: int = Field(default=6, ge=1)
 
 
 async def check_search() -> bool:
@@ -174,6 +196,19 @@ async def delete_dataset(name: str):
     except (ValueError, FileNotFoundError) as exc:
         raise HTTPException(status_code=404, detail="上传题集不存在") from exc
     return {"ok": True}
+
+
+@app.post("/api/runs")
+async def start_run(body: RunRequest):
+    """校验版本和题集后启动后台任务，立即返回独立运行编号。"""
+    try:
+        get_version(body.version)
+        runner.load_questions(body.dataset)
+    except (ValueError, FileNotFoundError, KeyError) as exc:
+        raise HTTPException(status_code=400, detail="版本或题集无效，请检查所选项目") from exc
+    run_id = f"web-{uuid4().hex}"
+    jobs.launch(body.dataset, body.version, body.concurrency, run_id)
+    return {"run_id": run_id}
 
 
 @app.get("/api/runs")

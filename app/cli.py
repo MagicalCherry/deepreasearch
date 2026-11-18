@@ -41,7 +41,7 @@ def main() -> None:
     single.add_argument("question")
     single.add_argument("--version", default="v0-closedbook")
     batch = commands.add_parser("run", help="批量评测或续跑")
-    batch.add_argument("--dataset", choices=["smoke20", "dev100"], required=True)
+    batch.add_argument("--dataset", required=True, help="内置或已上传的题集名称")
     batch.add_argument("--version", default="v0-closedbook")
     batch.add_argument("--run-id", required=True)
     batch.add_argument("--concurrency", type=int, default=10)
