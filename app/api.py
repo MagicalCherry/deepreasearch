@@ -1,4 +1,4 @@
-"""提供评测后端的健康检查、版本列表与研究 SSE；负责事件推送和断开时取消研究任务。"""
+"""提供健康检查、版本列表、题集管理与研究 SSE，隔离评测标注并在断开时取消研究。"""
 
 import asyncio
 import json
@@ -12,6 +12,7 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
 from app.llm import LLM
+from app import runner
 from app.runner import research
 from app.search import SearchClient
 from app.trace import Trace
@@ -83,6 +84,93 @@ async def health():
 async def versions():
     """返回已注册的真实版本，不添加占位版本。"""
     return list_versions()
+
+
+def dataset_metadata(name: str, items: list[dict]) -> dict:
+    """返回题集概要，不把评测标注混入研究请求。"""
+    return {"name": name, "n": len(items),
+            "source": "builtin" if name in runner.BUILTIN_DATASETS else "uploaded",
+            "has_evidence": any(bool(item.get("evidence_docids")) for item in items)}
+
+
+@app.get("/api/datasets")
+async def list_datasets():
+    """只列公开开发题集和独立上传目录，不扫描其他课程题集。"""
+    names = list(runner.BUILTIN_DATASETS)
+    if runner.UPLOADED_DATASET_DIR.exists():
+        names.extend(path.stem for path in sorted(runner.UPLOADED_DATASET_DIR.glob("*.jsonl"))
+                     if path.stem not in runner.BUILTIN_DATASETS)
+    return [dataset_metadata(name, runner.read_dataset(name)) for name in names]
+
+
+@app.get("/api/datasets/{name}")
+async def get_dataset(name: str):
+    """完整标注仅提供给评测页面；研究任务始终只接收题面。"""
+    try:
+        return runner.read_dataset(name)
+    except (ValueError, FileNotFoundError) as exc:
+        raise HTTPException(status_code=404, detail="题集不存在") from exc
+
+
+@app.post("/api/datasets")
+async def upload_dataset(request: Request):
+    """验证整份上传后才写文件，补齐编号，拒绝覆盖内置或已有题集。"""
+    try:
+        body = await request.json()
+        if not isinstance(body, dict):
+            raise ValueError("上传内容必须是对象")
+        name, items = body.get("name"), body.get("items")
+        path = runner.dataset_path(name)
+        # Windows 保留设备名不能用作文件名。
+        if name.upper() in {"CON", "PRN", "AUX", "NUL", *(f"COM{i}" for i in range(10)),
+                            *(f"LPT{i}" for i in range(10))}:
+            raise ValueError("题集名不能使用系统保留名称")
+        if name in runner.BUILTIN_DATASETS or path.exists():
+            raise ValueError("题集已存在，不能覆盖")
+        if not isinstance(items, list) or not items:
+            raise ValueError("items 必须是非空数组")
+        normalized, seen = [], set()
+        for index, item in enumerate(items, start=1):
+            if not isinstance(item, dict) or any(
+                not isinstance(item.get(key), str) or not item[key].strip()
+                for key in ("query", "answer")
+            ):
+                raise ValueError("每道题必须包含非空字符串 query 和 answer")
+            query_id = item.get("query_id", str(index))
+            if isinstance(query_id, bool) or not isinstance(query_id, (str, int)) or not str(query_id).strip():
+                raise ValueError("query_id 必须是非空字符串或整数")
+            query_id = str(query_id)
+            if query_id in seen:
+                raise ValueError("题集中存在重复编号")
+            seen.add(query_id)
+            for key in ("gold_docids", "evidence_docids"):
+                if key in item and (not isinstance(item[key], list) or any(
+                    isinstance(value, bool) or not isinstance(value, (str, int)) for value in item[key]
+                )):
+                    raise ValueError(f"{key} 必须是文档编号数组")
+            normalized.append({**item, "query_id": query_id})
+    except (ValueError, TypeError) as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    content = "".join(json.dumps(item, ensure_ascii=False) + "\n" for item in normalized)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        with path.open("x", encoding="utf-8") as stream:
+            stream.write(content)
+    except FileExistsError as exc:
+        raise HTTPException(status_code=400, detail="题集已存在，不能覆盖") from exc
+    return dataset_metadata(name, normalized)
+
+
+@app.delete("/api/datasets/{name}")
+async def delete_dataset(name: str):
+    """只删除独立上传目录中的指定题集，内置题集始终不可删除。"""
+    try:
+        if name in runner.BUILTIN_DATASETS:
+            raise FileNotFoundError(name)
+        runner.dataset_path(name).unlink()
+    except (ValueError, FileNotFoundError) as exc:
+        raise HTTPException(status_code=404, detail="上传题集不存在") from exc
+    return {"ok": True}
 
 
 @app.post("/api/research")

@@ -5,3 +5,4 @@
 __pycache__/
 /runs/
 /frontend_runtime/
+/data/uploaded_datasets/

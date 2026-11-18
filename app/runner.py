@@ -20,6 +20,26 @@ from app.versions import get_version
 
 DATASET_DIR = PROJECT_ROOT.parent / "MAS实操课程" / "01-项目任务书" / "验收题集"
 RUNS_DIR = PROJECT_ROOT / "runs"
+UPLOADED_DATASET_DIR = PROJECT_ROOT / "data" / "uploaded_datasets"
+BUILTIN_DATASETS = ("smoke20", "dev100")
+
+
+def dataset_path(dataset: str) -> Path:
+    """只解析允许的题集名；内置题集固定白名单，其他题集仅从上传目录读取。"""
+    if not isinstance(dataset, str) or not re.fullmatch(r"[A-Za-z0-9_-]+", dataset):
+        raise ValueError("题集名只能包含字母、数字、下划线和短横线")
+    directory = DATASET_DIR if dataset in BUILTIN_DATASETS else UPLOADED_DATASET_DIR
+    path = directory / f"{dataset}.jsonl"
+    if path.resolve().parent != directory.resolve():
+        raise ValueError("题集路径超出指定目录")
+    return path
+
+
+def read_dataset(dataset: str) -> list[dict]:
+    """读取完整评测标注，仅供题集页面和评测代码；Agent 使用 load_questions。"""
+    return [json.loads(line) for line in dataset_path(dataset).read_text(
+        encoding="utf-8-sig"
+    ).splitlines() if line.strip()]
 
 
 async def search_config(enabled: bool) -> dict:
@@ -43,13 +63,8 @@ async def search_config(enabled: bool) -> dict:
 
 def load_questions(dataset: str) -> list[dict[str, str]]:
     """只保留编号与题面，标注字段不离开数据加载边界。"""
-    if dataset not in {"smoke20", "dev100"}:
-        raise ValueError("当前仅支持 smoke20 和 dev100")
-    questions = []
-    for line in (DATASET_DIR / f"{dataset}.jsonl").read_text(encoding="utf-8-sig").splitlines():
-        if line.strip():
-            item = json.loads(line)
-            questions.append({"query_id": str(item["query_id"]), "query": item["query"]})
+    questions = [{"query_id": str(item["query_id"]), "query": item["query"]}
+                 for item in read_dataset(dataset)]
     if len({item["query_id"] for item in questions}) != len(questions):
         raise ValueError("题集中存在重复编号")
     return questions
