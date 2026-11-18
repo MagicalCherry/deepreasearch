@@ -1,0 +1,19 @@
+{
+  "n": 20,
+  "correct": 0,
+  "accuracy": 0.0,
+  "recall": 26.32,
+  "calibration_error": 89.62,
+  "calib_beta": 5,
+  "avg_confidence": 88.5,
+  "runner_errors": 0,
+  "avg_search": 99.85,
+  "avg_read": 0.0,
+  "avg_prompt_tokens": 91775,
+  "avg_completion_tokens": 47550,
+  "avg_seconds": 420.07,
+  "run": "s10-v12-qwen37-smoke20",
+  "version": "v1.2",
+  "dataset": "smoke20",
+  "judge_model": "qwen/qwen3.7-flash"
+}
