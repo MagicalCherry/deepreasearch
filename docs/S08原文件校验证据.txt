@@ -1,0 +1,10 @@
+用途：S08只读原文件与接入副本逐字节比较证据。
+state.py: IDENTICAL
+agents/__init__.py: IDENTICAL
+agents/architect.py: IDENTICAL
+agents/base.py: IDENTICAL
+agents/critic.py: IDENTICAL
+agents/data_analyst.py: IDENTICAL
+agents/scout.py: IDENTICAL
+agents/wizard.py: IDENTICAL
+agents/writer.py: IDENTICAL
