@@ -1,6 +1,7 @@
 """定义 Agent 版本及注册表，保存版本说明、运行入口和默认选项。"""
 
 from collections.abc import Awaitable, Callable
+from copy import deepcopy
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -78,3 +79,21 @@ register(Version(
     options={"max_iterations": 3, "retries": 2,
              "timeout_seconds": None, "max_search_calls": None},
 ))
+
+
+async def dr_run(question: str, trace: Trace, opts: dict[str, Any]) -> str:
+    """延迟加载迭代版流水线，不替换原样v1.0入口。"""
+    from app.agents.dr.pipeline import run
+    return await run(question, trace, opts)
+
+
+def dr_version(vid: str, label: str, description: str, **changes) -> None:
+    """新版本选项由上一迭代版深拷贝后只覆盖指定键，避免污染旧版本。"""
+    previous = next(reversed(_VERSIONS.values()))
+    options = deepcopy(previous.options)
+    options.update(deepcopy(changes))
+    register(Version(vid, label, description, dr_run, options))
+
+
+dr_version('v1.1', '约束规划', '按问题全部约束拆成三个子问题，生成英文检索式；其余角色保持原样。',
+           planner='constraints')

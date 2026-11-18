@@ -27,7 +27,8 @@ def universal_json():
         "outline": [{"id": f"sec_{i}", "title": f"Section {i}",
                      "description": "Fictional section", "section_type": "mixed",
                      "requires_data": False, "requires_chart": False,
-                     "search_queries": [f"demo query {i}"]} for i in range(1, 4)],
+                     "search_queries": [f"demo query {i}", f"demo alternate {i}"]} for i in range(1, 4)],
+        "answer_type": "fictional name", "constraints": ["fictional constraint"],
         "research_questions": ["Fictional question"], "key_entities": [],
         "mind_map": {}, "hypotheses": [],
         "extracted_facts": [{"content": "Fictional evidence",
@@ -112,3 +113,9 @@ async def test_every_registered_version_completes(version, offline_clients):
         assert trace.retrieved == {"1"}
         assert any(e["event"] == "fact" and e["docid"] == "1" for e in trace.events)
         assert {"plan", "verify"} <= {e["event"] for e in trace.events}
+    if version == 'v1.1':
+        plan = next(e for e in trace.events if e['event'] == 'plan')
+        assert plan['constraints'] == ['fictional constraint']
+        assert plan['answer_type'] == 'fictional name'
+        assert len(plan['subquestions']) == 3
+        assert all(len(s['search_queries']) == 2 for s in plan['subquestions'])

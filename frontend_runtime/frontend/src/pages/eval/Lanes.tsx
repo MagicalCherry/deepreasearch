@@ -43,11 +43,16 @@ export function EventCard({ e, queryId }: { e: Ev; queryId?: string }) {
         </> : e.task}
       </div>}
       {e.event === 'plan' && (
+        <>
+        {e.answer_type && <div className="lane-ev__body"><b>答案类型：</b>{e.answer_type}</div>}
+        {e.constraints?.length > 0 && <div className="lane-ev__body"><b>题目约束</b><ul>{e.constraints.map((x: string, i: number) => <li key={i}>{x}</li>)}</ul></div>}
         <ul className="lane-ev__list">
           {(e.items as string[]).slice(0, 12).map((x, i) => (
             <li key={i}>{x}</li>
           ))}
         </ul>
+        {e.hypotheses?.length > 0 && <div className="lane-ev__body"><b>待验证候选假设</b><ul>{e.hypotheses.map((h: any, i: number) => <li key={i}>{h.content ?? JSON.stringify(h)}</li>)}</ul></div>}
+        </>
       )}
       {e.event === 'search' && (
         <div className="lane-ev__body">
