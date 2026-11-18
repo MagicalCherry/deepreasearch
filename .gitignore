@@ -1,4 +1,6 @@
 .env
+.env.*
+!.env.openrouter.example
 .venv/
 __pycache__/
 /runs/

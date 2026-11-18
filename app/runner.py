@@ -132,6 +132,7 @@ async def run_eval(dataset: str, version: str, concurrency: int, run_id: str) ->
     questions = load_questions(dataset)
     config = {
         "version": version, "model": settings.model, "dataset": dataset,
+        "llm_provider": settings.provider, "llm_base_url": settings.base_url,
         "concurrency": concurrency, "options": deepcopy(registered.options),
         "git_sha": git_sha(), "max_tokens": settings.max_tokens,
         "budget": {"seconds": 600, "n_search": 50},

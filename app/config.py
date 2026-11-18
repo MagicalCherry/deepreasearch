@@ -1,4 +1,4 @@
-"""读取本地环境配置，提供百炼模型、检索服务和 tokenizer 缓存设置。"""
+"""按平台读取独立本地配置，提供模型、检索服务和tokenizer缓存设置，不输出密钥。"""
 
 from dataclasses import dataclass
 import os
@@ -9,7 +9,10 @@ from dotenv import load_dotenv
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 COURSE_ROOT = PROJECT_ROOT.parent
-ENV_FILE = PROJECT_ROOT / ".env"
+PROVIDER = os.getenv("LLM_PROVIDER", "dashscope").strip().lower()
+if PROVIDER not in {"dashscope", "openrouter"}:
+    raise ValueError("LLM_PROVIDER仅支持dashscope或openrouter")
+ENV_FILE = PROJECT_ROOT / (".env.openrouter" if PROVIDER == "openrouter" else ".env")
 
 # 模型 tokenizer 文件使用课程提供的本地副本，避免运行时联网下载。
 TIKTOKEN_CACHE_DIR = (
@@ -29,15 +32,19 @@ class Settings:
     model: str
     max_tokens: int
     search_url: str
+    provider: str = "dashscope"
 
 
 settings = Settings(
-    api_key=os.getenv("DASHSCOPE_API_KEY", ""),
+    api_key=os.getenv("OPENROUTER_API_KEY" if PROVIDER == "openrouter" else "DASHSCOPE_API_KEY", ""),
     base_url=os.getenv(
-        "DASHSCOPE_BASE_URL",
-        "https://dashscope.aliyuncs.com/compatible-mode/v1",
+        "OPENROUTER_BASE_URL" if PROVIDER == "openrouter" else "DASHSCOPE_BASE_URL",
+        "https://openrouter.ai/api/v1" if PROVIDER == "openrouter"
+        else "https://dashscope.aliyuncs.com/compatible-mode/v1",
     ),
-    model=os.getenv("LLM_MODEL", "qwen3.8-flash"),
+    model=os.getenv("OPENROUTER_MODEL", "qwen/qwen3.8-flash") if PROVIDER == "openrouter"
+        else os.getenv("LLM_MODEL", "qwen3.8-flash"),
     max_tokens=131072,#qwen3.8-flash 最大输出长度
     search_url=os.getenv("SEARCH_URL", "http://localhost:8765").rstrip("/"),
+    provider=PROVIDER,
 )

@@ -1,4 +1,4 @@
-"""封装百炼 OpenAI 兼容接口的异步对话、重试和 token 用量统计。"""
+"""封装百炼及OpenRouter兼容接口的异步对话、平台参数、重试和token统计。"""
 
 import asyncio
 from typing import Any
@@ -15,7 +15,8 @@ class LLM:
     def __init__(self, trace: Trace | None = None) -> None:
         self.trace = trace
         if not settings.api_key:
-            raise ValueError("缺少 DASHSCOPE_API_KEY，请在本地 .env 中配置。")
+            key_name = "OPENROUTER_API_KEY" if settings.provider == "openrouter" else "DASHSCOPE_API_KEY"
+            raise ValueError(f"缺少{key_name}，请在对应平台的本地配置中填写。")
 
         self.client = AsyncOpenAI(
             api_key=settings.api_key,
@@ -37,7 +38,8 @@ class LLM:
             "model": settings.model,
             "messages": messages,
             "max_tokens": settings.max_tokens,
-            "extra_body": {"enable_thinking": False},
+            "extra_body": ({"reasoning": {"enabled": False}}
+                           if settings.provider == "openrouter" else {"enable_thinking": False}),
             **kwargs,
         }
 
@@ -65,7 +67,7 @@ class LLM:
                     raise
                 await asyncio.sleep(2**attempt)
 
-        raise RuntimeError("百炼请求重试失败")
+        raise RuntimeError("模型请求重试失败")
 
     async def close(self) -> None:
         """关闭异步 HTTP 客户端。"""
