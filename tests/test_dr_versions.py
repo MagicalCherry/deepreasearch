@@ -21,3 +21,11 @@ def test_constraint_prompt_renders_only_question_placeholder():
     assert 'Original question:\nFictional question' in prompt
     assert 'exactly THREE subquestions' in prompt
     assert 'exactly TWO concrete ENGLISH keyword queries' in prompt
+
+
+def test_v12_adds_only_query_expansion_option():
+    """v1.2只在v1.1选项上增加两角度扩写，不能改变前一版配置。"""
+    previous = deepcopy(get_version('v1.1').options)
+    version = get_version('v1.2')
+    assert version.options == {**previous, 'expand': 2}
+    assert get_version('v1.1').options == previous

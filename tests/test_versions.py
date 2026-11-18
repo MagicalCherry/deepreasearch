@@ -29,6 +29,7 @@ def universal_json():
                      "requires_data": False, "requires_chart": False,
                      "search_queries": [f"demo query {i}", f"demo alternate {i}"]} for i in range(1, 4)],
         "answer_type": "fictional name", "constraints": ["fictional constraint"],
+        "queries": ["fictional alternate angle", "fictional distinct clue"],
         "research_questions": ["Fictional question"], "key_entities": [],
         "mind_map": {}, "hypotheses": [],
         "extracted_facts": [{"content": "Fictional evidence",

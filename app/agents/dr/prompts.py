@@ -33,3 +33,11 @@ evidence_for=[] and evidence_against=[]. It must remain a hypothesis until docum
 """
 
 PLANNING_SYSTEM = "You plan evidence-based factual retrieval. Follow the question's constraints and return only the required JSON."
+
+QUERY_EXPANSION = """Rewrite this retrieval query into exactly TWO alternative ENGLISH keyword queries.
+Keep its factual target. Use complementary angles: aliases or a distinctive explicit constraint,
+and a plausible named candidate ONLY as a hypothesis for verification. Do not invent confirmed facts.
+Avoid market commentary, instructions to a researcher, placeholders, quotation marks, Boolean
+operators and site filters. Return JSON only: {{"queries": ["first English keyword query", "second English keyword query"]}}.
+Original query: {query}
+"""

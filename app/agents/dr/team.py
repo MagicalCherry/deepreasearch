@@ -1,9 +1,37 @@
 """按版本选项构造四角色；v1.1仅改变Chief规划，其他角色继承原样适配行为。"""
 
 from copy import deepcopy
+import re
 
 from app.agents import s4_port
-from .prompts import CONSTRAINT_PLANNING, PLANNING_SYSTEM
+from .prompts import CONSTRAINT_PLANNING, PLANNING_SYSTEM, QUERY_EXPANSION
+
+
+def clean_query(query):
+    """清除BM25不支持的引擎语法，拒绝未消解占位符或过短查询。"""
+    if not isinstance(query, str) or re.search(r'<|>|示例|\[[^\]]+\]|\{[^}]+\}', query):
+        return ''
+    query = re.sub(r'\bsite\s*:\s*\S+', ' ', query, flags=re.IGNORECASE)
+    query = re.sub(r'\b(?:OR|AND)\b', ' ', query)
+    query = re.sub(r'["“”‘’\x27]|\.{2,}', ' ', query)
+    query = ' '.join(query.split())
+    return query if len(query) >= 6 and len(query.split()) >= 2 else ''
+
+
+def merge_rrf(lists, count, k=60):
+    """按URL去重，每个检索列表每篇只贡献一次倒数排名分；同分保留先出现顺序。"""
+    scores, documents = {}, {}
+    for results in lists:
+        seen = set()
+        for rank, item in enumerate(results, 1):
+            url = item.get('url')
+            if not url or url in seen:
+                continue
+            seen.add(url)
+            documents.setdefault(url, item)
+            scores[url] = scores.get(url, 0.0) + 1.0 / (k + rank)
+    return [{**documents[url], 'rrf_score': scores[url]}
+            for url in sorted(scores, key=scores.get, reverse=True)[:count]]
 
 
 class DRArchitect(s4_port.CorpusArchitect):
@@ -44,11 +72,36 @@ class DRArchitect(s4_port.CorpusArchitect):
 
 
 class DRScout(s4_port.CorpusScout):
-    """预留后续检索选项；v1.1不改变搜索、摘要提取与追踪逻辑。"""
+    """v1.1沿用检索；v1.2清理并扩写查询，复用原接口搜索并合并排名。"""
 
     def __init__(self, llm, trace, search, sources, opts):
         super().__init__(llm, trace, search, sources)
         self.opts = deepcopy(opts)
+
+    async def _execute_search(self, query, count=10):
+        if not self.opts.get('expand'):
+            return await super()._execute_search(query, count)
+        original = clean_query(query)
+        if not original:
+            return []
+        response = await self.call_llm(
+            system_prompt='You rewrite factual search queries for an English BM25 corpus. Return JSON only.',
+            user_prompt=QUERY_EXPANSION.format(query=original), json_mode=True,
+        )
+        parsed = self.parse_json_response(response)
+        alternatives = parsed.get('queries') if isinstance(parsed, dict) else None
+        if not isinstance(alternatives, list):
+            raise ValueError('检索扩写未返回queries列表')
+        queries = [original]
+        for candidate in alternatives[:self.opts['expand']]:
+            cleaned = clean_query(candidate)
+            if cleaned and cleaned not in queries:
+                queries.append(cleaned)
+        results = []
+        for rewritten in queries:
+            # 每次实际检索均走原适配层计数，不能把三次伪记为一次。
+            results.append(await super()._execute_search(rewritten, count))
+        return merge_rrf(results, count)
 
 
 class DRWriter(s4_port.CorpusWriter):
