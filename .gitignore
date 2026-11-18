@@ -4,3 +4,4 @@
 .venv/
 __pycache__/
 /runs/
+/frontend_runtime/
