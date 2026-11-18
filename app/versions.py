@@ -57,16 +57,7 @@ register(Version(
 register(Version(
     id="v0-single",
     label="单 Agent",
-    description="官方提示词的ReAct搜索基线，提供搜索和原文读取，最多30次工具调用。",
-    run=single_run,
-    options={"k": 5, "snippet_tokens": 512, "document_tokens": 8000,
-             "max_tool_calls": 30, "max_turns": 40},
-))
-
-register(Version(
-    id="v0-single-404fix",
-    label="单 Agent（文档404容错）",
-    description="在单Agent基线上，将文档404反馈给模型纠正；其余服务错误继续上抛。",
+    description="官方提示词的ReAct搜索基线，最多30次工具调用；文档404反馈给模型纠正，其余服务错误上抛。",
     run=single_run,
     options={"k": 5, "snippet_tokens": 512, "document_tokens": 8000,
              "max_tool_calls": 30, "max_turns": 40, "recover_document_404": True},
