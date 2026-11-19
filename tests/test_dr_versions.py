@@ -46,3 +46,11 @@ def test_v14_adds_reading_and_search_budgets():
     assert version.options == {**previous, 'read_docs': True, 'max_searches': 50,
                                'max_reads': 8, 'doc_max_tokens': 8000}
     assert get_version('v1.3').options == previous
+
+
+def test_v15_adds_memo_writer_and_evidence_critic():
+    """v1.5继承阅读预算，仅替换答案备忘录写作与证据核查。"""
+    previous = deepcopy(get_version('v1.4').options)
+    version = get_version('v1.5')
+    assert version.options == {**previous, 'writer': 'memo', 'critic': 'evidence'}
+    assert get_version('v1.4').options == previous
