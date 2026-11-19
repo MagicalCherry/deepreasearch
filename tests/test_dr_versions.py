@@ -54,3 +54,12 @@ def test_v15_adds_memo_writer_and_evidence_critic():
     version = get_version('v1.5')
     assert version.options == {**previous, 'writer': 'memo', 'critic': 'evidence'}
     assert get_version('v1.4').options == previous
+
+
+def test_v16_adds_loop_scout_and_near_duplicate_filter():
+    """v1.6仅增加循环侦探、六轮上限、每查询五篇及近似去重，旧版本不变。"""
+    previous = deepcopy(get_version('v1.5').options)
+    version = get_version('v1.6')
+    assert version.options == {**previous, 'scout': 'loop', 'scout_rounds': 6,
+                               'k_per_query': 5, 'neardup': True}
+    assert get_version('v1.5').options == previous
