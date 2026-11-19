@@ -65,6 +65,13 @@ body.drawer-open #researchLayout .detail-scroll{max-height:calc(100vh - 235px)}
  body.drawer-open #researchLayout>section{grid-row:2;max-height:400px;overflow:auto}
 }
 @media(max-width:760px){:root{--reader-width:300px}body.drawer-open main{min-width:340px}}
+
+/* 阅读源码时只保留两栏：左侧代码，右侧Agent详细流程。 */
+body.drawer-open #researchLayout{grid-template-columns:minmax(0,1fr)}
+body.drawer-open #researchLayout>section{display:none}
+body.drawer-open #researchLayout>aside{grid-row:auto;width:100%}
+body.drawer-open #researchLayout .detail-svg{max-width:730px;margin:0 auto}
+body.drawer-open #researchLayout .detail-scroll{max-height:calc(100vh - 220px)}
 </style></head><body>
 <header><div class="mini">DEEPRESEARCH / CODE ATLAS</div><h1>同一条工作流，六次设计演进</h1><p>v1.0 → v1.5 · 从行业报告到答案备忘录 · 按本项目实际代码讲解</p><p class="mini">离线页面 · 无模型调用 · 无费用 · 源码快照：e6de328，评测：2026-11-19</p></header>
 <main><nav id="versions" aria-label="选择版本"></nav>
