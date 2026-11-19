@@ -145,9 +145,13 @@ class CorpusScout(Traced, DeepScout):
         token = CURRENT_AGENT.set(lane)
         self.trace.emit("agent_start", agent=lane, role="侦探", task=section["title"])
         try:
-            await super()._research_section(state, section)
+            await self.investigate(state, section)
         finally:
             CURRENT_AGENT.reset(token)
+
+    async def investigate(self, state: dict, section: dict) -> None:
+        """可覆盖的章节研究入口；默认完整调用原S4主体，不改变基线行为。"""
+        await super()._research_section(state, section)
 
 
 class FactList(list):

@@ -4,6 +4,7 @@ from copy import deepcopy
 import asyncio
 import json
 import re
+from uuid import uuid4
 
 from app.agents import s4_port
 from .prompts import (CONSTRAINT_PLANNING, PLANNING_SYSTEM, QUERY_EXPANSION,
@@ -96,6 +97,134 @@ class DRScout(s4_port.CorpusScout):
         self._constraints = deepcopy(state.get('_constraints', []))
         self._question = state['query']
         return await super().process(state)
+
+    async def investigate(self, state, section):
+        """仅v1.6启用逐轮搜索与重新规划；旧版本调用原章节研究流程。"""
+        if self.opts.get('scout') != 'loop':
+            return await super().investigate(state, section)
+        await self.loop_section(state, section)
+
+    def _store_loop_facts(self, state, section, facts, documents):
+        """只允许本章节真实搜索返回的文档作为来源，全文事实仍由read_docs校验原文。"""
+        if not isinstance(facts, list):
+            return
+        for fact in facts:
+            if not isinstance(fact, dict):
+                continue
+            value = fact.get('docid')
+            if not isinstance(value, (str, int)) or isinstance(value, bool):
+                continue
+            docid = str(value)
+            document = documents.get(docid)
+            content = fact.get('content')
+            if not document or not isinstance(content, str) or not content.strip():
+                continue
+            url = document['source_url']
+            if any(f.get('content') == content and f.get('source_url') == url for f in state['facts']):
+                continue
+            if self._is_duplicate_fact(content, url):
+                continue
+            entry = {**fact, 'id': 'fact_' + uuid4().hex[:8], 'docid': docid,
+                     'source_url': url, 'source_name': document.get('title', ''),
+                     'related_sections': [section['id']], 'verified': False,
+                     'credibility_score': 0.5}
+            state['facts'].append(entry)
+            points = fact.get('data_points', [])
+            for point in points if isinstance(points, list) else []:
+                if isinstance(point, dict):
+                    state['data_points'].append({**point, 'id': 'dp_' + uuid4().hex[:8],
+                        'source': document.get('title', ''), 'docid': docid})
+
+    async def loop_section(self, state, section):
+        """每轮最多两个查询，再按当前结果决策；预算和读文限制沿用v1.4。"""
+        from .prompts import LOOP_INVESTIGATION
+        section['status'] = 'researching'
+        seeds = section.get('search_queries', [])
+        pending = [q for value in seeds if (q := clean_query(value))] if isinstance(seeds, list) else []
+        documents = {}
+        for round_index in range(self.opts.get('scout_rounds', 6)):
+            if self._budget['search_count'] >= self.opts['max_searches']:
+                self.trace.stop_reason = 'search_budget'
+                break
+            current, pending = pending[:2], pending[2:]
+            results = []
+            for query in current:
+                results.extend(await self._execute_search(query, count=self.opts.get('k_per_query', 5)))
+            latest = {}
+            for result in results:
+                docid = self.sources.get(result.get('url', ''))
+                if docid is None:
+                    continue
+                docid = str(docid)
+                if docid in latest:
+                    continue
+                latest[docid] = {'docid': docid, 'title': result.get('title', ''),
+                    'source_url': result['url'], 'snippet': str(result.get('summary', ''))[:260]}
+                if len(latest) >= 12:
+                    break
+            documents.update(latest)
+            self._available_docs.update(latest)
+            known_raw = {str(r.get('docid')) for r in state['raw_sources'] if isinstance(r, dict)}
+            for docid, document in latest.items():
+                if docid not in known_raw:
+                    state['raw_sources'].append(deepcopy(document))
+            payload = {'question': state['query'], 'constraints': state.get('_constraints', []),
+                'section': {'title': section.get('title'), 'description': section.get('description')},
+                'round': round_index + 1,
+                'facts': [{**f, 'docid': self.sources.get(f.get('source_url', ''), f.get('docid', ''))}
+                          for f in state['facts'][-25:]],
+                'candidates': list(self.candidates.values()), 'results': list(latest.values()),
+                'searched_queries': sorted(self._budget['queries'])}
+            response = await self.call_llm(
+                system_prompt='Investigate the supplied evidence and plan the next search round. Return JSON only.',
+                user_prompt=LOOP_INVESTIGATION + '\n' + json.dumps(payload, ensure_ascii=False),
+                json_mode=True, temperature=0.2)
+            result = self.parse_json_response(response)
+            if not isinstance(result, dict):
+                raise ValueError('循环侦探未返回JSON对象')
+            self._store_loop_facts(state, section, result.get('new_facts', []), documents)
+            candidates = result.get('candidates', [])
+            for candidate in candidates if isinstance(candidates, list) else []:
+                if isinstance(candidate, dict) and isinstance(candidate.get('name'), str) and candidate['name'].strip():
+                    self.candidates[candidate['name'].strip()] = deepcopy(candidate)
+            read_facts = await self.read_docs(result.get('read_docids', []), state['query'])
+            # 读取可由其他侦探已发现的文档，但只接受read_docs实际返回的校验事实。
+            read_documents = {f['docid']: self._available_docs[f['docid']] for f in read_facts}
+            self._store_loop_facts(state, section, read_facts, read_documents)
+            queries = result.get('queries', [])
+            queries = [q for value in queries[:2] if (q := clean_query(value))] if isinstance(queries, list) else []
+            pending = list(dict.fromkeys(pending + queries))
+            thought = result.get('thought', '')
+            self.trace.emit('plan', agent=s4_port.CURRENT_AGENT.get(), round=round_index + 1,
+                items=([thought] if isinstance(thought, str) and thought else []) + pending,
+                candidates=deepcopy(list(self.candidates.values())))
+            if result.get('done') is True or not pending:
+                break
+
+    async def _supplementary_research(self, state):
+        if self.opts.get('scout') != 'loop':
+            return await super()._supplementary_research(state)
+        pending = state.get('pending_search_queries', [])
+        if isinstance(pending, list) and pending:
+            section = {'id': 'supplementary', 'title': '补充核查',
+                       'description': '核查审核发现的证据缺口', 'search_queries': pending[:3]}
+            await self.loop_section(state, section)
+        state['pending_search_queries'] = []
+        state['phase'] = s4_port.ResearchPhase.WRITING.value
+        return state
+
+    def _near_duplicate(self, query):
+        """调用者持有预算锁；近似判重只比较实际已执行或已预留的查询。"""
+        if not self.opts.get('neardup'):
+            return False
+        words = set(re.findall(r'\w+', query.casefold()))
+        if not words:
+            return False
+        for previous in self._budget['queries']:
+            other = set(re.findall(r'\w+', previous.casefold()))
+            if other and len(words & other) / len(words | other) >= 0.7:
+                return True
+        return False
 
     async def _hypothesis_analysis(self, question, focus, results, limit):
         documents = [{'title': r.get('title', ''), 'source_url': r.get('url', ''),
@@ -245,7 +374,7 @@ class DRScout(s4_port.CorpusScout):
                     self.trace.stop_reason = 'search_budget'
                     return []
                 normalized = original.casefold()
-                if normalized in self._budget['originals'] or normalized in self._budget['queries']:
+                if normalized in self._budget['originals'] or normalized in self._budget['queries'] or self._near_duplicate(original):
                     return []
                 self._budget['originals'].add(normalized)
         response = await self.call_llm(
@@ -269,7 +398,7 @@ class DRScout(s4_port.CorpusScout):
                         self.trace.stop_reason = 'search_budget'
                         break
                     normalized = rewritten.casefold()
-                    if normalized in self._budget['queries']:
+                    if normalized in self._budget['queries'] or self._near_duplicate(rewritten):
                         continue
                     self._budget['queries'].add(normalized)
                     self._budget['search_count'] += 1

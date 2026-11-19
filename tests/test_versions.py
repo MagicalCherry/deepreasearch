@@ -30,6 +30,9 @@ def universal_json():
                      "search_queries": [f"demo query {i}", f"demo alternate {i}"]} for i in range(1, 4)],
         "answer_type": "fictional name", "constraints": ["fictional constraint"],
         "queries": ["fictional alternate angle", "fictional distinct clue"],
+        "thought": "Fictional evidence supports this section", "done": True,
+        "new_facts": [{"content": "Fictional evidence", "docid": "1"}],
+        "read_docids": ["1"], "candidates": [],
         "docs_to_read": ["1"], "answer_clues": [],
         "research_questions": ["Fictional question"], "key_entities": [],
         "mind_map": {}, "hypotheses": [],
@@ -128,3 +131,7 @@ async def test_every_registered_version_completes(version, offline_clients):
     if version == 'v1.4':
         assert 1 <= trace.n_read <= 8
         assert trace.n_search <= 50
+    if version == 'v1.6':
+        assert 1 <= trace.n_read <= 8
+        assert trace.n_search <= 50
+        assert any(e['event'] == 'plan' and e.get('round') == 1 for e in trace.events)
