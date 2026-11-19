@@ -293,9 +293,8 @@ function detailedGraph(){
 }
 
 // 默认按业务动作合并连续语句；条件判断独立保留，执行顺序不改变。
-let detailDensity='compact';
 function detailGraph(){
- const raw=detailedGraph();if(detailDensity==='fine')return raw;
+ const raw=detailedGraph();
  const groups=[];let pending=[];
  const flush=()=>{if(!pending.length)return;const first=pending[0],last=pending[pending.length-1];
   const names={'进入 Chief':'进入规划并记录开始','将题目填入提示词':'准备并调用规划模型','解析返回的JSON':'解析并检查规划结果','保存实体、问题与假设':'保存规划状态','读取pending章节':'准备并发章节研究','取出章节检索词':'执行章节检索','清理原查询':'清理并校验查询','取得共享预算锁':'检查预算与查询重复','调用LLM扩写查询':'扩写并解析查询','清理并合并扩写词':'执行扩写后的检索','确认已启用阅读':'准备文档阅读','解析并检查docid':'检查文档与阅读名额','请求前预留名额':'读取正文并记录事件','调用LLM提取证据':'提取并解析正文证据','分别处理两类信息':'核对并保存正文事实','按phase进入写作':'进入写作并选择章节','取出备忘录提示词':'组装输入并生成备忘录','等待LLM返回备忘录':'生成并解析备忘录','保存正文草稿':'保存草稿与来源引用','建立已知来源集合':'过滤引用并记录候选','直接拼接备忘录':'完成报告并进入审核','记录审核开始消息':'调用审核模型','逐条登记审核问题':'保存审核反馈与评分','统计未解决严重问题':'统计问题并记录审核结果','计算下一步路由':'分析审核问题并分流','保存待查查询':'保存查询并推进迭代','发出作答开始事件':'准备最终作答输入','绑定作答事件上下文':'调用模型并解析答案','再请求一次具体候选':'补充请求并返回答案','读取待查查询':'读取补搜任务','记录补搜开始消息':'准备并执行补充搜索','调用补搜分析方法':'分析并保存补搜事实','清空待查查询':'完成补搜并回写状态'};
@@ -343,8 +342,7 @@ function renderDetail(){
   if(decision){edges+='<path class="detail-wire" d="M'+(x+130)+' '+cy+'H478"/><text class="edge-word" x="439" y="'+(cy-9)+'">'+(step.side||'否')+'</text>';nodes+='<rect class="detail-exit" x="480" y="'+(cy-26)+'" width="146" height="52" rx="25"/><text class="exit-word" x="553" y="'+(cy+5)+'">'+esc(step.altTerminal||step.alt)+'</text>'}
   nodes+='<g tabindex="0" role="button" class="detail-node '+(i===selectedStep?'selected':'')+'" data-step="'+i+'" aria-label="'+esc(step.title)+'">'+(decision?'<path class="detail-diamond" d="M'+x+' '+y+'L'+(x+130)+' '+cy+'L'+x+' '+(y+74)+'L'+(x-130)+' '+cy+'Z"/>':'<rect class="detail-box" x="'+(x-130)+'" y="'+y+'" width="260" height="74" rx="8"/>')+'<text class="detail-title" x="'+x+'" y="'+(y+32)+'">'+esc(step.title)+'</text><text class="detail-sub" x="'+x+'" y="'+(y+55)+'">'+esc(step.sub.length>23?step.sub.slice(0,22)+'…':step.sub)+'</text></g>';
  });
- $('detailDiagram').innerHTML='<div class="density-tabs"><button data-density="compact" class="'+(detailDensity==='compact'?'active':'')+'">简明流程</button><button data-density="fine" class="'+(detailDensity==='fine'?'active':'')+'">展开细节</button></div>'+tabs+'<p class="mini muted">矩形：处理　菱形：判断　点击节点阅读对应函数</p><div class="detail-scroll"><svg class="detail-svg" viewBox="0 0 650 '+height+'" role="group" aria-label="'+labels[node]+'内部程序流程图"><defs><marker id="detailTip" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#7b8da9"/></marker></defs>'+edges+nodes+'</svg></div><p class="mini muted">节点按执行顺序展开；条件循环中的操作以当前分支为准。点击可看该步代码、作用说明与完整文件。</p>';
- $('detailDiagram').querySelectorAll('[data-density]').forEach(b=>b.onclick=()=>{detailDensity=b.dataset.density;selectedStep=0;selectedPart=0;renderDetail()});
+ $('detailDiagram').innerHTML=tabs+'<p class="mini muted">矩形：处理　菱形：判断　点击节点阅读对应函数</p><div class="detail-scroll"><svg class="detail-svg" viewBox="0 0 650 '+height+'" role="group" aria-label="'+labels[node]+'内部程序流程图"><defs><marker id="detailTip" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#7b8da9"/></marker></defs>'+edges+nodes+'</svg></div><p class="mini muted">节点按执行顺序展开；条件循环中的操作以当前分支为准。点击可看该步代码、作用说明与完整文件。</p>';
  $('detailDiagram').querySelectorAll('[data-view]').forEach(b=>b.onclick=()=>{detailView=b.dataset.view;selectedStep=0;renderDetail()});
  $('detailDiagram').querySelectorAll('[data-step]').forEach(b=>{const action=()=>{selectedStep=Number(b.dataset.step);selectedPart=0;openCode()};b.onclick=action;b.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();action()}}});
  if(panelOpen){showCode();requestAnimationFrame(()=>{const scroll=$('detailDiagram').querySelector('.detail-scroll');if(scroll)scroll.scrollTop=Math.max(0,selectedStep*126-100)})}
