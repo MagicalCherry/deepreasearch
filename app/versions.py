@@ -109,3 +109,6 @@ dr_version('v1.5', '答案备忘录与证据核查', '整题生成答案备忘�
 
 dr_version('v1.6', '循环侦探', '每轮搜索后重新规划，最多六轮，近似去重，补搜复用循环。',
            scout='loop', scout_rounds=6, k_per_query=5, neardup=True)
+
+dr_version('v1.6.1', '循环侦探流程修复', '保留状态重试，停止无新结果的循环，最后报告经过审核。',
+           flow_fixes=True)

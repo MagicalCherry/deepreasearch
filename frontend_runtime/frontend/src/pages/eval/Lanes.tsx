@@ -105,6 +105,11 @@ export function EventCard({ e, queryId }: { e: Ev; queryId?: string }) {
         <div style={{ whiteSpace: 'pre-wrap', marginTop: 12 }}>{e.content || '本次写作未生成报告正文。'}</div>
         {Object.entries(e.sections ?? {}).map(([id, content]) => <details key={id}><summary>章节草稿：{id}</summary><div style={{ whiteSpace: 'pre-wrap' }}>{String(content)}</div></details>)}
       </div>}
+      {e.event === 'stage_output' && e.kind === 'stage_error' && <div className="lane-ev__body">
+        <b>{e.will_retry ? '当前阶段失败，保留资料后重试' : '当前阶段失败，停止本次研究'}</b>
+        <div>{e.message || '当前阶段执行失败'}（{e.error_type}，第 {e.attempt} 次尝试）</div>
+        {e.error_kind && <div>错误类型：{e.error_kind}</div>}
+      </div>}
       {e.event === 'stage_output' && e.kind === 'review' && <div className="lane-ev__body">
         {!e.review ? <div>审核器未返回可解析的审核内容；不能据此认为报告没有问题。</div> : <>
           <b>审核结论：{e.review.overall_assessment?.verdict ?? '未提供'}</b>

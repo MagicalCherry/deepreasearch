@@ -71,6 +71,9 @@ async def _run_once(question: str, trace: Trace, opts: dict) -> str:
 
 async def run(question: str, trace: Trace, opts: dict[str, Any]) -> str:
     """整题最多重试两次；欠费、内容审核和取消直接向上传播，全部尝试计入用量。"""
+    if opts.get('flow_fixes'):
+        from .flow_fixes import run as resilient_run
+        return await resilient_run(question, trace, deepcopy(opts))
     for attempt in range(opts.get("retries", 2) + 1):
         try:
             return await _run_once(question, trace, deepcopy(opts))
