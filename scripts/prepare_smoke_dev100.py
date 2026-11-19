@@ -1,10 +1,12 @@
 """离线复用同模型同代码的smoke20结果及判分，准备只补80题的dev100目录并保存来源；不调用模型。"""
 
 import asyncio
+import argparse
 from copy import deepcopy
 import hashlib
 import json
 import os
+import re
 from pathlib import Path
 import subprocess
 import sys
@@ -35,7 +37,7 @@ def latest_lines(path):
     return records
 
 
-async def main():
+async def main(pairs=PAIRS):
     """先验证所有来源及目标，再建立新目录；检索健康快照为本地只读请求。"""
     # 不在旧dev100仍运行时创建替代批次，避免学员意外重复付费。
     for path in (ROOT / 'runs').glob('s08-qwen37-*dev100*/status.json'):
@@ -49,12 +51,21 @@ async def main():
         raise ValueError('题集重叠或题面不一致')
     head = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip()
     plans = []
-    for source_id, target_id in PAIRS:
+    for source_id, target_id in pairs:
+        if any(not re.fullmatch(r'[A-Za-z0-9_-]+', name) for name in (source_id, target_id)):
+            raise ValueError('运行名称只能使用字母、数字、下划线、短横线')
         source, target = ROOT / 'runs' / source_id, ROOT / 'runs' / target_id
         if target.exists():
             raise ValueError('目标已存在，不覆盖：' + target_id)
         original = (source / 'config.json').read_bytes()
         config = json.loads(original)
+        smoke_questions = load_questions('smoke20')
+        smoke_hash = hashlib.sha256(json.dumps(smoke_questions, sort_keys=True).encode()).hexdigest()
+        if config.get('dataset') != 'smoke20' or config.get('questions_sha256') != smoke_hash:
+            raise ValueError('来源不是当前smoke20题面配置：' + source_id)
+        summary = json.loads((source / 'summary.json').read_bytes())
+        if summary.get('judge_model') != settings.model:
+            raise ValueError('来源判分模型与当前模型不一致：' + source_id)
         status = json.loads((source / 'status.json').read_bytes())
         if status.get('status') != 'completed' or status.get('errors') != 0:
             raise ValueError('来源尚未全部成功完成：' + source_id)
@@ -99,4 +110,10 @@ async def main():
 
 
 if __name__ == '__main__':
-    asyncio.run(main())
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--source', help='已完成并判分的smoke20运行名称')
+    parser.add_argument('--target', help='新dev100运行名称；不会覆盖已有目录')
+    args = parser.parse_args()
+    if bool(args.source) != bool(args.target):
+        parser.error('--source与--target必须同时提供')
+    asyncio.run(main(((args.source, args.target),) if args.source else PAIRS))
