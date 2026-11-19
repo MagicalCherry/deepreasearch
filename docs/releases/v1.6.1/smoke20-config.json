@@ -1,0 +1,46 @@
+{
+  "version": "v1.6.1",
+  "model": "qwen/qwen3.7-flash",
+  "dataset": "smoke20",
+  "llm_provider": "openrouter",
+  "llm_base_url": "https://openrouter.ai/api/v1",
+  "concurrency": 8,
+  "options": {
+    "max_iterations": 3,
+    "retries": 2,
+    "timeout_seconds": null,
+    "max_search_calls": null,
+    "planner": "constraints",
+    "expand": 2,
+    "analysis": "hypothesis",
+    "read_docs": true,
+    "max_searches": 50,
+    "max_reads": 8,
+    "doc_max_tokens": 8000,
+    "writer": "memo",
+    "critic": "evidence",
+    "scout": "loop",
+    "scout_rounds": 6,
+    "k_per_query": 5,
+    "neardup": true,
+    "flow_fixes": true
+  },
+  "git_sha": "5770c5fa241569c73e619d52e8a26a74859f349b",
+  "max_tokens": 65536,
+  "budget": {
+    "seconds": null,
+    "n_search": null
+  },
+  "search": {
+    "enabled": true,
+    "url": "http://localhost:8765",
+    "index": "default",
+    "parameters": {
+      "k1": 0.9,
+      "b": 0.4,
+      "unit": "doc"
+    },
+    "docs": 100195
+  },
+  "questions_sha256": "d0593d99b8ac2a1579102cac8685536de75b6be0a7eab45434b5f7113b013f28"
+}
