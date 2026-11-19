@@ -29,20 +29,38 @@ def build():
             files[path] = key
             if key in blobs:
                 continue
-            ranges = {}
+            ranges, statements = {}, []
             def walk(tree, prefix=''):
                 for node in ast.iter_child_nodes(tree):
                     if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
                         name = prefix + node.name
                         ranges[name] = [node.lineno, node.end_lineno]
+                        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                            def blocks(parent):
+                                for child in ast.iter_child_nodes(parent):
+                                    if isinstance(child, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+                                        continue
+                                    if isinstance(child, ast.stmt):
+                                        end = child.end_lineno
+                                        # 长条件/循环只突出控制头；其内部语句单独收录。
+                                        if hasattr(child, 'body') and child.body and end - child.lineno > 10:
+                                            end = child.body[0].lineno - 1
+                                        statements.append({'owner': name, 'start': child.lineno,
+                                                           'end': end, 'kind': type(child).__name__})
+                                    elif isinstance(child, ast.keyword) and hasattr(child, 'lineno'):
+                                        statements.append({'owner': name, 'start': child.lineno,
+                                                           'end': child.end_lineno, 'kind': 'keyword'})
+                                    blocks(child)
+                            blocks(node)
                         walk(node, name + '.')
             walk(ast.parse(code))
-            blobs[key] = {'code': code, 'ranges': ranges}
+            blobs[key] = {'code': code, 'ranges': ranges, 'statements': statements}
         snapshots.append({'commit': commit, 'files': files})
     payload = json.dumps({'blobs': blobs, 'snapshots': snapshots}, ensure_ascii=False).replace('<', '\\u003c')
     text = PAGE.read_text(encoding='utf-8')
     start, end = '/* SOURCE_PANEL_START */', '/* SOURCE_PANEL_END */'
-    panel = (ROOT / 'docs/visualizations/flow-code-panel.js').read_text(encoding='utf-8')
+    panel = (ROOT / 'docs/visualizations/workflow-steps.js').read_text(encoding='utf-8')
+    panel += '\n' + (ROOT / 'docs/visualizations/flow-code-panel.js').read_text(encoding='utf-8')
     content = start + '\nconst SOURCE_DATA = ' + payload + ';\n' + panel + '\n' + end
     if start in text:
         a, b = text.index(start), text.index(end) + len(end)

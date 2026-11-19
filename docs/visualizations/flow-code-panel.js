@@ -2,7 +2,7 @@
 let codeTab='step', selectedStep=0, panelOpen=false, codeTarget=null;
 const OLD='app/s4/deep_research_v2/agents/', TEAM='app/agents/dr/team.py', PORT='app/agents/s4_port.py';
 let detailView='main';
-function detailGraph(){
+function coarseDetailGraph(){
  const pipe=v?'app/agents/dr/pipeline.py':PORT;
  const n=(title,sub,path,symbol,extra={})=>({title,sub,path,symbol,...extra});
  const scout=OLD+'scout.py',writer=OLD+'writer.py',critic=OLD+'critic.py',architect=OLD+'architect.py';
@@ -28,7 +28,8 @@ function highlight(line){
 }
 function renderDetail(){
  const steps=detailGraph();selectedStep=Math.min(selectedStep,steps.length-1);$('steps').hidden=true;
- const tabs=node===1?'<div class="detail-tabs">'+[['main','章节研究'],['search','单次检索'],['read','正文阅读'],['supplement','补充研究']].map(([id,t])=>'<button data-view="'+id+'" class="'+(detailView===id?'active':'')+'">'+t+'</button>').join('')+'</div>':'';
+ const views=node===1?[['main','章节研究'],['search','单次检索'],['read','正文阅读'],['supplement','补充研究']]:node===3?[['main','审核入口'],['review','审核调用'],['route','分流规则']]:node===2?[['main','撰写'],['revise','文字修订']]:[];
+ const tabs=views.length?'<div class="detail-tabs">'+views.map(([id,t])=>'<button data-view="'+id+'" class="'+(detailView===id?'active':'')+'">'+t+'</button>').join('')+'</div>':'';
  const x=270,w=260,gap=126,top=20,height=steps.length*gap+35;
  let edges='',nodes='';
  steps.forEach((step,i)=>{const y=top+i*gap,cy=y+37,decision=step.decision;
@@ -36,10 +37,10 @@ function renderDetail(){
   if(decision){edges+='<path class="detail-wire" d="M'+(x+130)+' '+cy+'H478"/><text class="edge-word" x="439" y="'+(cy-9)+'">'+(step.side||'否')+'</text>';nodes+='<rect class="detail-exit" x="480" y="'+(cy-26)+'" width="146" height="52" rx="25"/><text class="exit-word" x="553" y="'+(cy+5)+'">'+esc(step.altTerminal||step.alt)+'</text>'}
   nodes+='<g tabindex="0" role="button" class="detail-node '+(i===selectedStep?'selected':'')+'" data-step="'+i+'" aria-label="'+esc(step.title)+'">'+(decision?'<path class="detail-diamond" d="M'+x+' '+y+'L'+(x+130)+' '+cy+'L'+x+' '+(y+74)+'L'+(x-130)+' '+cy+'Z"/>':'<rect class="detail-box" x="'+(x-130)+'" y="'+y+'" width="260" height="74" rx="8"/>')+'<text class="detail-title" x="'+x+'" y="'+(y+32)+'">'+esc(step.title)+'</text><text class="detail-sub" x="'+x+'" y="'+(y+55)+'">'+esc(step.sub.length>23?step.sub.slice(0,22)+'…':step.sub)+'</text></g>';
  });
- $('detailDiagram').innerHTML=tabs+'<p class="mini muted">矩形：处理　菱形：判断　点击节点阅读对应函数</p><div class="detail-scroll"><svg class="detail-svg" viewBox="0 0 650 '+height+'" role="group" aria-label="'+labels[node]+'内部程序流程图"><defs><marker id="detailTip" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#7b8da9"/></marker></defs>'+edges+nodes+'</svg></div><p class="mini muted">简图聚合了消息发送与错误处理；源码面板保留完整函数。章节循环、追踪层级与例外以节点说明和源码为准。</p>';
+ $('detailDiagram').innerHTML=tabs+'<p class="mini muted">矩形：处理　菱形：判断　点击节点阅读对应函数</p><div class="detail-scroll"><svg class="detail-svg" viewBox="0 0 650 '+height+'" role="group" aria-label="'+labels[node]+'内部程序流程图"><defs><marker id="detailTip" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#7b8da9"/></marker></defs>'+edges+nodes+'</svg></div><p class="mini muted">节点按执行顺序展开；条件循环中的操作以当前分支为准。点击可看该步代码、作用说明与完整文件。</p>';
  $('detailDiagram').querySelectorAll('[data-view]').forEach(b=>b.onclick=()=>{detailView=b.dataset.view;selectedStep=0;renderDetail()});
  $('detailDiagram').querySelectorAll('[data-step]').forEach(b=>{const action=()=>{selectedStep=Number(b.dataset.step);openCode()};b.onclick=action;b.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();action()}}});
- if(panelOpen)showCode();
+ if(panelOpen){showCode();requestAnimationFrame(()=>{const scroll=$('detailDiagram').querySelector('.detail-scroll');if(scroll)scroll.scrollTop=Math.max(0,selectedStep*126-100)})}
 }
 function openCode(){panelOpen=true;$('codeDrawer').classList.add('open');$('drawerShade').hidden=false;document.body.classList.add('drawer-open');renderDetail();$('closeCode').focus()}
 function closeCode(){panelOpen=false;$('codeDrawer').classList.remove('open');$('drawerShade').hidden=true;document.body.classList.remove('drawer-open')}
@@ -51,17 +52,24 @@ function showCode(){
  const step=detailGraph()[selectedStep];$('stepDescription').textContent=step.title+'：'+step.sub;
  const range=blob?.ranges[symbol];
  if(!blob||!range){$('codeLines').textContent='此历史版本未包含该函数。';return}
- const [start,end]=range,lines=blob.code.split('\n'),first=codeTab==='step'?start:1,last=codeTab==='step'?end:lines.length;
+ const lines=blob.code.split('\n'),norm=t=>t.replace(/[\s'"]/g,'');
+ const candidates=step.focus?(blob.statements||[]).filter(b=>b.owner===symbol&&norm(lines.slice(b.start-1,b.end).join('\n')).includes(norm(step.focus))):[];
+ candidates.sort((a,b)=>(a.end-a.start)-(b.end-b.start)||a.start-b.start);
+ const picked=candidates[0],start=picked?picked.start:range[0],end=picked?picked.end:range[1];
+ const first=codeTab==='step'?start:1,last=codeTab==='step'?end:lines.length;
+ $('stepWhy').textContent=step.why||'这一节点聚合了相关操作；可结合完整文件查看调用前后关系。';
+ $('prevStep').disabled=selectedStep===0;$('nextStep').disabled=selectedStep===detailGraph().length-1;
+
  $('codeLines').innerHTML=lines.slice(first-1,last).map((line,i)=>{const n=first+i;return '<div class="code-line '+(n>=start&&n<=end?'in-function':'')+'" data-line="'+n+'"><span class="line-no">'+n+'</span><span class="line-code">'+highlight(line)+'</span></div>'}).join('');
- $('codeRange').textContent='当前函数 L'+start+'–L'+end+' · '+(codeTab==='step'?'当前步骤所在函数':'完整文件，蓝色区域为当前函数');
+ $('codeRange').textContent='步骤 '+(selectedStep+1)+' / '+detailGraph().length+' · L'+start+'–L'+end+' · '+(picked?'当前步骤语句':'本节点关联函数');
  $('fullTab').classList.toggle('active',codeTab==='full');$('stepTab').classList.toggle('active',codeTab==='step');
  $('fullTab').setAttribute('aria-selected',codeTab==='full');$('stepTab').setAttribute('aria-selected',codeTab==='step');
  requestAnimationFrame(()=>{const row=$('codeLines').querySelector('[data-line="'+start+'"]');$('codeViewport').scrollTop=row?Math.max(0,row.offsetTop-80):0});
 }
 function initCodePanel(){
  const detail=document.createElement('div');detail.id='detailDiagram';$('steps').after(detail);
- const container=document.createElement('div');container.innerHTML='<div id="drawerShade" hidden></div><aside id="codeDrawer" aria-label="只读源码面板"><div class="drawer-head"><div><small>源码阅读器 / READ ONLY</small><h2 id="drawerTitle"></h2></div><button id="closeCode" aria-label="关闭代码面板">关闭 ×</button></div><div class="reader-selectors"><select id="readerVersion" aria-label="源码版本"><option value="0">v1.0</option><option value="1">v1.1</option><option value="2">v1.2</option><option value="3">v1.3</option><option value="4">v1.4</option><option value="5">v1.5</option></select><select id="readerAgent" aria-label="选择Agent"><option value="0">Chief 规划</option><option value="1">Scout 检索</option><option value="2">Writer 撰写</option><option value="3">Critic 审核</option><option value="4">答案抽取</option></select></div><p id="stepDescription"></p><div class="code-tabs" role="tablist"><button id="stepTab" role="tab">当前步骤</button><button id="fullTab" role="tab">完整文件</button><button id="jumpCode">定位函数 ↓</button></div><div id="codePath"></div><div id="codeMeta"></div><div id="codeViewport" tabindex="0" aria-label="只读代码内容"><div id="codeLines"></div></div><div id="codeRange"></div><p class="source-note">源码取自所选版本实际实验提交，并非当前工作区最新版。当前步骤展示其所在函数；一项流程可能包含多个调用，可沿函数名继续在完整文件中阅读。</p></aside>';
- document.body.append(container);$('readerAgent').onchange=e=>selectNode(Number(e.target.value));$('readerVersion').onchange=e=>{v=Number(e.target.value);render()};$('closeCode').onclick=closeCode;$('drawerShade').onclick=closeCode;
+ const container=document.createElement('div');container.innerHTML='<div id="drawerShade" hidden></div><aside id="codeDrawer" aria-label="只读源码面板"><div class="drawer-head"><div><small>源码阅读器 / READ ONLY</small><h2 id="drawerTitle"></h2></div><button id="closeCode" aria-label="关闭代码面板">关闭 ×</button></div><div class="reader-selectors"><select id="readerVersion" aria-label="源码版本"><option value="0">v1.0</option><option value="1">v1.1</option><option value="2">v1.2</option><option value="3">v1.3</option><option value="4">v1.4</option><option value="5">v1.5</option></select><select id="readerAgent" aria-label="选择Agent"><option value="0">Chief 规划</option><option value="1">Scout 检索</option><option value="2">Writer 撰写</option><option value="3">Critic 审核</option><option value="4">答案抽取</option></select></div><p id="stepDescription"></p><div id="stepWhy"></div><div class="step-navigation"><button id="prevStep">← 上一步</button><button id="nextStep">下一步 →</button></div><div class="code-tabs" role="tablist"><button id="stepTab" role="tab">当前步骤</button><button id="fullTab" role="tab">完整文件</button><button id="jumpCode">定位函数 ↓</button></div><div id="codePath"></div><div id="codeMeta"></div><div id="codeViewport" tabindex="0" aria-label="只读代码内容"><div id="codeLines"></div></div><div id="codeRange"></div><p class="source-note">源码取自所选版本实际实验提交，并非当前工作区最新版。当前步骤按Python语法树定位到对应语句；完整文件高亮同一片段。跨函数调用可沿流程继续阅读。</p></aside>';
+ document.body.append(container);$('prevStep').onclick=()=>{selectedStep=Math.max(0,selectedStep-1);renderDetail()};$('nextStep').onclick=()=>{selectedStep=Math.min(detailGraph().length-1,selectedStep+1);renderDetail()};$('readerAgent').onchange=e=>selectNode(Number(e.target.value));$('readerVersion').onchange=e=>{v=Number(e.target.value);render()};$('closeCode').onclick=closeCode;$('drawerShade').onclick=closeCode;
  $('stepTab').onclick=()=>{codeTab='step';showCode()};$('fullTab').onclick=()=>{codeTab='full';showCode()};
  $('jumpCode').onclick=()=>{showCode()};document.addEventListener('keydown',e=>{if(e.key==='Escape'&&panelOpen)closeCode()});
 }
