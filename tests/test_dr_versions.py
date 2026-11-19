@@ -63,3 +63,12 @@ def test_v16_adds_loop_scout_and_near_duplicate_filter():
     assert version.options == {**previous, 'scout': 'loop', 'scout_rounds': 6,
                                'k_per_query': 5, 'neardup': True}
     assert get_version('v1.5').options == previous
+
+
+def test_v17_adds_constraint_critic_and_preserves_flow_fixes():
+    """v1.7继承v1.6.1流程修复，仅替换约束核查，不改变上一版本。"""
+    previous = deepcopy(get_version('v1.6.1').options)
+    version = get_version('v1.7')
+    assert previous['flow_fixes'] is True
+    assert version.options == {**previous, 'critic': 'constraints'}
+    assert get_version('v1.6.1').options == previous
