@@ -32,12 +32,12 @@ function renderDetail(){
  const tabs=views.length?'<div class="detail-tabs">'+views.map(([id,t])=>'<button data-view="'+id+'" class="'+(detailView===id?'active':'')+'">'+t+'</button>').join('')+'</div>':'';
  const x=270,w=260,gap=126,top=20,height=steps.length*gap+35;
  let edges='',nodes='';
- steps.forEach((step,i)=>{const y=top+i*gap,cy=y+37,decision=step.decision;
+ steps.forEach((step,i)=>{const y=top+i*gap,cy=y+37,decision=step.decision;const changed=(step.parts||[step]).some(isCurrentChange);
   if(i<steps.length-1){edges+='<path class="detail-wire" d="M'+x+' '+(y+74)+'V'+(y+gap)+'"/>';if(decision)edges+='<text class="edge-word" x="'+(x-18)+'" y="'+(y+105)+'">'+(step.vertical||'是')+'</text>'}
   if(decision){edges+='<path class="detail-wire" d="M'+(x+130)+' '+cy+'H478"/><text class="edge-word" x="439" y="'+(cy-9)+'">'+(step.side||'否')+'</text>';nodes+='<rect class="detail-exit" x="480" y="'+(cy-26)+'" width="146" height="52" rx="25"/><text class="exit-word" x="553" y="'+(cy+5)+'">'+esc(step.altTerminal||step.alt)+'</text>'}
-  nodes+='<g tabindex="0" role="button" class="detail-node '+(i===selectedStep?'selected':'')+'" data-step="'+i+'" aria-label="'+esc(step.title)+'">'+(decision?'<path class="detail-diamond" d="M'+x+' '+y+'L'+(x+130)+' '+cy+'L'+x+' '+(y+74)+'L'+(x-130)+' '+cy+'Z"/>':'<rect class="detail-box" x="'+(x-130)+'" y="'+y+'" width="260" height="74" rx="8"/>')+'<text class="detail-title" x="'+x+'" y="'+(y+32)+'">'+esc(step.title)+'</text><text class="detail-sub" x="'+x+'" y="'+(y+55)+'">'+esc(step.sub.length>23?step.sub.slice(0,22)+'…':step.sub)+'</text></g>';
+  nodes+='<g tabindex="0" role="button" class="detail-node '+(i===selectedStep?'selected ':'')+(changed?'version-change':'')+'" data-step="'+i+'" aria-label="'+esc(step.title)+'">'+(decision?'<path class="detail-diamond" d="M'+x+' '+y+'L'+(x+130)+' '+cy+'L'+x+' '+(y+74)+'L'+(x-130)+' '+cy+'Z"/>':'<rect class="detail-box" x="'+(x-130)+'" y="'+y+'" width="260" height="74" rx="8"/>')+'<text class="detail-title" x="'+x+'" y="'+(y+32)+'">'+esc(step.title)+'</text><text class="detail-sub" x="'+x+'" y="'+(y+55)+'">'+esc(step.sub.length>23?step.sub.slice(0,22)+'…':step.sub)+'</text></g>';
  });
- $('detailDiagram').innerHTML=tabs+'<p class="mini muted">矩形：处理　菱形：判断　点击节点阅读对应函数</p><div class="detail-scroll"><svg class="detail-svg" viewBox="0 0 650 '+height+'" role="group" aria-label="'+labels[node]+'内部程序流程图"><defs><marker id="detailTip" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#7b8da9"/></marker></defs>'+edges+nodes+'</svg></div><p class="mini muted">节点按执行顺序展开；条件循环中的操作以当前分支为准。点击可看该步代码、作用说明与完整文件。</p>';
+ $('detailDiagram').innerHTML=tabs+'<p class="mini muted">矩形：处理　菱形：判断　点击节点阅读对应函数</p><p class="change-legend"><span class="change-swatch"></span>绿色：本版新增／改动　<span class="normal-swatch"></span>普通色：继承流程</p><div class="detail-scroll"><svg class="detail-svg" viewBox="0 0 650 '+height+'" role="group" aria-label="'+labels[node]+'内部程序流程图"><defs><marker id="detailTip" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#7b8da9"/></marker></defs>'+edges+nodes+'</svg></div><p class="mini muted">节点按执行顺序展开；条件循环中的操作以当前分支为准。点击可看该步代码、作用说明与完整文件。</p>';
  $('detailDiagram').querySelectorAll('[data-view]').forEach(b=>b.onclick=()=>{detailView=b.dataset.view;selectedStep=0;renderDetail()});
  $('detailDiagram').querySelectorAll('[data-step]').forEach(b=>{const action=()=>{selectedStep=Number(b.dataset.step);selectedPart=0;openCode()};b.onclick=action;b.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();action()}}});
  if(panelOpen){showCode();requestAnimationFrame(()=>{const scroll=$('detailDiagram').querySelector('.detail-scroll');if(scroll)scroll.scrollTop=Math.max(0,selectedStep*126-100)})}
@@ -50,7 +50,7 @@ function showCode(){
  $('codePart').replaceChildren(...parts.map((part,i)=>{const option=document.createElement('option');option.value=String(i);option.textContent=(i+1)+'. '+part.title;return option}));$('codePart').value=String(selectedPart);$('codePartRow').hidden=parts.length<2;
  $('readerAgent').value=String(node);$('readerVersion').value=String(v);$('drawerTitle').textContent='v1.'+v+' / '+labels[node];$('codePath').textContent=path;
  $('codeMeta').textContent='只读 · Python · 实验提交 '+snapshot.commit+' · '+symbol;
- $('stepDescription').textContent=group.title+'：'+group.sub;
+ $('stepDescription').textContent=((group.parts||[group]).some(isCurrentChange)?'【本版新增／改动】 ':'')+group.title+'：'+group.sub;
  const range=blob?.ranges[symbol];
  if(!blob||!range){$('codeLines').textContent='此历史版本未包含该函数。';return}
  const lines=blob.code.split('\n'),norm=t=>t.replace(/[\s'"]/g,'');

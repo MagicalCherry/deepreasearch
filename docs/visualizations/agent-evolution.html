@@ -72,6 +72,17 @@ body.drawer-open #researchLayout>section{display:none}
 body.drawer-open #researchLayout>aside{grid-row:auto;width:100%}
 body.drawer-open #researchLayout .detail-svg{max-width:730px;margin:0 auto}
 body.drawer-open #researchLayout .detail-scroll{max-height:calc(100vh - 220px)}
+
+/* 绿色只标识所选版本的增量；选择状态只改变描边，避免盖掉增量颜色。 */
+.detail-node.version-change .detail-box,.detail-node.version-change .detail-diamond,
+.detail-node.version-change:hover .detail-box,.detail-node.version-change:hover .detail-diamond,
+.detail-node.version-change.selected .detail-box,.detail-node.version-change.selected .detail-diamond,
+.program .clickable.version-change .box,.program .clickable.version-change.active .box{fill:#dcf5e9;stroke:#26966d}
+.detail-node.version-change.selected .detail-box,.detail-node.version-change.selected .detail-diamond,
+.program .clickable.version-change.active .box{stroke:#315be8;stroke-width:2.5}
+.change-legend{font-size:12px;color:#50647a;line-height:2;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.change-swatch,.normal-swatch{display:inline-block;width:14px;height:14px;border-radius:3px;border:1px solid #b9c7db;background:#fff}
+.change-swatch{background:#dcf5e9;border-color:#26966d}
 </style></head><body>
 <header><div class="mini">DEEPRESEARCH / CODE ATLAS</div><h1>同一条工作流，六次设计演进</h1><p>v1.0 → v1.5 · 从行业报告到答案备忘录 · 按本项目实际代码讲解</p><p class="mini">离线页面 · 无模型调用 · 无费用 · 源码快照：e6de328，评测：2026-11-19</p></header>
 <main><nav id="versions" aria-label="选择版本"></nav>
@@ -111,7 +122,7 @@ function renderScenario(){let text='';if(scenario==='pass')text='Critic verdict=
  $('scenarioOutput').textContent=text;[...$('scenarios').children].forEach(b=>b.classList.toggle('active',b.dataset.id===scenario));}
 function selectNode(n){node=n;const d=nodeData(keys[n]);$('role').textContent=labels[n];$('nodeTitle').textContent=d.title;$('steps').replaceChildren(...d.steps.map(t=>{const li=document.createElement('li');li.textContent=t;return li}));$('source').textContent=d.source;$('limit').textContent=d.limit;$('position').textContent=`${n+1} / 5 · ${labels[n]}`;[...$('flow').querySelectorAll('[data-node]')].forEach((b,i)=>b.classList.toggle('active',i===n));selectedStep=0;detailView='main';renderDetail();$('route').textContent=n===3?'分叉发生在Critic之后：通过 → 抽取；缺证据且满足路由 → Scout；其他未通过 → Writer。':'所有角色读写同一个state；Trace记录实际发生的事件。点击“下一步”是讲解导航，不是运行研究。';}
 function drawProgram(){
- const box=(i,y,title,sub)=>`<g class="clickable" data-node="${i}" tabindex="0" role="button" aria-label="${title}"><rect class="box" x="340" y="${y}" width="280" height="68" rx="10"/><text class="node-label" x="480" y="${y+29}">${title}</text><text class="sub" x="480" y="${y+51}">${sub}</text></g>`;
+ const box=(i,y,title,sub)=>`<g class="clickable ${currentRoleChange(i)?'version-change':''}" data-node="${i}" tabindex="0" role="button" aria-label="${title}"><rect class="box" x="340" y="${y}" width="280" height="68" rx="10"/><text class="node-label" x="480" y="${y+29}">${title}</text><text class="sub" x="480" y="${y+51}">${sub}</text></g>`;
  $('flow').innerHTML=`<svg viewBox="0 0 960 890" role="group" aria-label="研究程序流程图，主线从上到下，左右为审核回环">
  <defs><marker id="tip" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#758198"/></marker></defs>
  <rect class="terminal" x="405" y="15" width="150" height="40" rx="20"/><text x="480" y="41">输入问题</text>
@@ -303,6 +314,19 @@ function detailGraph(){
  flush();return groups;
 }
 
+// 仅高亮当前版本的增量；旧版增量在下一版自动恢复普通色。
+function isCurrentChange(part){
+ if(v===0)return false;
+ const sym=part.symbol||'',title=part.title||'',focus=part.focus||'';
+ if(v===1)return sym.startsWith('DRArchitect.')||title==='将题目填入提示词'||title==='调用LLM生成规划';
+ if(v===2)return sym==='clean_query'||sym==='merge_rrf'||sym==='DRScout._execute_search';
+ if(v===3)return sym==='DRScout._hypothesis_analysis'||sym==='DRScout._normalize_hypothesis_analysis';
+ if(v===4)return sym==='DRScout.read_docs'||(sym==='DRScout._hypothesis_analysis'&&/docs_to_read|extracted_facts/.test(focus))||(sym==='DRScout._execute_search'&&/预算|锁|重复|大小写|登记|预留/.test(title));
+ if(v===5)return sym.startsWith('DRWriter.')||(sym==='_run_once'&&/draft_sections|final_report/.test(focus))||(sym==='CriticMaster._review_content'&&/prompt =|response =/.test(focus))||sym==='DRCritic.__init__';
+ return false;
+}
+function currentRoleChange(index){return (v===1&&index===0)||([2,3,4].includes(v)&&index===1)||(v===5&&[2,3].includes(index))}
+
 // 用途：流程块与历史源码联动；提供完整文件和当前步骤两个只读代码视图，构建时内嵌到HTML。
 let codeTab='step', selectedStep=0, selectedPart=0, panelOpen=false, codeTarget=null;
 const OLD='app/s4/deep_research_v2/agents/', TEAM='app/agents/dr/team.py', PORT='app/agents/s4_port.py';
@@ -337,12 +361,12 @@ function renderDetail(){
  const tabs=views.length?'<div class="detail-tabs">'+views.map(([id,t])=>'<button data-view="'+id+'" class="'+(detailView===id?'active':'')+'">'+t+'</button>').join('')+'</div>':'';
  const x=270,w=260,gap=126,top=20,height=steps.length*gap+35;
  let edges='',nodes='';
- steps.forEach((step,i)=>{const y=top+i*gap,cy=y+37,decision=step.decision;
+ steps.forEach((step,i)=>{const y=top+i*gap,cy=y+37,decision=step.decision;const changed=(step.parts||[step]).some(isCurrentChange);
   if(i<steps.length-1){edges+='<path class="detail-wire" d="M'+x+' '+(y+74)+'V'+(y+gap)+'"/>';if(decision)edges+='<text class="edge-word" x="'+(x-18)+'" y="'+(y+105)+'">'+(step.vertical||'是')+'</text>'}
   if(decision){edges+='<path class="detail-wire" d="M'+(x+130)+' '+cy+'H478"/><text class="edge-word" x="439" y="'+(cy-9)+'">'+(step.side||'否')+'</text>';nodes+='<rect class="detail-exit" x="480" y="'+(cy-26)+'" width="146" height="52" rx="25"/><text class="exit-word" x="553" y="'+(cy+5)+'">'+esc(step.altTerminal||step.alt)+'</text>'}
-  nodes+='<g tabindex="0" role="button" class="detail-node '+(i===selectedStep?'selected':'')+'" data-step="'+i+'" aria-label="'+esc(step.title)+'">'+(decision?'<path class="detail-diamond" d="M'+x+' '+y+'L'+(x+130)+' '+cy+'L'+x+' '+(y+74)+'L'+(x-130)+' '+cy+'Z"/>':'<rect class="detail-box" x="'+(x-130)+'" y="'+y+'" width="260" height="74" rx="8"/>')+'<text class="detail-title" x="'+x+'" y="'+(y+32)+'">'+esc(step.title)+'</text><text class="detail-sub" x="'+x+'" y="'+(y+55)+'">'+esc(step.sub.length>23?step.sub.slice(0,22)+'…':step.sub)+'</text></g>';
+  nodes+='<g tabindex="0" role="button" class="detail-node '+(i===selectedStep?'selected ':'')+(changed?'version-change':'')+'" data-step="'+i+'" aria-label="'+esc(step.title)+'">'+(decision?'<path class="detail-diamond" d="M'+x+' '+y+'L'+(x+130)+' '+cy+'L'+x+' '+(y+74)+'L'+(x-130)+' '+cy+'Z"/>':'<rect class="detail-box" x="'+(x-130)+'" y="'+y+'" width="260" height="74" rx="8"/>')+'<text class="detail-title" x="'+x+'" y="'+(y+32)+'">'+esc(step.title)+'</text><text class="detail-sub" x="'+x+'" y="'+(y+55)+'">'+esc(step.sub.length>23?step.sub.slice(0,22)+'…':step.sub)+'</text></g>';
  });
- $('detailDiagram').innerHTML=tabs+'<p class="mini muted">矩形：处理　菱形：判断　点击节点阅读对应函数</p><div class="detail-scroll"><svg class="detail-svg" viewBox="0 0 650 '+height+'" role="group" aria-label="'+labels[node]+'内部程序流程图"><defs><marker id="detailTip" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#7b8da9"/></marker></defs>'+edges+nodes+'</svg></div><p class="mini muted">节点按执行顺序展开；条件循环中的操作以当前分支为准。点击可看该步代码、作用说明与完整文件。</p>';
+ $('detailDiagram').innerHTML=tabs+'<p class="mini muted">矩形：处理　菱形：判断　点击节点阅读对应函数</p><p class="change-legend"><span class="change-swatch"></span>绿色：本版新增／改动　<span class="normal-swatch"></span>普通色：继承流程</p><div class="detail-scroll"><svg class="detail-svg" viewBox="0 0 650 '+height+'" role="group" aria-label="'+labels[node]+'内部程序流程图"><defs><marker id="detailTip" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#7b8da9"/></marker></defs>'+edges+nodes+'</svg></div><p class="mini muted">节点按执行顺序展开；条件循环中的操作以当前分支为准。点击可看该步代码、作用说明与完整文件。</p>';
  $('detailDiagram').querySelectorAll('[data-view]').forEach(b=>b.onclick=()=>{detailView=b.dataset.view;selectedStep=0;renderDetail()});
  $('detailDiagram').querySelectorAll('[data-step]').forEach(b=>{const action=()=>{selectedStep=Number(b.dataset.step);selectedPart=0;openCode()};b.onclick=action;b.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();action()}}});
  if(panelOpen){showCode();requestAnimationFrame(()=>{const scroll=$('detailDiagram').querySelector('.detail-scroll');if(scroll)scroll.scrollTop=Math.max(0,selectedStep*126-100)})}
@@ -355,7 +379,7 @@ function showCode(){
  $('codePart').replaceChildren(...parts.map((part,i)=>{const option=document.createElement('option');option.value=String(i);option.textContent=(i+1)+'. '+part.title;return option}));$('codePart').value=String(selectedPart);$('codePartRow').hidden=parts.length<2;
  $('readerAgent').value=String(node);$('readerVersion').value=String(v);$('drawerTitle').textContent='v1.'+v+' / '+labels[node];$('codePath').textContent=path;
  $('codeMeta').textContent='只读 · Python · 实验提交 '+snapshot.commit+' · '+symbol;
- $('stepDescription').textContent=group.title+'：'+group.sub;
+ $('stepDescription').textContent=((group.parts||[group]).some(isCurrentChange)?'【本版新增／改动】 ':'')+group.title+'：'+group.sub;
  const range=blob?.ranges[symbol];
  if(!blob||!range){$('codeLines').textContent='此历史版本未包含该函数。';return}
  const lines=blob.code.split('\n'),norm=t=>t.replace(/[\s'"]/g,'');

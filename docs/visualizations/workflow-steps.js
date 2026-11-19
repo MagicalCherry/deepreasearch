@@ -162,3 +162,16 @@ function detailGraph(){
  for(const item of raw){if(item.decision){flush();groups.push({...item,parts:[item]});continue}pending.push(item);if(pending.length===3)flush()}
  flush();return groups;
 }
+
+// 仅高亮当前版本的增量；旧版增量在下一版自动恢复普通色。
+function isCurrentChange(part){
+ if(v===0)return false;
+ const sym=part.symbol||'',title=part.title||'',focus=part.focus||'';
+ if(v===1)return sym.startsWith('DRArchitect.')||title==='将题目填入提示词'||title==='调用LLM生成规划';
+ if(v===2)return sym==='clean_query'||sym==='merge_rrf'||sym==='DRScout._execute_search';
+ if(v===3)return sym==='DRScout._hypothesis_analysis'||sym==='DRScout._normalize_hypothesis_analysis';
+ if(v===4)return sym==='DRScout.read_docs'||(sym==='DRScout._hypothesis_analysis'&&/docs_to_read|extracted_facts/.test(focus))||(sym==='DRScout._execute_search'&&/预算|锁|重复|大小写|登记|预留/.test(title));
+ if(v===5)return sym.startsWith('DRWriter.')||(sym==='_run_once'&&/draft_sections|final_report/.test(focus))||(sym==='CriticMaster._review_content'&&/prompt =|response =/.test(focus))||sym==='DRCritic.__init__';
+ return false;
+}
+function currentRoleChange(index){return (v===1&&index===0)||([2,3,4].includes(v)&&index===1)||(v===5&&[2,3].includes(index))}
