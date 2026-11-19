@@ -103,3 +103,6 @@ dr_version('v1.3', '假设驱动检索', '继承约束规划与检索扩写，�
            analysis='hypothesis')
 dr_version('v1.4', '正文阅读与搜索预算', '模型选择正文读取，每题最多50次实际搜索、8篇文档，每篇最多8000 token。',
            read_docs=True, max_searches=50, max_reads=8, doc_max_tokens=8000)
+
+dr_version('v1.5', '答案备忘录与证据核查', '整题生成答案备忘录，按证据链审核，补搜后重新撰写。',
+           writer='memo', critic='evidence')

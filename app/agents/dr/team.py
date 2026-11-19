@@ -287,6 +287,46 @@ class DRWriter(s4_port.CorpusWriter):
         super().__init__(llm, trace)
         self.opts = deepcopy(opts)
 
+    async def _write_section(self, state, section):
+        if self.opts.get('writer') != 'memo':
+            return await super()._write_section(state, section)
+        if section is not state['outline'][0]:
+            state['draft_sections'][section['id']] = ''
+            section['status'] = 'drafted'
+            return
+        from .prompts import MEMO_WRITING
+        response = await self.call_llm(
+            system_prompt='Write factual answer memos from supplied evidence only. Return JSON.',
+            user_prompt=MEMO_WRITING + '\n' + json.dumps({
+                'question': state['query'], 'constraints': state.get('_constraints', []),
+                'facts': state['facts'], 'data_points': state['data_points'],
+                'feedback': state['critic_feedback']}, ensure_ascii=False),
+            json_mode=True, temperature=0.3, max_tokens=16000)
+        result = self.parse_json_response(response)
+        if not isinstance(result, dict) or not isinstance(result.get('content'), str) or not result['content'].strip():
+            raise ValueError('答案备忘录未返回有效content')
+        state['draft_sections'][section['id']] = result['content']
+        section['status'] = 'drafted'
+        known = {f.get('source_url') for f in state['facts'] if isinstance(f, dict)}
+        state['references'] = [c for c in result.get('citations', [])
+                               if isinstance(c, dict) and c.get('url') and c['url'] in known]
+        self.trace.emit('plan', agent='writer', items=[str(result.get('best_answer', 'Unknown'))])
+
+    async def _synthesize_report(self, state):
+        if self.opts.get('writer') != 'memo':
+            return await super()._synthesize_report(state)
+        state['final_report'] = '\n\n'.join(
+            state['draft_sections'].get(s['id'], '') for s in state['outline']
+            if state['draft_sections'].get(s['id']))
+
+    async def _revise_report(self, state):
+        if self.opts.get('writer') != 'memo':
+            return await super()._revise_report(state)
+        state['draft_sections'] = {}
+        for section in state['outline']:
+            section['status'] = 'researching'
+        return await self._write_report(state)
+
 
 class DRCritic(s4_port.CorpusCritic):
     """按原样审核与路由，不在v1.1同时修改准确性审核标准。"""
@@ -294,3 +334,6 @@ class DRCritic(s4_port.CorpusCritic):
     def __init__(self, llm, trace, opts):
         super().__init__(llm, trace)
         self.opts = deepcopy(opts)
+        if self.opts.get('critic') == 'evidence':
+            from .prompts import EVIDENCE_REVIEW
+            self.REVIEW_PROMPT = EVIDENCE_REVIEW

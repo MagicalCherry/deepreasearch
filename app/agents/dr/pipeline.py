@@ -49,6 +49,11 @@ async def _run_once(question: str, trace: Trace, opts: dict) -> str:
                 break
             if state["phase"] == ResearchPhase.RE_RESEARCHING.value:
                 state = await _step(scout, state, "scout", "补充检索")
+                if opts.get('writer') == 'memo':
+                    state['draft_sections'] = {}
+                    state['final_report'] = ''
+                    for section in state['outline']:
+                        section['status'] = 'researching'
                 state["phase"] = ResearchPhase.WRITING.value
                 state = await _step(writer, state, "writer", "执笔")
             elif state["phase"] == ResearchPhase.REVISING.value:
