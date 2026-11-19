@@ -43,7 +43,7 @@ function renderDetail(){
  $('detailDiagram').querySelectorAll('[data-step]').forEach(b=>{const action=()=>{selectedStep=Number(b.dataset.step);selectedPart=0;openCode()};b.onclick=action;b.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();action()}}});
  if(panelOpen){showCode();requestAnimationFrame(()=>{const scroll=$('detailDiagram').querySelector('.detail-scroll');if(scroll)scroll.scrollTop=Math.max(0,selectedStep*126-100)})}
 }
-function openCode(){panelOpen=true;$('codeDrawer').classList.add('open');$('drawerShade').hidden=false;document.body.classList.add('drawer-open');renderDetail();$('closeCode').focus()}
+function openCode(){const wasOpen=panelOpen;panelOpen=true;$('codeDrawer').classList.add('open');$('drawerShade').hidden=false;document.body.classList.add('drawer-open');renderDetail();if(!wasOpen)requestAnimationFrame(()=>{$('detailDiagram').closest('aside').scrollIntoView({block:'start',behavior:'auto'})});$('closeCode').focus({preventScroll:true})}
 function closeCode(){panelOpen=false;$('codeDrawer').classList.remove('open');$('drawerShade').hidden=true;document.body.classList.remove('drawer-open')}
 function showCode(){
  const group=detailGraph()[selectedStep],parts=group.parts||[group];selectedPart=Math.min(selectedPart,parts.length-1);const step=parts[selectedPart];

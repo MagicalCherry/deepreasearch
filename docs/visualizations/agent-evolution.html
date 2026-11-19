@@ -47,11 +47,29 @@ body.drawer-open .grid{grid-template-columns:minmax(0,1fr)}
 #codePart{margin-left:8px;max-width:85%;background:#22314a;color:#dce8ff;border:1px solid #405374;border-radius:6px;padding:7px;font-size:12px}
 .density-tabs{display:flex;gap:7px;margin:12px 0}.density-tabs button{font-size:12px;padding:7px 12px}
 @media(max-width:760px){:root{--reader-width:320px}body.drawer-open main{min-width:460px}#codeDrawer{width:320px}}
+
+/* 源码开启时仍保留总图与详细图，避免将详细流程挤到总图下面。 */
+:root{--reader-width:clamp(330px,36vw,640px)}
+body.drawer-open main{padding:18px;min-width:0}
+body.drawer-open #researchLayout{grid-template-columns:minmax(250px,.8fr) minmax(330px,1.2fr);gap:14px;align-items:start}
+body.drawer-open #researchLayout>.card{padding:16px;min-width:0}
+body.drawer-open #researchLayout #flow svg{min-width:0}
+body.drawer-open #researchLayout .detail-svg{min-width:0}
+body.drawer-open #researchLayout h2{font-size:18px}
+body.drawer-open #researchLayout #source{font-size:11px}
+body.drawer-open #researchLayout .detail-scroll{max-height:calc(100vh - 235px)}
+@media(max-width:1200px){
+ :root{--reader-width:340px}
+ body.drawer-open #researchLayout{grid-template-columns:minmax(0,1fr)}
+ body.drawer-open #researchLayout>aside{grid-row:1}
+ body.drawer-open #researchLayout>section{grid-row:2;max-height:400px;overflow:auto}
+}
+@media(max-width:760px){:root{--reader-width:300px}body.drawer-open main{min-width:340px}}
 </style></head><body>
 <header><div class="mini">DEEPRESEARCH / CODE ATLAS</div><h1>同一条工作流，六次设计演进</h1><p>v1.0 → v1.5 · 从行业报告到答案备忘录 · 按本项目实际代码讲解</p><p class="mini">离线页面 · 无模型调用 · 无费用 · 源码快照：e6de328，评测：2026-11-19</p></header>
 <main><nav id="versions" aria-label="选择版本"></nav>
 <section class="card"><span class="tag" id="option"></span><h2 id="title"></h2><p id="intro"></p><div id="changes"></div><div class="metrics" id="metrics"></div></section>
-<div class="grid"><section class="card"><h2>① 程序流程图 · 点击节点看代码逻辑</h2><p class="muted">版本累积继承；绿色标签只表示当前版新增。角色不是自由调度，调用顺序由流水线决定。</p><div id="flow" class="program"></div><div class="toolbar"><button id="next">下一步 →</button><span class="muted" id="position"></span></div><div id="route" class="branch"></div><details><summary>共享状态：数据交给谁？</summary><p>Chief → outline、hypotheses；v1.1起增加 _constraints、_answer_type。</p><p>Scout → facts、data_points、raw_sources 等研究材料；v1.3候选还保存在同一个 DRScout 实例的 candidates。</p><p>Writer → draft_sections、final_report、references。</p><p>Critic → critic_feedback、unresolved_issues、quality_score、pending_search_queries。</p><p>Trace → search/read/fact/plan/stage_output 等事件、token、耗时与检索计数；状态字段不一定都自动成为前端事件。</p></details></section>
+<div class="grid" id="researchLayout"><section class="card"><h2>① 程序流程图 · 点击节点看代码逻辑</h2><p class="muted">版本累积继承；绿色标签只表示当前版新增。角色不是自由调度，调用顺序由流水线决定。</p><div id="flow" class="program"></div><div class="toolbar"><button id="next">下一步 →</button><span class="muted" id="position"></span></div><div id="route" class="branch"></div><details><summary>共享状态：数据交给谁？</summary><p>Chief → outline、hypotheses；v1.1起增加 _constraints、_answer_type。</p><p>Scout → facts、data_points、raw_sources 等研究材料；v1.3候选还保存在同一个 DRScout 实例的 candidates。</p><p>Writer → draft_sections、final_report、references。</p><p>Critic → critic_feedback、unresolved_issues、quality_score、pending_search_queries。</p><p>Trace → search/read/fact/plan/stage_output 等事件、token、耗时与检索计数；状态字段不一定都自动成为前端事件。</p></details></section>
 <aside class="card" aria-live="polite"><span class="tag" id="role"></span><h2 id="nodeTitle"></h2><p class="muted mini">点击下面流程块，在左侧阅读对应的真实代码。</p><ol class="steps" id="steps"></ol><h3>代码入口</h3><div class="code" id="source"></div><p id="limit" class="notice"></p></aside></div>
 <section class="card"><h2>② Scout 内部 · 新流程加在哪里？</h2><div class="program" id="scoutFlow"></div><p id="scoutText"></p><details><summary>“追踪搜索”与“阅读全文”有什么区别？</summary><p>原 Scout 的两层追踪是从分析结果里取后续检索词，再调用搜索和分析；不代表自动打开网页里的所有链接。v1.3把候选验证查询优先塞入既有追踪入口。</p><p>v1.4才把 docs_to_read 接到 read_docs()：按已返回的docid读取正文，再提取带原文片段的事实。每篇最多8000 token，不保证完整长文全部读完。</p></details><details><summary>为什么会出现 0 搜索的 Scout？</summary><p>v1.2起，clean_query() 拒绝带未替换占位符的查询，例如 [Actor Name]。若一组初始查询全部被拒绝，子任务即使已发“开始”事件也可能0搜索；没有自动重生成查询的恢复机制。v1.4还会因重复查询或预算耗尽返回空结果。这些是不同原因。</p></details></section>
 <section class="card"><h2>③ 审核回环 · 选择一种情况</h2><div class="toolbar" id="scenarios"></div><div id="scenarioOutput" class="branch" aria-live="polite"></div><p class="muted mini">这是根据代码绘制的示意，不运行模型；审核“通过”不是答案正确的保证，轮数耗尽也不代表证据补齐。</p></section>
@@ -324,7 +342,7 @@ function renderDetail(){
  $('detailDiagram').querySelectorAll('[data-step]').forEach(b=>{const action=()=>{selectedStep=Number(b.dataset.step);selectedPart=0;openCode()};b.onclick=action;b.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();action()}}});
  if(panelOpen){showCode();requestAnimationFrame(()=>{const scroll=$('detailDiagram').querySelector('.detail-scroll');if(scroll)scroll.scrollTop=Math.max(0,selectedStep*126-100)})}
 }
-function openCode(){panelOpen=true;$('codeDrawer').classList.add('open');$('drawerShade').hidden=false;document.body.classList.add('drawer-open');renderDetail();$('closeCode').focus()}
+function openCode(){const wasOpen=panelOpen;panelOpen=true;$('codeDrawer').classList.add('open');$('drawerShade').hidden=false;document.body.classList.add('drawer-open');renderDetail();if(!wasOpen)requestAnimationFrame(()=>{$('detailDiagram').closest('aside').scrollIntoView({block:'start',behavior:'auto'})});$('closeCode').focus({preventScroll:true})}
 function closeCode(){panelOpen=false;$('codeDrawer').classList.remove('open');$('drawerShade').hidden=true;document.body.classList.remove('drawer-open')}
 function showCode(){
  const group=detailGraph()[selectedStep],parts=group.parts||[group];selectedPart=Math.min(selectedPart,parts.length-1);const step=parts[selectedPart];
