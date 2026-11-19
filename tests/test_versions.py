@@ -48,6 +48,9 @@ def universal_json():
         "full_report": "Fictional report", "executive_summary": "Demo", "conclusions": [],
         "references": [], "overall_assessment": {"quality_score": 8, "verdict": "pass"},
         "issues": [], "missing_aspects": [], "fact_check_results": [],
+        "constraint_checks": [{"constraint_index": 0, "constraint": "fictional constraint",
+                               "status": "verified", "docid": "1", "note": "Fictional evidence"}],
+        "alternative_candidate": "",
         "revised_content": "Revised fictional report", "addressed_issues": [],
     }
 
@@ -135,3 +138,22 @@ async def test_every_registered_version_completes(version, offline_clients):
         assert 1 <= trace.n_read <= 8
         assert trace.n_search <= 50
         assert any(e['event'] == 'plan' and e.get('round') == 1 for e in trace.events)
+    if version == 'v1.7':
+        verification = [e for e in trace.events if e['event'] == 'verify'][-1]
+        assert (verification['verified'], verification['total']) == (1, 1)
+
+
+async def test_v17_pipeline_caps_confidence_with_unverified_evidence(monkeypatch, offline_clients):
+    """从实际流水线到最终answer事件验证封顶，防止只改提示词而漏改保存结果。"""
+    original = universal_json
+    def unsupported_json():
+        payload = original()
+        payload['constraint_checks'][0]['docid'] = '999'
+        return payload
+    monkeypatch.setitem(globals(), 'universal_json', unsupported_json)
+    trace = Trace()
+    answer = await runner.research('Fictional question', 'v1.7', trace, {'max_iterations': 1})
+    assert 'Confidence: 25%' in answer
+    verify = [e for e in trace.events if e['event'] == 'verify'][-1]
+    assert (verify['verified'], verify['total'], verify['verdict']) == (0, 1, 'fail')
+    assert next(e for e in trace.events if e['event'] == 'answer')['confidence'] == 25

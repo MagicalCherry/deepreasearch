@@ -115,6 +115,17 @@ export function EventCard({ e, queryId }: { e: Ev; queryId?: string }) {
           <b>审核结论：{e.review.overall_assessment?.verdict ?? '未提供'}</b>
           <div>质量评分：{e.review.overall_assessment?.quality_score ?? '未提供'}</div>
           <div style={{ whiteSpace: 'pre-wrap' }}>{e.review.overall_assessment?.summary}</div>
+          {Array.isArray(e.review.constraint_checks) && <div style={{ marginTop: 12 }}>
+            <b>逐条约束核查</b>
+            {e.review.constraint_checks.map((c: any, i: number) => <div key={i} style={{ marginTop: 8 }}>
+              <Tag color={c.status === 'verified' ? 'success' : c.status === 'refuted' ? 'error' : 'warning'}>
+                {c.status === 'verified' ? '已证实' : c.status === 'refuted' ? '已证伪' : '未验证'}
+              </Tag>{c.constraint}
+              {c.docid && <DocLink docid={String(c.docid)} queryId={queryId} />}
+              <div className="eval-muted">{c.note}</div>
+            </div>)}
+          </div>}
+          {e.review.alternative_candidate && <div>建议核查其他候选：{e.review.alternative_candidate}</div>}
           {(e.review.issues ?? []).map((issue: any, i: number) => <div key={i} style={{ marginTop: 12 }}>
             <b>问题 {i + 1}：{issue.issue_type}（{issue.severity}）</b>
             <div>{issue.description}</div><div>修改建议：{issue.suggestion ?? '未提供'}</div>

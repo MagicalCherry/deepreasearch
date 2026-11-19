@@ -295,8 +295,10 @@ async def run(question, trace, opts):
         for review_index in range(state['max_iterations']):
             state = await retry_stage(critic, state, 'critic', '核查', opts)
             passed = state['phase'] == ResearchPhase.COMPLETED.value
+            from .constraints import counts
+            verified, total = counts(state) if opts.get('critic') == 'constraints' else (0, 0)
             trace.emit('verify', agent='critic', verdict='pass' if passed else 'fail',
-                       verified=0, total=0, note=f"证据审核：quality_score={state['quality_score']}，未解决问题={state['unresolved_issues']}")
+                       verified=verified, total=total, note=f"证据审核：quality_score={state['quality_score']}，未解决问题={state['unresolved_issues']}")
             if passed:
                 break
             if review_index + 1 >= state['max_iterations']:
@@ -323,6 +325,12 @@ async def run(question, trace, opts):
                 state = await retry_stage(writer, state, 'writer', '修订', opts)
             else:
                 break
+        if opts.get('critic') == 'constraints':
+            from .constraints import answer_context, cap_answer
+            answer = await retry_operation(lambda: _extract(question, state, llm, trace, sources,
+                                            answer_suffix=answer_context(state)),
+                                           trace, 'answer', opts.get('retries', 2))
+            return cap_answer(answer, state)
         return await retry_operation(lambda: _extract(question, state, llm, trace, sources),
                                      trace, 'answer', opts.get('retries', 2))
     finally:

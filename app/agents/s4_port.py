@@ -185,7 +185,7 @@ async def _step(agent: Traced, state: dict, lane: str, role: str) -> dict:
 
 
 async def _extract(question: str, state: dict, llm: LLM,
-                   trace: Trace, sources: dict[str, str]) -> str:
+                   trace: Trace, sources: dict[str, str], answer_suffix: str = '') -> str:
     trace.emit("agent_start", agent="answer", role="作答", task=question)
     facts = [{"content": f.get("content"),
               "docid": sources.get(f.get("source_url", ""), ""),
@@ -196,7 +196,7 @@ async def _extract(question: str, state: dict, llm: LLM,
         "Cite only provided document IDs in square brackets; do not invent evidence. "
         "Use Explanation:, Exact Answer:, Confidence: (0-100%) fields."
     )}, {"role": "user", "content": (
-        f"Question: {question}\nReport:\n{state['final_report']}\nFacts:\n{facts}"
+        f"Question: {question}\nReport:\n{state['final_report']}\nFacts:\n{facts}" + answer_suffix
     )}]
     token = CURRENT_AGENT.set("answer")
     adapter = Traced(llm, trace)

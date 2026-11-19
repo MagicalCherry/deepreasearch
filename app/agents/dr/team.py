@@ -466,3 +466,19 @@ class DRCritic(s4_port.CorpusCritic):
         if self.opts.get('critic') == 'evidence':
             from .prompts import EVIDENCE_REVIEW
             self.REVIEW_PROMPT = EVIDENCE_REVIEW
+
+    async def _review_content(self, state):
+        if self.opts.get('critic') == 'constraints':
+            from .constraints import review
+            return await review(self, state)
+        return await super()._review_content(state)
+
+    def _analyze_issues_for_routing(self, review_result):
+        if self.opts.get('critic') != 'constraints':
+            return super()._analyze_issues_for_routing(review_result)
+        # 保留替代候选优先级，不能沿用父类的set排序。
+        queries = list(review_result.get('missing_aspects', []))
+        queries.extend(i.get('search_query') for i in review_result.get('issues', [])
+                       if i.get('requires_new_search') and i.get('search_query'))
+        queries = list(dict.fromkeys(q for value in queries if (q := clean_query(value))))[:5]
+        return {'should_research': bool(queries), 'search_queries': queries}
