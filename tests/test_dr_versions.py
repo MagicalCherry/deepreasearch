@@ -37,3 +37,12 @@ def test_v13_adds_only_hypothesis_analysis_option():
     version = get_version('v1.3')
     assert version.options == {**previous, 'analysis': 'hypothesis'}
     assert get_version('v1.2').options == previous
+
+
+def test_v14_adds_reading_and_search_budgets():
+    """v1.4只增加正文阅读和本阶段指定的检索/阅读预算，旧版本不变。"""
+    previous = deepcopy(get_version('v1.3').options)
+    version = get_version('v1.4')
+    assert version.options == {**previous, 'read_docs': True, 'max_searches': 50,
+                               'max_reads': 8, 'doc_max_tokens': 8000}
+    assert get_version('v1.3').options == previous

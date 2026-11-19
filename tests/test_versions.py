@@ -30,9 +30,11 @@ def universal_json():
                      "search_queries": [f"demo query {i}", f"demo alternate {i}"]} for i in range(1, 4)],
         "answer_type": "fictional name", "constraints": ["fictional constraint"],
         "queries": ["fictional alternate angle", "fictional distinct clue"],
+        "docs_to_read": ["1"], "answer_clues": [],
         "research_questions": ["Fictional question"], "key_entities": [],
         "mind_map": {}, "hypotheses": [],
         "extracted_facts": [{"content": "Fictional evidence",
+                             "quote": "Fictional evidence",
                              "source_url": "https://example.test/1", "source_name": "Demo",
                              "credibility_score": 0.8, "data_points": []}],
         "entities_discovered": [], "hypothesis_evidence": [], "key_insights": [],
@@ -71,6 +73,9 @@ def offline_clients(monkeypatch):
             closed.append("llm")
 
     class FakeSearch:
+        async def document(self, docid, max_tokens=None):
+            return {"docid": docid, "title": "Demo", "text": "Fictional evidence"}
+
         async def search(self, q, k=5):
             await asyncio.sleep(0)
             return {"results": [{"docid": "1", "title": "Demo", "score": 1.0,
@@ -120,3 +125,6 @@ async def test_every_registered_version_completes(version, offline_clients):
         assert plan['answer_type'] == 'fictional name'
         assert len(plan['subquestions']) == 3
         assert all(len(s['search_queries']) == 2 for s in plan['subquestions'])
+    if version == 'v1.4':
+        assert 1 <= trace.n_read <= 8
+        assert trace.n_search <= 50

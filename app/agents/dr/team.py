@@ -1,11 +1,13 @@
 """按版本选项构造四角色；v1.1仅改变Chief规划，其他角色继承原样适配行为。"""
 
 from copy import deepcopy
+import asyncio
 import json
 import re
 
 from app.agents import s4_port
-from .prompts import CONSTRAINT_PLANNING, PLANNING_SYSTEM, QUERY_EXPANSION, HYPOTHESIS_ANALYSIS
+from .prompts import (CONSTRAINT_PLANNING, PLANNING_SYSTEM, QUERY_EXPANSION,
+                      HYPOTHESIS_ANALYSIS, DOCUMENT_SELECTION, DOCUMENT_READING)
 
 
 def clean_query(query):
@@ -82,6 +84,13 @@ class DRScout(s4_port.CorpusScout):
         self.candidates = {}
         self._constraints = []
         self._question = ''
+        self._available_docs = {}
+        # 状态挂在整题Trace上，章节并发、补搜及整题重试不会重置预算。
+        if self.opts.get('max_searches') is not None:
+            if not hasattr(trace, '_dr_budget'):
+                trace._dr_budget = {'lock': asyncio.Lock(), 'search_count': trace.n_search,
+                                    'queries': set(), 'originals': set(), 'reads': set()}
+            self._budget = trace._dr_budget
 
     async def process(self, state):
         self._constraints = deepcopy(state.get('_constraints', []))
@@ -92,18 +101,85 @@ class DRScout(s4_port.CorpusScout):
         documents = [{'title': r.get('title', ''), 'source_url': r.get('url', ''),
                       'snippet': str(r.get('summary', ''))[:300]} for r in results[:limit]
                      if isinstance(r, dict)]
+        if self.opts.get('read_docs'):
+            for document in documents:
+                docid = self.sources.get(document['source_url'])
+                if docid:
+                    document['docid'] = docid
+                    self._available_docs[docid] = document
+        prompt = HYPOTHESIS_ANALYSIS.format(
+            question=question, constraints=json.dumps(self._constraints, ensure_ascii=False),
+            focus=focus, candidates=json.dumps(list(self.candidates.values()), ensure_ascii=False),
+            documents=json.dumps(documents, ensure_ascii=False))
+        if self.opts.get('read_docs'):
+            prompt += DOCUMENT_SELECTION
         response = await self.call_llm(
             system_prompt='You analyze retrieved evidence and propose falsifiable candidate hypotheses. Return JSON only.',
-            user_prompt=HYPOTHESIS_ANALYSIS.format(
-                question=question, constraints=json.dumps(self._constraints, ensure_ascii=False),
-                focus=focus, candidates=json.dumps(list(self.candidates.values()), ensure_ascii=False),
-                documents=json.dumps(documents, ensure_ascii=False)),
+            user_prompt=prompt,
             json_mode=True, temperature=0.2,
         )
         parsed = self.parse_json_response(response)
         if not isinstance(parsed, dict):
             raise ValueError('候选分析未返回JSON对象')
-        return self._normalize_hypothesis_analysis(parsed)
+        analysis = self._normalize_hypothesis_analysis(parsed)
+        if self.opts.get('read_docs'):
+            analysis['extracted_facts'].extend(await self.read_docs(
+                analysis.get('docs_to_read', []), question))
+        return analysis
+
+    async def read_docs(self, docids, query):
+        """只读本次真实检索结果，每次最多两篇；事实需有正文可核对的原文片段。"""
+        if not self.opts.get('read_docs') or not isinstance(docids, list):
+            return []
+        facts, selected = [], 0
+        for value in docids:
+            if selected >= 2:
+                break
+            docid = value.get('docid') if isinstance(value, dict) else value
+            if not isinstance(docid, (str, int)) or isinstance(docid, bool):
+                continue
+            docid = str(docid)
+            if docid not in self._available_docs:
+                continue
+            async with self._budget['lock']:
+                if docid in self._budget['reads']:
+                    continue
+                if len(self._budget['reads']) >= self.opts['max_reads']:
+                    break
+                # 网络请求前预留，确保三个并发侦探不会重复读取或超限。
+                self._budget['reads'].add(docid)
+                selected += 1
+            document = await self.search.document(docid, max_tokens=self.opts['doc_max_tokens'])
+            text = document.get('text', '')
+            self.trace.emit('read', agent=s4_port.CURRENT_AGENT.get(), docid=docid,
+                            title=document.get('title', ''),
+                            span=f"前{self.opts['doc_max_tokens']} token以内")
+            if not isinstance(text, str) or not text.strip():
+                continue
+            response = await self.call_llm(
+                system_prompt='Extract evidence from the supplied document text. Return JSON only.',
+                user_prompt=DOCUMENT_READING.format(query=query,
+                    constraints=json.dumps(self._constraints, ensure_ascii=False), docid=docid,
+                    title=document.get('title', ''), text=text), json_mode=True, temperature=0.2)
+            parsed = self.parse_json_response(response)
+            if not isinstance(parsed, dict):
+                raise ValueError('正文阅读未返回JSON对象')
+            for key in ('extracted_facts', 'answer_clues'):
+                values = parsed.get(key, [])
+                for fact in values if isinstance(values, list) else []:
+                    if not isinstance(fact, dict):
+                        continue
+                    quote, content = fact.get('quote'), fact.get('content')
+                    if not isinstance(quote, str) or not quote.strip() or quote not in text:
+                        continue
+                    if not isinstance(content, str) or not content.strip():
+                        continue
+                    facts.append({'content': ('答案线索（待核实）：' if key == 'answer_clues' else '')
+                                  + content + '\n原文片段：' + quote,
+                                  'source_url': self._available_docs[docid]['source_url'],
+                                  'source_name': document.get('title', ''), 'data_points': [],
+                                  'credibility_score': 0.5, 'docid': docid, 'quote': quote})
+        return facts
 
     def _normalize_hypothesis_analysis(self, parsed):
         """过滤原角色按dict读取的列表，验证查询置前并复用两层追踪入口。"""
@@ -163,6 +239,15 @@ class DRScout(s4_port.CorpusScout):
         original = clean_query(query)
         if not original:
             return []
+        if self.opts.get('max_searches') is not None:
+            async with self._budget['lock']:
+                if self._budget['search_count'] >= self.opts['max_searches']:
+                    self.trace.stop_reason = 'search_budget'
+                    return []
+                normalized = original.casefold()
+                if normalized in self._budget['originals'] or normalized in self._budget['queries']:
+                    return []
+                self._budget['originals'].add(normalized)
         response = await self.call_llm(
             system_prompt='You rewrite factual search queries for an English BM25 corpus. Return JSON only.',
             user_prompt=QUERY_EXPANSION.format(query=original), json_mode=True,
@@ -178,8 +263,20 @@ class DRScout(s4_port.CorpusScout):
                 queries.append(cleaned)
         results = []
         for rewritten in queries:
+            if self.opts.get('max_searches') is not None:
+                async with self._budget['lock']:
+                    if self._budget['search_count'] >= self.opts['max_searches']:
+                        self.trace.stop_reason = 'search_budget'
+                        break
+                    normalized = rewritten.casefold()
+                    if normalized in self._budget['queries']:
+                        continue
+                    self._budget['queries'].add(normalized)
+                    self._budget['search_count'] += 1
             # 每次实际检索均走原适配层计数，不能把三次伪记为一次。
             results.append(await super()._execute_search(rewritten, count))
+        if self.opts.get('max_searches') is not None and self._budget['search_count'] >= self.opts['max_searches']:
+            self.trace.stop_reason = 'search_budget'
         return merge_rrf(results, count)
 
 
