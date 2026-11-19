@@ -90,11 +90,12 @@ def diagnose(run, dataset, output):
     total = (f'总数：题集{len(questions)}题，已有结果{len(results)}题，正确{correct}题，'
              f'错误或运行出错{len(cards)}题，缺失{len(questions)-len(results)}题；'
              + '，'.join(f'{name}{counts[name]}题' for name in CATEGORIES) + '。')
-    lines = ['<!-- 用途：S09离线错题分类、证据命中统计与学员人工复盘；仅供评测分析。 -->',
-             total, '', '# v1.0失败诊断', '', f'运行：`{directory.name}`；题集：`{dataset}`。',
+    lines = ['<!-- 用途：离线错题分类、证据命中统计与学员人工复盘；仅供评测分析。 -->',
+             total, '', f"# {config['version']}失败诊断", '', f'运行：`{directory.name}`；题集：`{dataset}`。',
              '', '分类优先级：运行出错 → 格式/未给具体答案 → 零召回 → 召回到没推对。',
              '“格式”按教案包含无法确定类回答，不仅指字段语法错误；证据命中只表示检索返回过，不代表阅读全文或验证完成。',
-             '本次为smoke20探索诊断，不代替dev100正式验收。未输出标准答案或金标编号。', '']
+             ('本次为smoke20探索诊断，不代替dev100正式验收。' if dataset == 'smoke20'
+              else '本次为dev100开发集诊断，不代表样本外正式验收通过。') + '未输出标准答案或金标编号。', '']
     for name in CATEGORIES:
         lines += [f'## {name}（{counts[name]}题）', '',
                   '| 题号 | 给出的答案 | 证据命中 | 金标命中 | 搜索次数 | 阅读次数 |',

@@ -1,0 +1,16 @@
+{
+  "s08-qwen37-s4-dev100-reuse20": {
+    "n": 100,
+    "zero_recall_all_questions": 47,
+    "recall_at_least_half_but_wrong": 16,
+    "wrong": 92,
+    "wrong_confidence_at_least_80": 65
+  },
+  "s12-v16-qwen37-dev100-reuse20": {
+    "n": 100,
+    "zero_recall_all_questions": 46,
+    "recall_at_least_half_but_wrong": 15,
+    "wrong": 88,
+    "wrong_confidence_at_least_80": 74
+  }
+}
