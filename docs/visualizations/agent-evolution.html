@@ -6,6 +6,22 @@
 :root{--bg:#f3f5fa;--card:#fff;--ink:#17233b;--muted:#596880;--line:#dce3ef;--blue:#315be8;--soft:#edf1ff;--green:#13744e;--orange:#9b570e}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.65 system-ui,"Microsoft YaHei",sans-serif}button,select{font:inherit}button{cursor:pointer}button:focus-visible,a:focus-visible,select:focus-visible{outline:3px solid #df9818;outline-offset:3px}header{background:#142343;color:white;padding:36px max(24px,calc((100vw - 1320px)/2))}header p{color:#c3d1ed;margin:7px 0}h1{font-size:30px;margin:5px 0}h2{font-size:21px;margin:0 0 16px}h3{margin:0 0 8px}main{max-width:1368px;margin:auto;padding:24px}nav{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}button{border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);padding:10px 15px}button.active{background:var(--blue);color:white;border-color:var(--blue)}.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:24px;margin-bottom:20px}.muted,small{color:var(--muted)}.tag{font:12px/1.6 system-ui;display:inline-block;border-radius:5px;padding:2px 7px;background:var(--soft);color:var(--blue);margin:3px}.new{background:#e1f5eb;color:var(--green)}.grid{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(320px,1fr);gap:20px}.flow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:18px 0}.node{flex:1;min-width:100px;padding:14px 9px;text-align:center}.node b,.node small{display:block}.node.active small{color:#e0e7ff}.arrow{color:var(--muted)}.branch{padding:14px;background:var(--bg);border-radius:10px;border-left:3px solid var(--blue);margin:10px 0}.toolbar{display:flex;gap:9px;align-items:center;flex-wrap:wrap}.steps{counter-reset:steps;padding:0;list-style:none}.steps li{padding:10px 0 10px 34px;position:relative;border-bottom:1px solid var(--line)}.steps li:before{counter-increment:steps;content:counter(steps);position:absolute;left:0;top:13px;background:var(--soft);color:var(--blue);border-radius:50%;width:23px;height:23px;text-align:center;font-size:12px}.code{background:#17233b;color:#e4ecff;border-radius:10px;padding:16px;white-space:pre-wrap;overflow-wrap:anywhere;font:13px/1.7 Consolas,monospace}.files{display:grid;gap:7px}.files button{text-align:left;padding:9px 12px}details{border-top:1px solid var(--line);padding:12px 0}summary{cursor:pointer;font-weight:600}.notice{background:#fff6e7;border-left:3px solid #cc8b23;padding:12px 15px;border-radius:8px;color:#70430b}.tablewrap{overflow:auto}table{border-collapse:collapse;width:100%;white-space:nowrap}th,td{text-align:left;border-bottom:1px solid var(--line);padding:12px}th{color:var(--muted);font-size:13px}tr.current{background:var(--soft)}.metrics{display:flex;gap:12px;flex-wrap:wrap}.metric{background:var(--bg);padding:12px 18px;border-radius:9px;flex:1}.metric b{display:block;font-size:24px}.mini{font-size:13px}a{color:var(--blue)}footer{padding:10px 0 30px;color:var(--muted)}@media(max-width:900px){.grid{grid-template-columns:1fr}.card{padding:18px}main{padding:15px}h1{font-size:25px}.node{min-width:115px}}
 
 .program{overflow:auto;margin:16px 0}.program svg{display:block;width:100%;min-width:650px;height:auto}.program .box{fill:var(--card);stroke:var(--line);stroke-width:2}.program .decision{fill:#fff6e7;stroke:#bc7c20;stroke-width:2}.program .wire{fill:none;stroke:var(--muted);stroke-width:2;marker-end:url(#tip)}.program text{fill:var(--ink);font:15px system-ui,"Microsoft YaHei",sans-serif;text-anchor:middle}.program .edge-label{font-size:13px;fill:var(--muted)}.program .sub{font-size:12px;fill:var(--muted)}.program .clickable{cursor:pointer}.program .clickable.active .box,.program .clickable.active .decision{fill:var(--soft);stroke:var(--blue);stroke-width:3}.program .clickable:focus{outline:none}.program .clickable:focus .box,.program .clickable:focus .decision{stroke:#cc8b23;stroke-width:4}.program .terminal{fill:var(--soft);stroke:var(--blue);stroke-width:1.5}
+
+/* 图中文字统一字体、尺寸和权重；分支标签用独立背景隔开连线。 */
+body,button,select,.program text{font-family:"Microsoft YaHei UI","Microsoft YaHei","Segoe UI",Arial,sans-serif}
+.program text{font-size:17px;font-weight:400;letter-spacing:0}
+.program .node-label{font-size:19px;font-weight:600}
+.program .sub{font-size:14px;fill:#647187}
+.program .branch-title{font-size:16px;font-weight:500;fill:#42516a}
+.program .box{fill:#fff;stroke:#ccd6e6;stroke-width:1.5}
+.program .decision{fill:#f1f4ff;stroke:#5775c9;stroke-width:1.8}
+.program .wire{stroke:#758198;stroke-width:1.8}
+.program .label-bg{fill:#fff;stroke:none}
+.program .change-note{fill:#eaf6ef;stroke:#b9d9c5;stroke-width:1}
+.program .terminal{fill:#f1f4ff;stroke:#7b92d2;stroke-width:1.4}
+.program .clickable.active .box{fill:#eef3ff;stroke:#315be8;stroke-width:2.2}
+.flow-footnote{background:#f5f7fb;border-radius:8px;color:#596880;padding:12px 16px;font-size:13px;line-height:1.8}
+#flow svg{min-width:620px}.program .clickable:hover .box{stroke:#315be8;fill:#f5f7ff}
 </style></head><body>
 <header><div class="mini">DEEPRESEARCH / CODE ATLAS</div><h1>同一条工作流，六次设计演进</h1><p>v1.0 → v1.5 · 从行业报告到答案备忘录 · 按本项目实际代码讲解</p><p class="mini">离线页面 · 无模型调用 · 无费用 · 源码快照：e6de328，评测：2026-11-19</p></header>
 <main><nav id="versions" aria-label="选择版本"></nav>
@@ -45,26 +61,25 @@ function renderScenario(){let text='';if(scenario==='pass')text='Critic verdict=
  $('scenarioOutput').textContent=text;[...$('scenarios').children].forEach(b=>b.classList.toggle('active',b.dataset.id===scenario));}
 function selectNode(n){node=n;const d=nodeData(keys[n]);$('role').textContent=labels[n];$('nodeTitle').textContent=d.title;$('steps').replaceChildren(...d.steps.map(t=>{const li=document.createElement('li');li.textContent=t;return li}));$('source').textContent=d.source;$('limit').textContent=d.limit;$('position').textContent=`${n+1} / 5 · ${labels[n]}`;[...$('flow').querySelectorAll('[data-node]')].forEach((b,i)=>b.classList.toggle('active',i===n));$('route').textContent=n===3?'分叉发生在Critic之后：通过 → 抽取；缺证据且满足路由 → Scout；其他未通过 → Writer。':'所有角色读写同一个state；Trace记录实际发生的事件。点击“下一步”是讲解导航，不是运行研究。';}
 function drawProgram(){
- const svg=`<svg viewBox="0 0 900 660" role="group" aria-label="研究程序流程图。可点击角色节点查看逻辑。">
- <defs><marker id="tip" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor"/></marker></defs>
- <path class="wire" d="M450 48V77 M450 135V165 M450 223V253 M450 311V345 M450 465V499 M450 557V595"/>
- <path class="wire" d="M350 405H200V282H350"/>
- <path class="wire" d="M550 405H738V194H550"/>
- <path class="wire" d="M395 438H95V528H350"/>
- <rect class="terminal" x="385" y="10" width="130" height="38" rx="19"/><text x="450" y="35">开始 / 题目</text>
- ${[['Chief · 生成规划',77,'大纲、约束、检索词'],['Scout · 搜索研究',165,'章节并行 · 追踪 · 事实'],['Writer · 撰写',253,v>=5?'整题答案备忘录':'逐章写作 + 报告整合']].map(([t,y,sub],i)=>`<g class="clickable" data-node="${i}" tabindex="0" role="button" aria-label="${t}"><rect class="box" x="350" y="${y}" width="200" height="58" rx="7"/><text x="450" y="${y+24}">${t}</text><text class="sub" x="450" y="${y+45}">${sub}</text></g>`).join('')}
- <g class="clickable" data-node="3" tabindex="0" role="button" aria-label="Critic审核及路由"><path class="decision" d="M450 345L550 405L450 465L350 405Z"/><text x="450" y="397">Critic 审核</text><text class="sub" x="450" y="420">通过 / 补搜 / 修订？</text></g>
- <g class="clickable" data-node="4" tabindex="0" role="button" aria-label="最终答案抽取"><rect class="box" x="350" y="499" width="200" height="58" rx="7"/><text x="450" y="523">最终答案抽取</text><text class="sub" x="450" y="544">短答案 · 置信度 · 引用</text></g>
- <rect class="terminal" x="385" y="595" width="130" height="38" rx="19"/><text x="450" y="620">结束 / 保存结果</text>
- <text class="edge-label" x="520" y="485">通过</text>
- <text class="edge-label" x="674" y="385">缺证据且路由满足</text>
- <text class="edge-label" x="738" y="160">补充搜索</text>
- <text class="edge-label" x="217" y="385">仅文字修订</text>
- <text class="edge-label" x="207" y="442">回到 Writer</text>
- <text class="edge-label" x="247" y="574">轮数耗尽 → 抽取</text>
- ${v>=5?'<rect x="615" y="220" width="240" height="65" rx="8" fill="#e1f5eb"/><text x="735" y="245">v1.5 补搜后新增</text><text class="sub" x="735" y="267">清空旧草稿 → 重新撰写 → 再审核</text>':''}
- </svg>`;
- $('flow').innerHTML=svg;
+ const box=(i,y,title,sub)=>`<g class="clickable" data-node="${i}" tabindex="0" role="button" aria-label="${title}"><rect class="box" x="340" y="${y}" width="280" height="68" rx="10"/><text class="node-label" x="480" y="${y+29}">${title}</text><text class="sub" x="480" y="${y+51}">${sub}</text></g>`;
+ $('flow').innerHTML=`<svg viewBox="0 0 960 890" role="group" aria-label="研究程序流程图，主线从上到下，左右为审核回环">
+ <defs><marker id="tip" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#758198"/></marker></defs>
+ <rect class="terminal" x="405" y="15" width="150" height="40" rx="20"/><text x="480" y="41">输入问题</text>
+ <path class="wire" d="M480 55V90 M480 158V195 M480 263V300 M480 368V405 M480 473V515 M480 625V690 M480 758V800"/>
+ <path class="wire return-wire" d="M370 570H140V334H340"/>
+ <path class="wire return-wire" d="M590 570H820V229H620"/>
+ ${box(0,90,'Chief · 规划',v?'提取约束 · 拆解子问题':'行业研究模板 · 生成大纲')}
+ ${box(1,195,'Scout · 研究','检索 → 分析 → 追踪'+(v>=4?' → 读正文':''))}
+ ${box(2,300,'Writer · 撰写',v>=5?'整题一份答案备忘录':'逐章写作 → 整合报告')}
+ ${box(3,405,'Critic · 审核',v>=5?'核对答案与证据链':'审核报告质量与缺失信息')}
+ <path class="decision" d="M480 515L590 570L480 625L370 570Z"/><text class="node-label" x="480" y="577">如何继续？</text>
+ <rect class="label-bg" x="68" y="445" width="144" height="63" rx="8"/><text class="branch-title" x="140" y="472">仅需修改文字</text><text class="sub" x="140" y="493">回到 Writer</text>
+ <rect class="label-bg" x="742" y="445" width="156" height="63" rx="8"/><text class="branch-title" x="820" y="472">需要补充证据</text><text class="sub" x="820" y="493">满足原路由条件</text>
+ <rect class="label-bg" x="494" y="642" width="88" height="28" rx="6"/><text class="branch-title" x="538" y="662">审核通过</text>
+ ${box(4,690,'最终答案抽取','报告 + 事实 → 答案 / 置信度 / 引用')}
+ <rect class="terminal" x="385" y="800" width="190" height="42" rx="21"/><text x="480" y="827">保存结果 · 结束</text>
+ ${v>=5?'<rect class="change-note" x="650" y="285" width="280" height="76" rx="9"/><text class="branch-title" x="790" y="311">v1.5 · 补搜完成后</text><text class="sub" x="790" y="334">清空旧草稿，再撰写并审核</text>':''}
+ </svg><div class="flow-footnote">循环边界：默认最多3轮。轮数耗尽时会进入答案抽取，不代表审核通过。这里将该退出条件单独说明，避免与正常分支混在一起。</div>`;
  $('flow').querySelectorAll('[data-node]').forEach(g=>{const action=()=>selectNode(Number(g.dataset.node));g.onclick=action;g.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();action()}}});
 }
 function render(){const d=versions[v];[...$('versions').children].forEach((b,i)=>{b.classList.toggle('active',i===v);b.setAttribute('aria-pressed',i===v)});$('option').textContent=d.option;$('title').textContent=`v1.${v} · ${d.name}`;$('intro').textContent=d.intro;$('changes').replaceChildren(...d.add.map(t=>{const s=document.createElement('span');s.className='tag new';s.textContent='本版新增 · '+t;return s}));$('metrics').innerHTML=`<div class="metric"><small>答对</small><b>${d.m[0]} / 20</b></div><div class="metric"><small>平均搜索</small><b>${d.m[3]}</b></div><div class="metric"><small>平均阅读</small><b>${d.m[4]}</b></div><div class="metric"><small>平均耗时</small><b>${Math.round(d.m[7])}s</b></div>`;
