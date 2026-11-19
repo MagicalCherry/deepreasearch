@@ -44,33 +44,64 @@ function renderDetail(){
 }
 function openCode(){const wasOpen=panelOpen;panelOpen=true;$('codeDrawer').classList.add('open');$('drawerShade').hidden=false;document.body.classList.add('drawer-open');renderDetail();if(!wasOpen)requestAnimationFrame(()=>{$('detailDiagram').closest('aside').scrollIntoView({block:'start',behavior:'auto'})});$('closeCode').focus({preventScroll:true})}
 function closeCode(){panelOpen=false;$('codeDrawer').classList.remove('open');$('drawerShade').hidden=true;document.body.classList.remove('drawer-open')}
+function sourceSlice(part){
+ const snap=SOURCE_DATA.snapshots[v],blob=SOURCE_DATA.blobs[snap.files[part.path]],range=blob?.ranges[part.symbol];
+ if(!range)return null;const lines=blob.code.split('\n'),norm=t=>t.replace(/[\s'"]/g,'');
+ const matches=part.focus?(blob.statements||[]).filter(b=>b.owner===part.symbol&&norm(lines.slice(b.start-1,b.end).join('\n')).includes(norm(part.focus))):[];
+ matches.sort((a,b)=>(a.end-a.start)-(b.end-b.start)||a.start-b.start);
+ return {part,blob,lines,start:matches[0]?.start||range[0],end:matches[0]?.end||range[1]};
+}
+function relatedChanges(group){
+ if(!(group.parts||[group]).some(isCurrentChange))return [];
+ const prompt='app/agents/dr/prompts.py',p=(title,path,symbol,why)=>({title,path,symbol,why,related:true});
+ if(v===1&&node===0)return [p('改动位置：替换规划模板',TEAM,'DRArchitect.__init__','在构造时将原行业模板替换为CONSTRAINT_PLANNING。'),p('改动位置：初次和重试都用新提示',TEAM,'DRArchitect.call_llm','父类仍负责调用，但这里覆盖system/user提示词，防止重试退回行业模板。'),p('新增约束规划提示词',prompt,'CONSTRAINT_PLANNING','要求答案类型、全部约束、三个子问题及英文检索词。')];
+ if(v===2&&node===1)return [p('新增扩写提示词',prompt,'QUERY_EXPANSION','把一条查询扩写为两个不同角度。')];
+ if(v===3&&node===1)return [p('新增候选假设分析提示',prompt,'HYPOTHESIS_ANALYSIS','要求候选、满足/未满足约束与具体的验证查询。')];
+ if(v===4&&node===1)return [p('新增选择正文的指令',prompt,'DOCUMENT_SELECTION','分析结果新增docs_to_read，选择真实返回的文档编号。'),p('新增正文证据提取提示',prompt,'DOCUMENT_READING','要求原文片段与答案线索，不是仅分析搜索摘要。')];
+ if(v===5&&node===2)return [p('新增答案备忘录提示',prompt,'MEMO_WRITING','用一份答案备忘录替代逐章行业报告。')];
+ if(v===5&&node===3)return [p('改动位置：替换审核提示',TEAM,'DRCritic.__init__','审核处理及路由函数沿用，实例REVIEW_PROMPT被换成证据核查提示。'),p('新增证据核查提示词',prompt,'EVIDENCE_REVIEW','检查答案与证据链；缺口用原路由可识别的结构化字段输出。')];
+ return [];
+}
 function showCode(){
- const group=detailGraph()[selectedStep],parts=group.parts||[group];selectedPart=Math.min(selectedPart,parts.length-1);const step=parts[selectedPart];
- const path=step.path,symbol=step.symbol,snapshot=SOURCE_DATA.snapshots[v],blob=SOURCE_DATA.blobs[snapshot.files[path]];
- $('codePart').replaceChildren(...parts.map((part,i)=>{const option=document.createElement('option');option.value=String(i);option.textContent=(i+1)+'. '+part.title;return option}));$('codePart').value=String(selectedPart);$('codePartRow').hidden=parts.length<2;
- $('readerAgent').value=String(node);$('readerVersion').value=String(v);$('drawerTitle').textContent='v1.'+v+' / '+labels[node];$('codePath').textContent=path;
- $('codeMeta').textContent='只读 · Python · 实验提交 '+snapshot.commit+' · '+symbol;
- $('stepDescription').textContent=((group.parts||[group]).some(isCurrentChange)?'【本版新增／改动】 ':'')+group.title+'：'+group.sub;
- const range=blob?.ranges[symbol];
- if(!blob||!range){$('codeLines').textContent='此历史版本未包含该函数。';return}
- const lines=blob.code.split('\n'),norm=t=>t.replace(/[\s'"]/g,'');
- const candidates=step.focus?(blob.statements||[]).filter(b=>b.owner===symbol&&norm(lines.slice(b.start-1,b.end).join('\n')).includes(norm(step.focus))):[];
- candidates.sort((a,b)=>(a.end-a.start)-(b.end-b.start)||a.start-b.start);
- const picked=candidates[0],start=picked?picked.start:range[0],end=picked?picked.end:range[1];
- const first=codeTab==='step'?start:1,last=codeTab==='step'?end:lines.length;
- $('stepWhy').textContent=group.why||'这一节点聚合了相关操作；可结合完整文件查看调用前后关系。';
+ const group=detailGraph()[selectedStep],snap=SOURCE_DATA.snapshots[v];
+ const parts=(group.parts||[group]).slice();
+ for(const extra of relatedChanges(group))if(!parts.some(p=>p.path===extra.path&&p.symbol===extra.symbol&&!p.focus))parts.push(extra);
+ const slices=parts.map(sourceSlice).filter(Boolean),hasChange=(group.parts||[group]).some(isCurrentChange);
+ $('readerAgent').value=String(node);$('readerVersion').value=String(v);$('drawerTitle').textContent='v1.'+v+' / '+labels[node];
+ $('stepDescription').textContent=group.title+' · 全部'+(group.parts||[group]).length+'个子步骤';
+ const delta=['原样基线，无前一版本对照。','行业报告规划 → 约束拆题。新增模板替换、重试提示覆盖与约束字段保存。','单角度查询 → 原词加两个扩写角度，并清理语法、用RRF合并。','一般摘要分析 → 候选假设与约束验证，优先搜索验证词。','摘要为主 → 可选择读取正文；同时新增整题50次搜索、8篇阅读预算。','多章报告 → 一份答案备忘录；审核关注证据，补搜后清空旧稿重写。'][v];
+ $('stepWhy').textContent=(hasChange?'本版变化：'+delta:'本模块沿用之前流程，本版没有新增业务逻辑。')+'\n绿色代码行：相对上一实验版本实际新增／修改。普通代码行：沿用。';
+ $('codePath').textContent=codeTab==='step'?'当前模块 · 所有子步骤与相关改动位置':'当前模块涉及的完整源码文件';
+ $('codeMeta').textContent='只读 · 实验提交 '+snap.commit+(v?' · 对照 '+SOURCE_DATA.snapshots[v-1].commit:' · 基线');
  $('prevStep').disabled=selectedStep===0;$('nextStep').disabled=selectedStep===detailGraph().length-1;
-
- $('codeLines').innerHTML=lines.slice(first-1,last).map((line,i)=>{const n=first+i;return '<div class="code-line '+(n>=start&&n<=end?'in-function':'')+'" data-line="'+n+'"><span class="line-no">'+n+'</span><span class="line-code">'+highlight(line)+'</span></div>'}).join('');
- $('codeRange').textContent='步骤 '+(selectedStep+1)+' / '+detailGraph().length+' · L'+start+'–L'+end+' · '+(picked?'当前步骤语句':'本节点关联函数');
+ function linesHTML(slice,start,end){
+  const changes=snap.changes?.[slice.part.path]||[];
+  return slice.lines.slice(start-1,end).map((line,i)=>{const n=start+i,changed=changes.some(h=>n>=h.start&&n<=h.end);return '<div class="code-line '+(changed?'actual-change ':'')+(n>=slice.start&&n<=slice.end?'in-function':'')+'"><span class="line-no">'+n+'</span><span class="diff-sign">'+(changed?'+':' ')+'</span><span class="line-code">'+highlight(line)+'</span></div>'}).join('');
+ }
+ function removalHTML(slice){
+  if(!v)return '';const previous=SOURCE_DATA.snapshots[v-1],old=SOURCE_DATA.blobs[previous.files[slice.part.path]];if(!old)return '';
+  const hunks=(snap.changes?.[slice.part.path]||[]).filter(h=>h.old_end>=h.old_start&&h.start<=slice.end+1&&h.end>=slice.start-1);
+  if(!hunks.length)return '';return '<div class="before-label">上一版被替换／删除的代码</div>'+hunks.map(h=>old.code.split('\n').slice(h.old_start-1,Math.min(h.old_end,h.old_start+19)).map((line,i)=>'<div class="code-line removed-line"><span class="line-no">'+(h.old_start+i)+'</span><span class="diff-sign">−</span><span class="line-code">'+highlight(line)+'</span></div>').join('')+(h.old_end-h.old_start>=20?'<div class="code-hint">较长旧片段仅展示前20行。</div>':'')).join('');
+ }
+ let html='';
+ if(codeTab==='step')html=slices.map((slice,i)=>{
+  const {part,start,end}=slice,changes=snap.changes?.[part.path]||[],changed=changes.some(h=>h.start<=end&&h.end>=start);
+  return '<section class="source-section"><div class="source-heading"><b>'+(part.related?'相关改动位置':('子步骤 '+(i+1)))+' · '+esc(part.title)+'</b><span class="source-status '+(changed?'changed':'')+'">'+(changed?'本版代码有改动':'沿用代码')+'</span><p>'+esc(part.why||part.sub||'')+'</p><code>'+esc(part.path)+' · '+esc(part.symbol)+' · L'+start+'–L'+end+'</code></div>'+removalHTML(slice)+linesHTML(slice,start,end)+'</section>';
+ }).join('');
+ else{
+  const paths=[...new Set(slices.map(s=>s.part.path))];
+  html=paths.map(path=>{const items=slices.filter(s=>s.part.path===path),slice=items[0];return '<section class="source-section"><div class="source-heading"><b>'+esc(path)+'</b><p>蓝色背景定位当前模块片段；绿色行表示本版真实改动。</p></div>'+slice.lines.map((line,i)=>{const n=i+1,changed=(snap.changes?.[path]||[]).some(h=>n>=h.start&&n<=h.end),focused=items.some(x=>n>=x.start&&n<=x.end);return '<div class="code-line '+(changed?'actual-change ':'')+(focused?'in-function':'')+'" '+(focused?'data-focus="true"':'')+'><span class="line-no">'+n+'</span><span class="diff-sign">'+(changed?'+':' ')+'</span><span class="line-code">'+highlight(line)+'</span></div>'}).join('')+'</section>'}).join('');
+ }
+ $('codeLines').innerHTML=html||'当前版本没有此源码位置。';
+ $('codeRange').textContent='模块 '+(selectedStep+1)+' / '+detailGraph().length+' · 已同时展示全部子步骤，无需选择代码位置';
  $('fullTab').classList.toggle('active',codeTab==='full');$('stepTab').classList.toggle('active',codeTab==='step');
  $('fullTab').setAttribute('aria-selected',codeTab==='full');$('stepTab').setAttribute('aria-selected',codeTab==='step');
- requestAnimationFrame(()=>{const row=$('codeLines').querySelector('[data-line="'+start+'"]');$('codeViewport').scrollTop=row?Math.max(0,row.offsetTop-80):0});
+ requestAnimationFrame(()=>{const row=$('codeLines').querySelector('[data-focus]');$('codeViewport').scrollTop=codeTab==='full'&&row?Math.max(0,row.offsetTop-60):0});
 }
 function initCodePanel(){
  const detail=document.createElement('div');detail.id='detailDiagram';$('steps').after(detail);
- const container=document.createElement('div');container.innerHTML='<div id="drawerShade" hidden></div><aside id="codeDrawer" aria-label="只读源码面板"><div class="drawer-head"><div><small>源码阅读器 / READ ONLY</small><h2 id="drawerTitle"></h2></div><button id="closeCode" aria-label="关闭代码面板">关闭 ×</button></div><div class="reader-selectors"><select id="readerVersion" aria-label="源码版本"><option value="0">v1.0</option><option value="1">v1.1</option><option value="2">v1.2</option><option value="3">v1.3</option><option value="4">v1.4</option><option value="5">v1.5</option></select><select id="readerAgent" aria-label="选择Agent"><option value="0">Chief 规划</option><option value="1">Scout 检索</option><option value="2">Writer 撰写</option><option value="3">Critic 审核</option><option value="4">答案抽取</option></select></div><p id="stepDescription"></p><div id="stepWhy"></div><label id="codePartRow">代码位置 <select id="codePart" aria-label="当前动作的代码位置"></select></label><div class="step-navigation"><button id="prevStep">← 上一步</button><button id="nextStep">下一步 →</button></div><div class="code-tabs" role="tablist"><button id="stepTab" role="tab">当前步骤</button><button id="fullTab" role="tab">完整文件</button><button id="jumpCode">定位函数 ↓</button></div><div id="codePath"></div><div id="codeMeta"></div><div id="codeViewport" tabindex="0" aria-label="只读代码内容"><div id="codeLines"></div></div><div id="codeRange"></div><p class="source-note">源码取自所选版本实际实验提交，并非当前工作区最新版。当前步骤按Python语法树定位到对应语句；完整文件高亮同一片段。跨函数调用可沿流程继续阅读。</p></aside>';
- document.body.append(container);$('codePart').onchange=e=>{selectedPart=Number(e.target.value);showCode()};$('prevStep').onclick=()=>{selectedStep=Math.max(0,selectedStep-1);selectedPart=0;renderDetail()};$('nextStep').onclick=()=>{selectedStep=Math.min(detailGraph().length-1,selectedStep+1);selectedPart=0;renderDetail()};$('readerAgent').onchange=e=>selectNode(Number(e.target.value));$('readerVersion').onchange=e=>{v=Number(e.target.value);render()};$('closeCode').onclick=closeCode;$('drawerShade').onclick=closeCode;
+ const container=document.createElement('div');container.innerHTML='<div id="drawerShade" hidden></div><aside id="codeDrawer" aria-label="只读源码面板"><div class="drawer-head"><div><small>源码阅读器 / READ ONLY</small><h2 id="drawerTitle"></h2></div><button id="closeCode" aria-label="关闭代码面板">关闭 ×</button></div><div class="reader-selectors"><select id="readerVersion" aria-label="源码版本"><option value="0">v1.0</option><option value="1">v1.1</option><option value="2">v1.2</option><option value="3">v1.3</option><option value="4">v1.4</option><option value="5">v1.5</option></select><select id="readerAgent" aria-label="选择Agent"><option value="0">Chief 规划</option><option value="1">Scout 检索</option><option value="2">Writer 撰写</option><option value="3">Critic 审核</option><option value="4">答案抽取</option></select></div><p id="stepDescription"></p><div id="stepWhy"></div><div class="step-navigation"><button id="prevStep">← 上一步</button><button id="nextStep">下一步 →</button></div><div class="code-tabs" role="tablist"><button id="stepTab" role="tab">当前步骤</button><button id="fullTab" role="tab">完整文件</button><button id="jumpCode">定位函数 ↓</button></div><div id="codePath"></div><div id="codeMeta"></div><div id="codeViewport" tabindex="0" aria-label="只读代码内容"><div id="codeLines"></div></div><div id="codeRange"></div><p class="source-note">源码取自所选版本实际实验提交，并非当前工作区最新版。当前模块的子步骤按执行顺序全部展开。绿色代码根据相邻实验提交的真实差异生成；提示词替换等跨文件改动另列相关位置。</p></aside>';
+ document.body.append(container);$('prevStep').onclick=()=>{selectedStep=Math.max(0,selectedStep-1);selectedPart=0;renderDetail()};$('nextStep').onclick=()=>{selectedStep=Math.min(detailGraph().length-1,selectedStep+1);selectedPart=0;renderDetail()};$('readerAgent').onchange=e=>selectNode(Number(e.target.value));$('readerVersion').onchange=e=>{v=Number(e.target.value);render()};$('closeCode').onclick=closeCode;$('drawerShade').onclick=closeCode;
  $('stepTab').onclick=()=>{codeTab='step';showCode()};$('fullTab').onclick=()=>{codeTab='full';showCode()};
  $('jumpCode').onclick=()=>{showCode()};document.addEventListener('keydown',e=>{if(e.key==='Escape'&&panelOpen)closeCode()});
 }

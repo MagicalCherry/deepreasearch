@@ -2,6 +2,7 @@
 
 import ast
 import hashlib
+import difflib
 import json
 from pathlib import Path
 import subprocess
@@ -32,6 +33,10 @@ def build():
             ranges, statements = {}, []
             def walk(tree, prefix=''):
                 for node in ast.iter_child_nodes(tree):
+                    if isinstance(node, ast.Assign):
+                        for target in node.targets:
+                            if isinstance(target, ast.Name):
+                                ranges[prefix + target.id] = [node.lineno, node.end_lineno]
                     if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
                         name = prefix + node.name
                         ranges[name] = [node.lineno, node.end_lineno]
@@ -55,7 +60,18 @@ def build():
                         walk(node, name + '.')
             walk(ast.parse(code))
             blobs[key] = {'code': code, 'ranges': ranges, 'statements': statements}
-        snapshots.append({'commit': commit, 'files': files})
+        changes = {}
+        if snapshots:
+            previous = snapshots[-1]['files']
+            for path, key in files.items():
+                before = blobs[previous[path]]['code'].splitlines() if path in previous else []
+                after = blobs[key]['code'].splitlines()
+                changes[path] = [dict(kind=kind, old_start=a+1, old_end=b,
+                                      start=c+1, end=d)
+                                 for kind, a, b, c, d in difflib.SequenceMatcher(
+                                     None, before, after, autojunk=False).get_opcodes()
+                                 if kind != 'equal']
+        snapshots.append({'commit': commit, 'files': files, 'changes': changes})
     payload = json.dumps({'blobs': blobs, 'snapshots': snapshots}, ensure_ascii=False).replace('<', '\\u003c')
     text = PAGE.read_text(encoding='utf-8')
     start, end = '/* SOURCE_PANEL_START */', '/* SOURCE_PANEL_END */'
