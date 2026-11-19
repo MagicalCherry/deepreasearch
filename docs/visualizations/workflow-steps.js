@@ -1,5 +1,5 @@
 // 用途：把角色执行过程拆成语句级教学节点；focus定位真实源码语句，why解释该步的作用。
-function detailGraph(){
+function detailedGraph(){
  const pipe=v?'app/agents/dr/pipeline.py':PORT,A=OLD+'architect.py',S=OLD+'scout.py',W=OLD+'writer.py',C=OLD+'critic.py';
  const step=(title,sub,path,symbol,focus,why,extra={})=>({title,sub,path,symbol,focus,why,...extra});
  const a=(title,focus,why,extra={})=>step(title,'规划函数内的具体操作',A,'ChiefArchitect._initial_planning',focus,why,extra);
@@ -150,4 +150,16 @@ function detailGraph(){
   return [sup('读取待查查询','pending_queries =','查询来自Critic写入的pending_search_queries。'),sup('没有待查查询？','if not pending_queries:','为空直接把phase设为writing并返回。',{decision:true,vertical:'否',side:'是',alt:'回到写作阶段'}),sup('记录补搜开始消息','"research_step"','在state中记录搜索阶段状态。'),sup('逐条处理最多5个查询','for query in pending_queries[:5]:','不并发处理这个列表；每条依次调用搜索。'),sup('执行当前版搜索','results = await self._execute_search','仍走版本对应的扩写、去重、预算规则。'),sup('有检索结果？','if results:','没有结果就继续下一查询。',{decision:true,vertical:'是',side:'否',alt:'继续下一查询'}),sup('调用补搜分析方法','analysis = await self._analyze_supplementary_results','这里仍是原补搜分析提示词，并非_hypothesis_analysis。'),sup('提取并去重事实','if not self._is_duplicate_fact','只有有analysis且事实不重复时才保存。'),sup('写入带补搜标记的事实','state["facts"].append','is_supplementary=True，related_sections为空列表。'),sup('清空待查查询','state["pending_search_queries"] =','已尝试的列表清空，不保证每条都找到了证据。'),sup('切回写作阶段','state["phase"] =','随后把state返回流水线。'),...(v>=5?[step('清空旧章节草稿','draft_sections = {}',pipe,'_run_once',"state['draft_sections'] =",'v1.5补搜返回后，流水线主动清空旧草稿。'),step('清空旧报告并重置章节','状态恢复researching',pipe,'_run_once',"state['final_report'] =",'防止Writer把已drafted章节跳过；随后逐章重置状态。')]:[]),step('再次调用Writer','按最新facts撰写',pipe,'_run_once','"执笔"','写完回到Critic审核回环。')];
  }
  return coarseDetailGraph();
+}
+
+// 默认按业务动作合并连续语句；条件判断独立保留，执行顺序不改变。
+let detailDensity='compact';
+function detailGraph(){
+ const raw=detailedGraph();if(detailDensity==='fine')return raw;
+ const groups=[];let pending=[];
+ const flush=()=>{if(!pending.length)return;const first=pending[0],last=pending[pending.length-1];
+  const names={'进入 Chief':'进入规划并记录开始','将题目填入提示词':'准备并调用规划模型','解析返回的JSON':'解析并检查规划结果','保存实体、问题与假设':'保存规划状态','读取pending章节':'准备并发章节研究','取出章节检索词':'执行章节检索','清理原查询':'清理并校验查询','取得共享预算锁':'检查预算与查询重复','调用LLM扩写查询':'扩写并解析查询','清理并合并扩写词':'执行扩写后的检索','确认已启用阅读':'准备文档阅读','解析并检查docid':'检查文档与阅读名额','请求前预留名额':'读取正文并记录事件','调用LLM提取证据':'提取并解析正文证据','分别处理两类信息':'核对并保存正文事实','按phase进入写作':'进入写作并选择章节','取出备忘录提示词':'组装输入并生成备忘录','等待LLM返回备忘录':'生成并解析备忘录','保存正文草稿':'保存草稿与来源引用','建立已知来源集合':'过滤引用并记录候选','直接拼接备忘录':'完成报告并进入审核','记录审核开始消息':'调用审核模型','逐条登记审核问题':'保存审核反馈与评分','统计未解决严重问题':'统计问题并记录审核结果','计算下一步路由':'分析审核问题并分流','保存待查查询':'保存查询并推进迭代','发出作答开始事件':'准备最终作答输入','绑定作答事件上下文':'调用模型并解析答案','再请求一次具体候选':'补充请求并返回答案','读取待查查询':'读取补搜任务','记录补搜开始消息':'准备并执行补充搜索','调用补搜分析方法':'分析并保存补搜事实','清空待查查询':'完成补搜并回写状态'};
+  groups.push({...first,title:names[first.title]||first.title,sub:pending.length>1?'包含'+pending.length+'项相关操作':first.sub,parts:pending.slice(),why:pending.map((p,i)=>(i+1)+'. '+p.title+'：'+p.why).join('\n\n')});pending=[]};
+ for(const item of raw){if(item.decision){flush();groups.push({...item,parts:[item]});continue}pending.push(item);if(pending.length===3)flush()}
+ flush();return groups;
 }
