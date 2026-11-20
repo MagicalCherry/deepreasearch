@@ -1,0 +1,140 @@
+{
+  "_purpose": "v1.9正式开发集原始summary、默认索引观察与离线诊断溯源；不包含题集答案或金标编号。",
+  "summary": {
+    "n": 100,
+    "correct": 52,
+    "accuracy": 52.0,
+    "recall": 56.98,
+    "calibration_error": 22.64,
+    "calib_beta": 25,
+    "avg_confidence": 38.4,
+    "runner_errors": 0,
+    "avg_search": 21.84,
+    "avg_read": 1.6,
+    "avg_prompt_tokens": 493528,
+    "avg_completion_tokens": 15270,
+    "avg_seconds": 135.08,
+    "confidence_source": "response_field_when_valid_else_original_judge",
+    "run": "s15-v19-qwen37-dev100-reuse20",
+    "version": "v1.9",
+    "dataset": "dev100",
+    "judge_model": "qwen/qwen3.7-flash"
+  },
+  "top5_observation": {
+    "_purpose": "S15默认索引top5长度观察，真实历史查询，无标注或模型调用。",
+    "model_calls": 0,
+    "word_count_method": "split on whitespace",
+    "observations": [
+      {
+        "query_id": "132",
+        "actual_query": "band formed 1966 cover song nightclub erupted audience refused work permits London",
+        "index": "default",
+        "top5": [
+          {
+            "rank": 1,
+            "docid": "65776",
+            "title": "The Byrds - Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/The_Byrds",
+            "whitespace_words": 13985,
+            "characters": 87594,
+            "opening": "---\ntitle: The Byrds - Wikipedia\nauthor: Authority control databases\ndate: 2002-10-03\n---\nname: The Byrds\nbackground: group_or_band\nalt: A photograph of five young men with moptop "
+          },
+          {
+            "rank": 2,
+            "docid": "50917",
+            "title": "THE SOUTH AFRICAN ROCK ENCYCLOPEDIA",
+            "url": "http://rock.co.za/files/fc_index.html",
+            "whitespace_words": 11673,
+            "characters": 68054,
+            "opening": "---\ntitle: THE SOUTH AFRICAN ROCK ENCYCLOPEDIA\ndate: 2012-04-29\n---\nThe online South African Rock Encyclopedia covers the history of South African rock music from the 1950s up to t"
+          },
+          {
+            "rank": 3,
+            "docid": "63983",
+            "title": "Music Video – Everything You Need To Know",
+            "url": "https://www.nfi.edu/music-video/",
+            "whitespace_words": 10032,
+            "characters": 63079,
+            "opening": "---\ntitle: Music Video – Everything You Need To Know\ndate: 2019-04-30\n---\nA music video is a variable-length video that combines a music song or album with pictures created for adv"
+          },
+          {
+            "rank": 4,
+            "docid": "26121",
+            "title": "Booze, Blood and Noise: The Violent Roots of Manchester Punk",
+            "url": "https://medium.com/cuepoint/booze-blood-and-noise-the-violent-roots-of-manchester-punk-af8092bcaac3",
+            "whitespace_words": 6529,
+            "characters": 38267,
+            "opening": "---\ntitle: Booze, Blood and Noise: The Violent Roots of Manchester Punk\nauthor: Published\ndate: 2015-02-24\n---\nBooze, Blood and Noise: The Violent Roots of Manchester Punk\n\nA blow-"
+          },
+          {
+            "rank": 5,
+            "docid": "59490",
+            "title": "AudioCulture Quiz",
+            "url": "https://www.audioculture.co.nz/articles/audioculture-quiz",
+            "whitespace_words": 46282,
+            "characters": 267543,
+            "opening": "---\ntitle: AudioCulture Quiz\nauthor: AudioCulture\ndate: 2021-05-10\n---\nWelcome to the weekly AudioCulture Quiz. Clue: answers are on the site or, for those in a hurry, at the link "
+          }
+        ]
+      },
+      {
+        "query_id": "226",
+        "actual_query": "European landmark unveiled early 20th century renovated early 21st century former open-air factory",
+        "index": "default",
+        "top5": [
+          {
+            "rank": 1,
+            "docid": "88936",
+            "title": "Woodside, Queens - Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Woodside,_Queens",
+            "whitespace_words": 9243,
+            "characters": 58204,
+            "opening": "---\ntitle: Woodside, Queens - Wikipedia\nauthor: Authority control databases International VIAF FAST National United States Israel Geographic MusicBrainz area\ndate: 2004-12-30\n---\nn"
+          },
+          {
+            "rank": 2,
+            "docid": "65415",
+            "title": "Woolworth Building - Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Woolworth_Building",
+            "whitespace_words": 10656,
+            "characters": 67476,
+            "opening": "---\ntitle: Woolworth Building - Wikipedia\nauthor: Authority control databases\ndate: 2003-07-16\n---\nname: Woolworth Building\nimage_size: 225\nimage_alt: Color photo of the Woolworth "
+          },
+          {
+            "rank": 3,
+            "docid": "161",
+            "title": "Richmond, Virginia - Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Richmond,_Virginia",
+            "whitespace_words": 12751,
+            "characters": 81995,
+            "opening": "---\ntitle: Richmond, Virginia - Wikipedia\nauthor: Authority control databases\ndate: 2002-05-24\n---\nname: Richmond\nsettlement_type: State capital and independent city\nimage_skyline:"
+          },
+          {
+            "rank": 4,
+            "docid": "38959",
+            "title": "Wind Town (Vėjo Miestelis)",
+            "url": "https://www.gensler.com/projects/all",
+            "whitespace_words": 62084,
+            "characters": 436885,
+            "opening": "---\ntitle: Wind Town (Vėjo Miestelis)\ndate: 2025-01-01\n---\n2013 Items\n\nWind Town (Vėjo Miestelis)\n\nSvencelė, Lithuania\n\nSBA Urban worked with Gensler to create a design concept for"
+          },
+          {
+            "rank": 5,
+            "docid": "80957",
+            "title": "The finest brutalist architecture in the world",
+            "url": "https://www.wallpaper.com/architecture/brutalist-architecture",
+            "whitespace_words": 13357,
+            "characters": 85535,
+            "opening": "---\ntitle: The finest brutalist architecture in the world\nauthor: Ellie Stathaki\ndate: 2025-01-14\n---\nThe finest brutalist architecture in the world\n\nFor some of the world's finest"
+          }
+        ]
+      }
+    ]
+  },
+  "diagnostic_hashes": {
+    "results.jsonl": "c4d0a823ad824c63f8b62f6ca88ca54aeb81c4ee6dc124f4fa85b5928d255ca7",
+    "judged.jsonl": "6c784803ba8c246663ef2cb1341b5664291dbb4044584769dff6c939b86dd03d",
+    "summary.json": "f2480bd0048cd63bae7b973d9b8b59d5bd17237b069d06f41764dd673bd060cd",
+    "config.json": "73989eaa89b53f920a20a8bdef2f663fc4036971affe3d77ff5eb65f6f49b4b1"
+  }
+}
