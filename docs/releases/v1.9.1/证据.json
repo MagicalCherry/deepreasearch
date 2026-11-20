@@ -1,0 +1,39 @@
+{
+  "_purpose": "保存补丁版smoke20原始summary、引用纠错审计与原运行文件哈希，非dev100验收。",
+  "summary": {
+    "n": 20,
+    "correct": 15,
+    "accuracy": 75.0,
+    "recall": 70.74,
+    "calibration_error": 35.93,
+    "calib_beta": 5,
+    "avg_confidence": 47.8,
+    "runner_errors": 0,
+    "avg_search": 22.95,
+    "avg_read": 1.65,
+    "avg_prompt_tokens": 560876,
+    "avg_completion_tokens": 17177,
+    "avg_seconds": 165.4,
+    "confidence_source": "response_field_when_valid_else_original_judge",
+    "run": "s15-v191-qwen37-smoke20",
+    "version": "v1.9.1",
+    "dataset": "smoke20",
+    "judge_model": "qwen/qwen3.7-flash"
+  },
+  "citation_audit": {
+    "_purpose": "v1.9.1引用纠错实际触发与来源准入离线统计，不包含题集答案或标注编号。",
+    "run": "s15-v191-qwen37-smoke20",
+    "repair_attempts": 51,
+    "fully_valid_after_repair": 12,
+    "repaired_reports_with_eligible_facts": 37,
+    "eligible_fact_candidates_after_repair": 209,
+    "final_reports_with_unseen_docid": 6,
+    "unseen_fact_candidates": 33
+  },
+  "source_sha256": {
+    "results.jsonl": "b1e30bef39bf7b69c506dbc5b0b26ce7a9df44911001bfd63e2bafa061c9fd4e",
+    "judged.jsonl": "3f98d210c6b1b6064590a0052e2b4ec30e912a5646ef0fe943e5b23b2270e391",
+    "summary.json": "b687e90377972be7ac6aa4aa3046e3039fde42cb1534e38f31c5d0c2448458ef",
+    "config.json": "d5e1403d089eceb80408e6dc01202c2e38cdb8950186aae16dad76676d453d91"
+  }
+}
