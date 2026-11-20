@@ -1,6 +1,7 @@
 """只读诊断v1.7规划、检索、阅读、事实、写作及审核交接；标注仅用于离线命中计数，不调用服务。"""
 
 from collections import Counter
+import argparse
 import hashlib
 import json
 from pathlib import Path
@@ -10,6 +11,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from app.answer import parse
 from app.agents.dr.team import clean_query
+from app.agents.dr.react_scout import parse_scout_report
 
 
 def latest(path):
@@ -18,7 +20,13 @@ def latest(path):
 
 
 def main():
-    run = ROOT / 'runs/s13-v17-qwen37-dev100-reuse20'
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--run', default='runs/s13-v17-qwen37-dev100-reuse20')
+    parser.add_argument('--output', default='docs/v1.7阶段排查.json')
+    args = parser.parse_args()
+    run, output = Path(args.run).resolve(), Path(args.output).resolve()
+    if ROOT / 'runs' not in run.parents or ROOT / 'docs' not in output.parents:
+        parser.error('运行必须位于runs、报告必须位于docs')
     paths = [run / name for name in ('results.jsonl', 'judged.jsonl', 'summary.json', 'config.json')]
     digests = {p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in paths}
     results, judged = latest(paths[0]), latest(paths[1])
@@ -39,6 +47,8 @@ def main():
         evidence = set(map(str, questions[key].get('evidence_docids', [])))
         got = set(map(str, result.get('retrieved_docids', [])))
         reviews = [e for e in events if e['event'] == 'stage_output' and e.get('kind') == 'review']
+        scout_reports = [e for e in events if e['event'] == 'stage_output' and e.get('kind') == 'scout_report']
+        parsed_reports = [parse_scout_report(e.get('content','')) for e in scout_reports]
         checks = reviews[-1]['review'].get('constraint_checks', []) if reviews else []
         writer = [str(e['items'][0]) for e in events if e['event'] == 'plan'
                   and e['agent'] == 'writer' and e.get('items')]
@@ -68,6 +78,11 @@ def main():
             'supplements':supplements,'stop_reason':result.get('stop_reason'),
             'planner_restarts':sum(e['event']=='agent_start' and e['agent']=='planner' for e in events)-1,
             'stage_retry_events':sum(e['event']=='stage_output' and e.get('kind')=='stage_error' for e in events)})
+        cases[-1].update(scout_reports=len(scout_reports),
+            zero_tool_reports=sum(e.get('tool_calls')==0 for e in scout_reports),
+            reports_without_cited_findings=sum(not p['facts'] for p in parsed_reports),
+            report_facts_with_unseen_docid=sum(f['docid'] not in set(map(str,e.get('observed_docids',[])))
+                for e,p in zip(scout_reports,parsed_reports) for f in p['facts']))
     def aggregate(rows):
         return {'n':len(rows),'no_facts':sum(c['facts']==0 for c in rows),
             'no_read':sum(c['reads']==0 for c in rows),'zero_evidence_retrieved':sum(c['evidence_retrieved']==0 for c in rows),
@@ -82,13 +97,17 @@ def main():
             'chinese_searches':sum(c['chinese_searches'] for c in rows),
             'unreviewed_final_report':sum(not c['last_report_reviewed'] for c in rows),
             'planner_restarts':sum(c['planner_restarts'] for c in rows),
+            'scout_reports':sum(c['scout_reports'] for c in rows),
+            'zero_tool_reports':sum(c['zero_tool_reports'] for c in rows),
+            'reports_without_cited_findings':sum(c['reports_without_cited_findings'] for c in rows),
+            'report_facts_with_unseen_docid':sum(c['report_facts_with_unseen_docid'] for c in rows),
             'stop_reasons':dict(Counter(c['stop_reason'] for c in rows))}
-    report = {'_purpose':'v1.7阶段交接离线诊断，只输出证据命中数量，不输出标准答案或金标编号。',
+    report = {'_purpose':'阶段交接离线诊断，只输出证据命中数量，不输出标准答案或金标编号。',
         'run':run.name,'source_sha256':digests,'all':aggregate(cases),
         'wrong':aggregate([c for c in cases if not c['correct']]),
         'correct':aggregate([c for c in cases if c['correct']]),'cases':cases}
     assert all(hashlib.sha256(p.read_bytes()).hexdigest()==digests[p.name] for p in paths)
-    (ROOT / 'docs/v1.7阶段排查.json').write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+    output.write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
     print(json.dumps({k:v for k,v in report.items() if k!='cases'},ensure_ascii=False,indent=2))
     print('Selected cases:',json.dumps([c for c in cases if c['query_id'] in {'93','331','422','934','972','883','356','1177','590'}],ensure_ascii=False,indent=2))
 
