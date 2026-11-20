@@ -1,0 +1,286 @@
+{
+  "_purpose": "S16段落索引构建状态原始快照，ready前不执行回放；无模型调用。",
+  "snapshots": [
+    {
+      "observed_at": "2026-11-20T05:41:06.512380+00:00",
+      "indexes": [
+        {
+          "name": "default",
+          "k1": 0.9,
+          "b": 0.4,
+          "unit": "doc",
+          "status": "ready",
+          "started_at": 1794752297.417801,
+          "n_units": 100195,
+          "vocab": 3488108,
+          "nnz": 84514729,
+          "seconds": 665
+        },
+        {
+          "name": "k25b1",
+          "k1": 25.0,
+          "b": 1.0,
+          "unit": "doc",
+          "status": "ready",
+          "started_at": 1795145880.4477258,
+          "n_units": 100195,
+          "vocab": 3488108,
+          "nnz": 84514729,
+          "seconds": 612
+        },
+        {
+          "name": "psg",
+          "k1": 0.9,
+          "b": 0.4,
+          "unit": "passage",
+          "status": "building",
+          "started_at": 1795152942.9575708,
+          "win": 256,
+          "stride": 192,
+          "progress": 0.399
+        }
+      ]
+    },
+    {
+      "observed_at": "2026-11-20T05:43:27.527037+00:00",
+      "indexes": [
+        {
+          "name": "default",
+          "k1": 0.9,
+          "b": 0.4,
+          "unit": "doc",
+          "status": "ready",
+          "started_at": 1794752297.417801,
+          "n_units": 100195,
+          "vocab": 3488108,
+          "nnz": 84514729,
+          "seconds": 665
+        },
+        {
+          "name": "k25b1",
+          "k1": 25.0,
+          "b": 1.0,
+          "unit": "doc",
+          "status": "ready",
+          "started_at": 1795145880.4477258,
+          "n_units": 100195,
+          "vocab": 3488108,
+          "nnz": 84514729,
+          "seconds": 612
+        },
+        {
+          "name": "psg",
+          "k1": 0.9,
+          "b": 0.4,
+          "unit": "passage",
+          "status": "building",
+          "started_at": 1795152942.9575708,
+          "win": 256,
+          "stride": 192,
+          "progress": 0.579
+        }
+      ]
+    },
+    {
+      "observed_at": "2026-11-20T05:47:09.031235+00:00",
+      "indexes": [
+        {
+          "name": "default",
+          "k1": 0.9,
+          "b": 0.4,
+          "unit": "doc",
+          "status": "ready",
+          "started_at": 1794752297.417801,
+          "n_units": 100195,
+          "vocab": 3488108,
+          "nnz": 84514729,
+          "seconds": 665
+        },
+        {
+          "name": "k25b1",
+          "k1": 25.0,
+          "b": 1.0,
+          "unit": "doc",
+          "status": "ready",
+          "started_at": 1795145880.4477258,
+          "n_units": 100195,
+          "vocab": 3488108,
+          "nnz": 84514729,
+          "seconds": 612
+        },
+        {
+          "name": "psg",
+          "k1": 0.9,
+          "b": 0.4,
+          "unit": "passage",
+          "status": "building",
+          "started_at": 1795152942.9575708,
+          "win": 256,
+          "stride": 192,
+          "progress": 0.858
+        }
+      ]
+    },
+    {
+      "observed_at": "2026-11-20T05:47:58.161593+00:00",
+      "indexes": [
+        {
+          "name": "default",
+          "k1": 0.9,
+          "b": 0.4,
+          "unit": "doc",
+          "status": "ready",
+          "started_at": 1794752297.417801,
+          "n_units": 100195,
+          "vocab": 3488108,
+          "nnz": 84514729,
+          "seconds": 665
+        },
+        {
+          "name": "k25b1",
+          "k1": 25.0,
+          "b": 1.0,
+          "unit": "doc",
+          "status": "ready",
+          "started_at": 1795145880.4477258,
+          "n_units": 100195,
+          "vocab": 3488108,
+          "nnz": 84514729,
+          "seconds": 612
+        },
+        {
+          "name": "psg",
+          "k1": 0.9,
+          "b": 0.4,
+          "unit": "passage",
+          "status": "building",
+          "started_at": 1795152942.9575708,
+          "win": 256,
+          "stride": 192,
+          "progress": 0.918
+        }
+      ]
+    },
+    {
+      "observed_at": "2026-11-20T05:48:49.601946+00:00",
+      "indexes": [
+        {
+          "name": "default",
+          "k1": 0.9,
+          "b": 0.4,
+          "unit": "doc",
+          "status": "ready",
+          "started_at": 1794752297.417801,
+          "n_units": 100195,
+          "vocab": 3488108,
+          "nnz": 84514729,
+          "seconds": 665
+        },
+        {
+          "name": "k25b1",
+          "k1": 25.0,
+          "b": 1.0,
+          "unit": "doc",
+          "status": "ready",
+          "started_at": 1795145880.4477258,
+          "n_units": 100195,
+          "vocab": 3488108,
+          "nnz": 84514729,
+          "seconds": 612
+        },
+        {
+          "name": "psg",
+          "k1": 0.9,
+          "b": 0.4,
+          "unit": "passage",
+          "status": "building",
+          "started_at": 1795152942.9575708,
+          "win": 256,
+          "stride": 192,
+          "progress": 0.998
+        }
+      ]
+    },
+    {
+      "observed_at": "2026-11-20T05:49:04.636759+00:00",
+      "indexes": [
+        {
+          "name": "default",
+          "k1": 0.9,
+          "b": 0.4,
+          "unit": "doc",
+          "status": "ready",
+          "started_at": 1794752297.417801,
+          "n_units": 100195,
+          "vocab": 3488108,
+          "nnz": 84514729,
+          "seconds": 665
+        },
+        {
+          "name": "k25b1",
+          "k1": 25.0,
+          "b": 1.0,
+          "unit": "doc",
+          "status": "ready",
+          "started_at": 1795145880.4477258,
+          "n_units": 100195,
+          "vocab": 3488108,
+          "nnz": 84514729,
+          "seconds": 612
+        },
+        {
+          "name": "psg",
+          "k1": 0.9,
+          "b": 0.4,
+          "unit": "passage",
+          "status": "building",
+          "started_at": 1795152942.9575708,
+          "win": 256,
+          "stride": 192,
+          "progress": 1.0
+        }
+      ]
+    },
+    {
+      "observed_at": "2026-11-20T05:53:05.073273+00:00",
+      "indexes": [
+        {
+          "name": "default",
+          "k1": 0.9,
+          "b": 0.4,
+          "unit": "doc",
+          "status": "ready",
+          "started_at": 1794752297.417801,
+          "n_units": 100195,
+          "vocab": 3488108,
+          "nnz": 84514729,
+          "seconds": 665
+        },
+        {
+          "name": "k25b1",
+          "k1": 25.0,
+          "b": 1.0,
+          "unit": "doc",
+          "status": "ready",
+          "started_at": 1795145880.4477258,
+          "n_units": 100195,
+          "vocab": 3488108,
+          "nnz": 84514729,
+          "seconds": 612
+        },
+        {
+          "name": "psg",
+          "k1": 0.9,
+          "b": 0.4,
+          "unit": "passage",
+          "status": "failed",
+          "started_at": 1795152942.9575708,
+          "win": 256,
+          "stride": 192,
+          "progress": 1.0,
+          "error": "OSError: [Errno 12] Cannot allocate memory"
+        }
+      ]
+    }
+  ]
+}

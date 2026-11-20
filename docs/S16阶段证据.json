@@ -1,0 +1,72 @@
+{
+  "_purpose": "S16片段方案冒烟原始summary、逐题对照和三版本交集；未做dev100，段落回放待索引ready。",
+  "summary": {
+    "n": 20,
+    "correct": 14,
+    "accuracy": 70.0,
+    "recall": 60.74,
+    "calibration_error": 38.77,
+    "calib_beta": 5,
+    "avg_confidence": 44.5,
+    "runner_errors": 0,
+    "avg_search": 21.65,
+    "avg_read": 1.9,
+    "avg_prompt_tokens": 399818,
+    "avg_completion_tokens": 14697,
+    "avg_seconds": 162.12,
+    "confidence_source": "response_field_when_valid_else_original_judge",
+    "run": "s16-v20-qwen37-smoke20",
+    "version": "v2.0",
+    "dataset": "smoke20",
+    "judge_model": "qwen/qwen3.7-flash"
+  },
+  "source_git_sha": "a33c0a729d4bd8402a01941c2781ae7a74d87eb0",
+  "compare_v19": {
+    "n": 20,
+    "a_correct": 13,
+    "b_correct": 14,
+    "better": [
+      "132"
+    ],
+    "worse": []
+  },
+  "compare_v191": {
+    "n": 20,
+    "a_correct": 15,
+    "b_correct": 14,
+    "better": [],
+    "worse": [
+      "1025"
+    ]
+  },
+  "three_way": {
+    "runs": [
+      "s15-v19-qwen37-smoke20",
+      "s15-v191-qwen37-smoke20",
+      "s16-v20-qwen37-smoke20"
+    ],
+    "n": 20,
+    "all_correct": 13,
+    "any_correct": 15,
+    "all_wrong": 5
+  },
+  "fee_authorization": "用户明确暂不付费，先看回放；psg构建失败，等待资源处理选择，不启动dev100或模型重跑。",
+  "passage_index_build_failure": {
+    "name": "psg",
+    "k1": 0.9,
+    "b": 0.4,
+    "unit": "passage",
+    "status": "failed",
+    "started_at": 1795152942.9575708,
+    "win": 256,
+    "stride": 192,
+    "progress": 1.0,
+    "error": "OSError: [Errno 12] Cannot allocate memory"
+  },
+  "resource_observation": {
+    "host_total_GiB": 15.8,
+    "host_free_GiB_at_observation": 1.3,
+    "docker_available_GiB": 7.653,
+    "note": "离散资源采样，非构建峰值；未改系统配置或停止其他服务。"
+  }
+}
