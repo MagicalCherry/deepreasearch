@@ -1,0 +1,83 @@
+{
+  "_purpose": "S18 600秒dev100原始汇总、逐题对照及延迟/撞线统计；仅离线，不改写原运行。",
+  "summary": {
+    "n": 100,
+    "correct": 63,
+    "accuracy": 63.0,
+    "recall": 67.59,
+    "calibration_error": 21.02,
+    "calib_beta": 25,
+    "avg_confidence": 48.8,
+    "runner_errors": 0,
+    "avg_search": 21.92,
+    "avg_read": 5.89,
+    "avg_prompt_tokens": 557093,
+    "avg_completion_tokens": 18079,
+    "avg_seconds": 187.23,
+    "confidence_source": "response_field_when_valid_else_original_judge",
+    "run": "s18-v22-600-qwen37-dev100-reuse20",
+    "version": "v2.2",
+    "dataset": "dev100",
+    "judge_model": "qwen/qwen3.7-flash"
+  },
+  "comparison": {
+    "baseline": "s17-v21-qwen37-dev100-reuse20",
+    "improved": [
+      "161",
+      "436",
+      "1058",
+      "169"
+    ],
+    "regressed": [
+      "422",
+      "1025",
+      "486",
+      "297",
+      "724",
+      "1188",
+      "472",
+      "593",
+      "944",
+      "356",
+      "497",
+      "742"
+    ]
+  },
+  "latency": {
+    "n": 100,
+    "avg_seconds": 187.227,
+    "p90_seconds": 310.0865208000032,
+    "max_seconds": 532.1823788000038,
+    "time_budget_count": 2,
+    "time_budget_query_ids": [
+      "27",
+      "8"
+    ],
+    "runner_errors": 0,
+    "p90_method": "nearest_rank_ceil",
+    "scope": "每题最后记录，含错误题；不含被续跑替代的失败尝试耗时，不是批次吞吐或全部计费。"
+  },
+  "baseline_latency": {
+    "n": 100,
+    "avg_seconds": 181.581,
+    "p90_seconds": 272.8964585999929,
+    "max_seconds": 360.6911405999999,
+    "time_budget_count": 0,
+    "time_budget_query_ids": [],
+    "runner_errors": 0,
+    "p90_method": "nearest_rank_ceil",
+    "scope": "每题最后记录，含错误题；不含被续跑替代的失败尝试耗时，不是批次吞吐或全部计费。"
+  },
+  "time_budget_hit_details": [
+    {
+      "query_id": "8",
+      "correct": false,
+      "seconds": 433.7410047000012
+    },
+    {
+      "query_id": "27",
+      "correct": true,
+      "seconds": 488.7369936999894
+    }
+  ]
+}
