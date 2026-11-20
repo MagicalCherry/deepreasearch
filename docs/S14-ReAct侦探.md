@@ -73,3 +73,5 @@ react_loop新增shrink与raise_on_max_turns=False可选参数，默认保持旧�
 实际准确率29%、召回27.53%、校准误差9.69、平均置信度27.6%、输入620775/输出14259 token、142.90秒/题。对v1.7 +17/-2。输入约12.02倍，耗时增加33.89%；零召回48→49，未解决该瓶颈。高召回档14/28→22/28，各版档内题目不一定相同。置信度提取不一致0题。
 
 Tutor result=partial，原文：“还差：dev100 ≥ 40%。请把对应命令的原始输出或文件原文原样贴上来再提交一次，不要转述。” missing=["dev100 ≥ 40%"]，next_step_id=S15。已提交完整原始输出，不重复提交相同29%碰门槛。get_hint返回matched=true，hint="正常，工具结果累积在每个侦探的上下文里。"，未解释40%或给出质量修复方案。保留S14未通过，不自动推进S15；后续方向需学员确认，不自动收费重跑。
+
+GitHub已原子推送release/v1.8分支和v1.8标签，发布提交c36d0fc；基于dev100实际运行代码5838883追加版本报告。标签说明明确S14 partial、未达40%，不覆盖远端main/master。地址：https://github.com/MagicalCherry/deepreasearch/tree/release/v1.8 。
