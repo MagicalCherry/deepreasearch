@@ -24,12 +24,39 @@ class Trace:
         self.retrieved: set[str] = set()
         self.stop_reason: str | None = None
         self._started = perf_counter()
+        self.deadline: float | None = None
+        self.research_deadline: float | None = None
+        self.total_deadline: float | None = None
         self._listeners: set[asyncio.Queue] = set()
 
     @property
     def seconds(self) -> float:
         """使用单调时钟计算已用秒数，避免系统校时影响。"""
         return perf_counter() - self._started
+
+    def set_time_budget(self, seconds: float, answer_reserve: float = 60) -> None:
+        """从整题起点设置软、研究硬截止及总截止；旧版本不调用。"""
+        import math
+        if (isinstance(seconds, bool) or isinstance(answer_reserve, bool)
+                or not isinstance(seconds, (int, float)) or not isinstance(answer_reserve, (int, float))
+                or not math.isfinite(seconds) or not math.isfinite(answer_reserve)
+                or not 0 < answer_reserve < seconds):
+            raise ValueError('时间预算必须有限且大于正数作答预留时间')
+        self.deadline = self._started + seconds * .7
+        self.research_deadline = self._started + seconds - answer_reserve
+        self.total_deadline = self._started + seconds
+
+    def past_deadline(self) -> bool:
+        """软截止后禁止新增研究；不依赖系统墙上时钟，保留time_budget原因。"""
+        if self.deadline is not None and perf_counter() >= self.deadline:
+            self.stop_reason = 'time_budget'
+            return True
+        return False
+
+    def time_remaining(self, *, research: bool = False) -> float:
+        """返回硬截止剩余秒数，供可取消的asyncio.wait_for使用。"""
+        deadline = self.research_deadline if research else self.total_deadline
+        return max(0., deadline - perf_counter()) if deadline is not None else float('inf')
 
     def subscribe(self) -> asyncio.Queue:
         """订阅后续事件；命令行和后续 SSE 页面各自消费自己的队列。"""

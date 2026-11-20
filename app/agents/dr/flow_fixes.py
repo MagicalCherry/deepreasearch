@@ -66,6 +66,9 @@ class ResilientScout(DRScout):
         self._read_locks = {}
 
     async def _execute_search(self, query, count=10):
+        if self.trace.past_deadline():
+            progress(self.trace, 'time_budget', '软截止已过，停止新增搜索。')
+            return []
         cleaned = clean_query(query)
         if not cleaned:
             progress(self.trace, 'invalid_query', '跳过无效或带占位符的查询。')
@@ -241,6 +244,9 @@ class ResilientScout(DRScout):
                 progress(self.trace, 'no_executable_queries', '没有新的可执行查询，结束当前侦探任务。')
 
     async def _supplementary_research(self, state):
+        if self.trace.past_deadline():
+            state['phase'] = ResearchPhase.WRITING.value
+            return state
         queries = state.get('pending_search_queries', [])
         if isinstance(queries, list) and queries:
             section = {'id': f"supplementary_{state['iteration']}",
@@ -282,6 +288,9 @@ async def run(question, trace, opts):
     """每题仅创建一份工作状态和角色实例，最多指定次数审核，保留最后审核稿结束。"""
     if opts.get('max_iterations', 3) < 1:
         raise ValueError('至少需要一次审核')
+    timed = opts.get('time_budget') is not None
+    if timed:
+        trace.set_time_budget(opts['time_budget'], opts.get('answer_reserve', 60))
     llm = s4_port.LLM(trace=trace)
     search = None
     try:
@@ -292,54 +301,85 @@ async def run(question, trace, opts):
         state['facts'] = FactList(trace, sources)
         architect, scout = DRArchitect(llm, trace, opts), ResilientScout(llm, trace, search, sources, opts)
         writer, critic = DRWriter(llm, trace, opts), ValidatedCritic(llm, trace, opts)
-        state = await retry_stage(architect, state, 'planner', '规划', opts)
-        trace.emit('plan', agent='planner', constraints=state.get('_constraints', []),
-                   answer_type=state.get('_answer_type', ''), hypotheses=state.get('hypotheses', []),
-                   subquestions=state['outline'], items=[f"{s['title']}: {'; '.join(s['search_queries'])}" for s in state['outline']])
-        state = await retry_stage(scout, state, 'scout', '侦探', opts)
-        state['phase'] = ResearchPhase.WRITING.value
-        state = await retry_stage(writer, state, 'writer', '执笔', opts)
-        for review_index in range(state['max_iterations']):
-            state = await retry_stage(critic, state, 'critic', '核查', opts)
-            passed = state['phase'] == ResearchPhase.COMPLETED.value
-            from .constraints import counts
-            verified, total = counts(state) if opts.get('critic') == 'constraints' else (0, 0)
-            trace.emit('verify', agent='critic', verdict='pass' if passed else 'fail',
-                       verified=verified, total=total, note=f"证据审核：quality_score={state['quality_score']}，未解决问题={state['unresolved_issues']}")
-            if passed:
-                break
-            if review_index + 1 >= state['max_iterations']:
-                if trace.stop_reason is None:
-                    trace.stop_reason = 'review_budget'
-                trace.emit('plan', agent='critic', reason='review_budget',
-                           items=['审核轮数耗尽，保留最后已审核稿及未解决问题；本稿未通过审核。'])
-                break
-            if state['phase'] == ResearchPhase.RE_RESEARCHING.value:
-                before = evidence_signature(state)
-                state = await retry_stage(scout, state, 'scout', '补充检索', opts)
-                if evidence_signature(state) == before:
-                    if trace.stop_reason is None:
-                        trace.stop_reason = 'no_new_evidence'
-                    trace.emit('plan', agent='critic', reason='no_new_evidence',
-                               items=['补搜未增加可用事实或数据，保留已审核稿；未解决问题仍保留。'])
+        async def research_stages():
+            nonlocal state
+            state = await retry_stage(architect, state, 'planner', '规划', opts)
+            trace.emit('plan', agent='planner', constraints=state.get('_constraints', []),
+                       answer_type=state.get('_answer_type', ''), hypotheses=state.get('hypotheses', []),
+                       subquestions=state['outline'], items=[f"{s['title']}: {'; '.join(s['search_queries'])}" for s in state['outline']])
+            state = await retry_stage(scout, state, 'scout', '侦探', opts)
+            state['phase'] = ResearchPhase.WRITING.value
+            state = await retry_stage(writer, state, 'writer', '执笔', opts)
+            for review_index in range(state['max_iterations']):
+                if trace.past_deadline():
+                    progress(trace, 'time_budget', '软截止已过，不再开启新一轮审核。')
                     break
-                state['draft_sections'], state['final_report'], state['references'] = {}, '', []
-                for section in state['outline']:
-                    section['status'] = 'researching'
-                state['phase'] = ResearchPhase.WRITING.value
-                state = await retry_stage(writer, state, 'writer', '执笔', opts)
-            elif state['phase'] == ResearchPhase.REVISING.value:
-                state = await retry_stage(writer, state, 'writer', '修订', opts)
-            else:
-                break
-        if opts.get('critic') == 'constraints':
-            from .constraints import answer_context, cap_answer
-            answer = await retry_operation(lambda: _extract(question, state, llm, trace, sources,
-                                            answer_suffix=answer_context(state)),
-                                           trace, 'answer', opts.get('retries', 2))
-            return cap_answer(answer, state)
-        return await retry_operation(lambda: _extract(question, state, llm, trace, sources),
-                                     trace, 'answer', opts.get('retries', 2))
+                state = await retry_stage(critic, state, 'critic', '核查', opts)
+                passed = state['phase'] == ResearchPhase.COMPLETED.value
+                from .constraints import counts
+                verified, total = counts(state) if opts.get('critic') == 'constraints' else (0, 0)
+                trace.emit('verify', agent='critic', verdict='pass' if passed else 'fail',
+                           verified=verified, total=total, note=f"证据审核：quality_score={state['quality_score']}，未解决问题={state['unresolved_issues']}")
+                if passed:
+                    break
+                if review_index + 1 >= state['max_iterations']:
+                    if trace.stop_reason is None:
+                        trace.stop_reason = 'review_budget'
+                    trace.emit('plan', agent='critic', reason='review_budget',
+                               items=['审核轮数耗尽，保留最后已审核稿及未解决问题；本稿未通过审核。'])
+                    break
+                if trace.past_deadline():
+                    break
+                if state['phase'] == ResearchPhase.RE_RESEARCHING.value:
+                    before = evidence_signature(state)
+                    state = await retry_stage(scout, state, 'scout', '补充检索', opts)
+                    if evidence_signature(state) == before:
+                        if trace.stop_reason is None:
+                            trace.stop_reason = 'no_new_evidence'
+                        trace.emit('plan', agent='critic', reason='no_new_evidence',
+                                   items=['补搜未增加可用事实或数据，保留已审核稿；未解决问题仍保留。'])
+                        break
+                    state['draft_sections'], state['final_report'], state['references'] = {}, '', []
+                    for section in state['outline']:
+                        section['status'] = 'researching'
+                    state['phase'] = ResearchPhase.WRITING.value
+                    state = await retry_stage(writer, state, 'writer', '执笔', opts)
+                elif state['phase'] == ResearchPhase.REVISING.value:
+                    state = await retry_stage(writer, state, 'writer', '修订', opts)
+                else:
+                    break
+
+        if timed:
+            try:
+                await asyncio.wait_for(research_stages(), timeout=trace.time_remaining(research=True))
+            except TimeoutError:
+                trace.stop_reason = 'time_budget'
+                # 超时可能发生在Writer中途，不能把未完成/未审核正文当成已审核稿。
+                state['final_report'] = ''
+                trace.emit('plan', agent='planner', reason='time_budget',
+                           items=['研究硬截止已到，研究任务已取消；按已有事实作答，未完成审核不视为通过。'])
+        else:
+            await research_stages()
+        async def finish_answer():
+            if opts.get('critic') == 'constraints':
+                from .constraints import answer_context, cap_answer
+                answer = await retry_operation(lambda: _extract(question, state, llm, trace, sources,
+                                                answer_suffix=answer_context(state)),
+                                               trace, 'answer', opts.get('retries', 2))
+                return cap_answer(answer, state)
+            return await retry_operation(lambda: _extract(question, state, llm, trace, sources),
+                                         trace, 'answer', opts.get('retries', 2))
+
+        if not timed:
+            return await finish_answer()
+        try:
+            return await asyncio.wait_for(finish_answer(), timeout=trace.time_remaining())
+        except TimeoutError:
+            trace.stop_reason = 'time_budget'
+            trace.emit('plan', agent='answer', reason='time_budget',
+                       items=['作答时间也已用尽，停止请求；返回明确的未能确定，不编造结论。'])
+            return ('Explanation: The time budget expired before an evidence-supported answer could be completed.\n'
+                    'Exact Answer: Unknown\nConfidence: 0%')
     finally:
         try:
             if search is not None:

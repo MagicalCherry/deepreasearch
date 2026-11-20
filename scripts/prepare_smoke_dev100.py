@@ -19,6 +19,7 @@ from app.config import settings
 from app.history import process_alive
 from app.runner import load_questions, search_config
 from app.versions import get_version
+from app.trace import Trace
 
 PAIRS = (
     ('s08-qwen37-closedbook-smoke20', 's08-qwen37-closedbook-dev100-reuse20'),
@@ -37,7 +38,18 @@ def latest_lines(path):
     return records
 
 
-async def main(pairs=PAIRS):
+def reuse_options(version_id, time_budget=None):
+    """复用300秒组时须显式声明预算，仅允许覆盖时间，不放宽其他配置核对。"""
+    options = deepcopy(get_version(version_id).options)
+    if time_budget is not None:
+        if 'time_budget' not in options:
+            raise ValueError('来源版本没有时间预算选项')
+        Trace().set_time_budget(time_budget, options.get('answer_reserve', 60))
+        options['time_budget'] = time_budget
+    return options
+
+
+async def main(pairs=PAIRS, time_budget=None):
     """先验证所有来源及目标，再建立新目录；检索健康快照为本地只读请求。"""
     # 不在旧dev100仍运行时创建替代批次，避免学员意外重复付费。
     for path in (ROOT / 'runs').glob('s08-qwen37-*dev100*/status.json'):
@@ -76,7 +88,7 @@ async def main(pairs=PAIRS):
             raise ValueError('研究代码或依赖已改变：' + changed)
         expected = {'model': settings.model, 'llm_provider': settings.provider,
                     'llm_base_url': settings.base_url, 'max_tokens': settings.max_tokens,
-                    'options': deepcopy(get_version(config['version']).options)}
+                    'options': reuse_options(config['version'], time_budget)}
         if any(config[k] != v for k, v in expected.items()):
             raise ValueError('当前模型或版本配置与来源不同：' + source_id)
         snapshot = await search_config(config['version'] != 'v0-closedbook',
@@ -114,7 +126,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--source', help='已完成并判分的smoke20运行名称')
     parser.add_argument('--target', help='新dev100运行名称；不会覆盖已有目录')
+    parser.add_argument('--time-budget', type=float, help='显式匹配来源运行覆盖过的时间预算，例如300')
     args = parser.parse_args()
     if bool(args.source) != bool(args.target):
         parser.error('--source与--target必须同时提供')
-    asyncio.run(main(((args.source, args.target),) if args.source else PAIRS))
+    asyncio.run(main(((args.source, args.target),) if args.source else PAIRS, args.time_budget))

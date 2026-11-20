@@ -390,6 +390,8 @@ class DRScout(s4_port.CorpusScout):
         return await self._hypothesis_analysis(original_query, search_query, results, 6)
 
     async def _execute_search(self, query, count=10):
+        if self.trace.past_deadline():
+            return []
         if not self.opts.get('expand'):
             return await super()._execute_search(query, count)
         original = clean_query(query)
@@ -419,6 +421,8 @@ class DRScout(s4_port.CorpusScout):
                 queries.append(cleaned)
         results = []
         for rewritten in queries:
+            if self.trace.past_deadline():
+                break
             if self.opts.get('max_searches') is not None:
                 async with self._budget['lock']:
                     if self._budget['search_count'] >= self.opts['max_searches']:

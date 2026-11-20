@@ -179,6 +179,8 @@ class ScoutTools(Tools):
     async def call(self, name, args):
         from .team import clean_query
         self.used += 1
+        if self.trace.past_deadline():
+            return {'error': 'Time budget reached; finish with available evidence.'}
         budget, opts = self.scout._budget, self.scout.opts
         if name == 'search':
             query = clean_query(args.get('query'))
@@ -247,6 +249,8 @@ class PiScoutTools(PiTools):
     async def call(self, name, args):
         from .team import clean_query
         self.used += 1
+        if self.trace.past_deadline():
+            return {'error': 'Time budget reached; finish with available evidence.'}
         if not self.valid_args(name, args):
             return {'error': 'Use a supported tool with reason and valid parameters.'}
         budget, opts = self.scout._budget, self.scout.opts
@@ -289,6 +293,9 @@ class PiScoutTools(PiTools):
 async def react_section(scout, state, section):
     """每个章节保留独立工具计数，重试不重置预算；成功报告才沉淀为可引用事实。"""
     lane = s4_port.CURRENT_AGENT.get()
+    if scout.trace.past_deadline():
+        section['status'] = 'researched'
+        return
     context = scout._react_sections.get(section['id'])
     if context is None:
         remaining = scout.opts['max_searches'] - scout._budget['search_count']

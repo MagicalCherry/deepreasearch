@@ -143,23 +143,29 @@ def load_results(path: Path) -> dict[str, dict]:
     return records
 
 
-async def run_eval(dataset: str, version: str, concurrency: int, run_id: str) -> dict:
+async def run_eval(dataset: str, version: str, concurrency: int, run_id: str, opts: dict | None = None) -> dict:
     """受限并发评测：完成即落盘，续跑跳过成功题并重试错误题。"""
     if concurrency < 1:
         raise ValueError("并发数必须大于0")
     if not re.fullmatch(r"[A-Za-z0-9_-]+", run_id):
         raise ValueError("run_id 只能包含字母、数字、下划线和短横线")
     registered = get_version(version)
+    options = deepcopy(registered.options)
+    options.update(deepcopy(opts or {}))
+    if options.get('time_budget') is not None:
+        Trace().set_time_budget(options['time_budget'], options.get('answer_reserve', 60))
+        if not options.get('flow_fixes'):
+            raise ValueError('该版本不支持时间预算覆盖')
     questions = load_questions(dataset)
     config = {
         "version": version, "model": settings.model, "dataset": dataset,
         "llm_provider": settings.provider, "llm_base_url": settings.base_url,
-        "concurrency": concurrency, "options": deepcopy(registered.options),
+        "concurrency": concurrency, "options": options,
         "git_sha": git_sha(), "max_tokens": settings.max_tokens,
-        "budget": {"seconds": registered.options.get("timeout_seconds", 600),
+        "budget": {"seconds": options.get('time_budget', options.get("timeout_seconds", 600)),
                    "n_search": registered.options.get("max_search_calls", 50)},
         "search": await search_config(enabled=version != "v0-closedbook",
-            **{key: registered.options[key] for key in ('index', 'snippet') if key in registered.options}),
+            **{key: options[key] for key in ('index', 'snippet') if key in options}),
         "questions_sha256": hashlib.sha256(json.dumps(questions, sort_keys=True).encode()).hexdigest(),
     }
     directory = RUNS_DIR / run_id
@@ -207,7 +213,8 @@ async def run_eval(dataset: str, version: str, concurrency: int, run_id: str) ->
                 trace = Trace()
                 response, error = "", None
                 try:
-                    response = await research(item["query"], version, trace)
+                    response = (await research(item["query"], version, trace, opts)
+                                if opts else await research(item["query"], version, trace))
                 except Exception as exc:
                     error = f"{type(exc).__name__}: {exc}"
                     if isinstance(exc, LLMError) and exc.kind == "arrearage":

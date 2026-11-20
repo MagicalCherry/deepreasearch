@@ -222,6 +222,8 @@ async def react_loop(llm: Any, messages: list[dict], tools: Tools,
     last_text = ''
     options = {'truncate': shrink} if shrink is not None else {}
     for _ in range(max_turns):
+        if tools.trace.past_deadline():
+            break
         if used >= max_tool_calls:
             break
         response = await llm.chat(history, tools=tools.definitions(), **options)
@@ -242,7 +244,9 @@ async def react_loop(llm: Any, messages: list[dict], tools: Tools,
             }} for call in calls],
         })
         for call in calls:
-            if used >= max_tool_calls:
+            if tools.trace.past_deadline():
+                result = {"error": "Time budget reached; no tool was executed. Finish with collected evidence."}
+            elif used >= max_tool_calls:
                 # 同轮多个请求也不能突破预算；仍逐个回复，保持消息协议完整。
                 result = {"error": "Tool budget exhausted; no tool was executed."}
             else:
@@ -254,7 +258,8 @@ async def react_loop(llm: Any, messages: list[dict], tools: Tools,
             history.append({"role": "tool", "tool_call_id": call.id,
                             "content": json.dumps(result, ensure_ascii=False)})
 
-    reason = "tool_budget" if used >= max_tool_calls else "max_turns"
+    reason = ('time_budget' if tools.trace.past_deadline() else
+              "tool_budget" if used >= max_tool_calls else "max_turns")
     if not raise_on_max_turns:
         tools.trace.emit('plan', agent=tools.agent, reason=reason,
                          items=['侦探达到工具或轮次上限，按已有证据整理发现报告。'])
