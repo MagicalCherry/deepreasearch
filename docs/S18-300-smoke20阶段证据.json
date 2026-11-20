@@ -1,0 +1,589 @@
+{
+  "_purpose": "S18 300秒smoke20原始汇总、两基线对照、P90及撞线阶段记录；仅离线统计，不改写原运行。",
+  "summary": {
+    "n": 20,
+    "correct": 14,
+    "accuracy": 70.0,
+    "recall": 60.29,
+    "calibration_error": 37.42,
+    "calib_beta": 5,
+    "avg_confidence": 45.8,
+    "runner_errors": 0,
+    "avg_search": 20.25,
+    "avg_read": 5.25,
+    "avg_prompt_tokens": 491584,
+    "avg_completion_tokens": 16996,
+    "avg_seconds": 183.35,
+    "confidence_source": "response_field_when_valid_else_original_judge",
+    "run": "s18-v22-300-qwen37-smoke20",
+    "version": "v2.2",
+    "dataset": "smoke20",
+    "judge_model": "qwen/qwen3.7-flash"
+  },
+  "latency": {
+    "n": 20,
+    "avg_seconds": 183.351,
+    "p90_seconds": 241.59818499999528,
+    "max_seconds": 245.3796474999981,
+    "time_budget_count": 11,
+    "time_budget_query_ids": [
+      "1022",
+      "1248",
+      "226",
+      "297",
+      "473",
+      "486",
+      "710",
+      "760",
+      "93",
+      "934",
+      "972"
+    ],
+    "runner_errors": 0,
+    "p90_method": "nearest_rank_ceil",
+    "scope": "每题最后记录，含错误题；不含被续跑替代的失败尝试耗时，不是批次吞吐或全部计费。"
+  },
+  "comparisons": {
+    "s17-v21-qwen37-smoke20": {
+      "improved": [],
+      "regressed": [
+        "1025",
+        "422",
+        "486"
+      ]
+    },
+    "s18-v22-600-qwen37-smoke20": {
+      "improved": [
+        "297"
+      ],
+      "regressed": []
+    }
+  },
+  "hit_details": [
+    {
+      "query_id": "93",
+      "seconds": 236.7107185999921,
+      "correct": true,
+      "time_events": [
+        {
+          "agent": "scout",
+          "t": 214.13878490000207,
+          "reason": "time_budget",
+          "items": [
+            "侦探达到工具或轮次上限，按已有证据整理发现报告。"
+          ]
+        },
+        {
+          "agent": "planner",
+          "t": 232.64386509999167,
+          "reason": "time_budget",
+          "items": [
+            "软截止已过，不再开启新一轮审核。"
+          ]
+        }
+      ],
+      "last_stage": [
+        {
+          "agent": "critic",
+          "t": 195.01238909999665,
+          "event": "verify"
+        },
+        {
+          "agent": "scout",
+          "t": 195.01245219999691,
+          "event": "agent_start"
+        },
+        {
+          "agent": "writer",
+          "t": 219.05811329999415,
+          "event": "agent_start"
+        },
+        {
+          "agent": "answer",
+          "t": 232.6439362999954,
+          "event": "agent_start"
+        }
+      ]
+    },
+    {
+      "query_id": "473",
+      "seconds": 237.54455329998746,
+      "correct": false,
+      "time_events": [
+        {
+          "agent": "scout",
+          "t": 211.60564039999736,
+          "reason": "time_budget",
+          "items": [
+            "侦探达到工具或轮次上限，按已有证据整理发现报告。"
+          ]
+        },
+        {
+          "agent": "planner",
+          "t": 234.28554829998757,
+          "reason": "time_budget",
+          "items": [
+            "软截止已过，不再开启新一轮审核。"
+          ]
+        }
+      ],
+      "last_stage": [
+        {
+          "agent": "critic",
+          "t": 176.50004799998715,
+          "event": "verify"
+        },
+        {
+          "agent": "scout",
+          "t": 176.50008319999324,
+          "event": "agent_start"
+        },
+        {
+          "agent": "writer",
+          "t": 219.13888799998676,
+          "event": "agent_start"
+        },
+        {
+          "agent": "answer",
+          "t": 234.28562859998783,
+          "event": "agent_start"
+        }
+      ]
+    },
+    {
+      "query_id": "486",
+      "seconds": 243.45584720000625,
+      "correct": false,
+      "time_events": [
+        {
+          "agent": "scout",
+          "t": 231.01543850000598,
+          "reason": "time_budget",
+          "items": [
+            "侦探达到工具或轮次上限，按已有证据整理发现报告。"
+          ]
+        },
+        {
+          "agent": "planner",
+          "t": 240.00982239999576,
+          "reason": "time_budget",
+          "items": [
+            "研究硬截止已到，研究任务已取消；按已有事实作答，未完成审核不视为通过。"
+          ]
+        }
+      ],
+      "last_stage": [
+        {
+          "agent": "critic",
+          "t": 91.8057043000008,
+          "event": "agent_start"
+        },
+        {
+          "agent": "critic",
+          "t": 111.2265938000055,
+          "event": "verify"
+        },
+        {
+          "agent": "scout",
+          "t": 111.22663780000585,
+          "event": "agent_start"
+        },
+        {
+          "agent": "answer",
+          "t": 240.010059799999,
+          "event": "agent_start"
+        }
+      ]
+    },
+    {
+      "query_id": "226",
+      "seconds": 245.3796474999981,
+      "correct": true,
+      "time_events": [
+        {
+          "agent": "scout",
+          "t": 210.64908799999102,
+          "reason": "time_budget",
+          "items": [
+            "侦探达到工具或轮次上限，按已有证据整理发现报告。"
+          ]
+        },
+        {
+          "agent": "planner",
+          "t": 240.00246750000224,
+          "reason": "time_budget",
+          "items": [
+            "研究硬截止已到，研究任务已取消；按已有事实作答，未完成审核不视为通过。"
+          ]
+        }
+      ],
+      "last_stage": [
+        {
+          "agent": "scout",
+          "t": 190.76152620000357,
+          "event": "agent_start"
+        },
+        {
+          "agent": "writer",
+          "t": 218.78891139999905,
+          "event": "agent_start"
+        },
+        {
+          "agent": "writer",
+          "t": 231.52405680000084,
+          "event": "agent_start"
+        },
+        {
+          "agent": "answer",
+          "t": 240.00274270000227,
+          "event": "agent_start"
+        }
+      ]
+    },
+    {
+      "query_id": "710",
+      "seconds": 219.49278860000777,
+      "correct": false,
+      "time_events": [
+        {
+          "agent": "scout",
+          "t": 211.24172420000832,
+          "reason": "time_budget",
+          "items": [
+            "侦探达到工具或轮次上限，按已有证据整理发现报告。"
+          ]
+        }
+      ],
+      "last_stage": [
+        {
+          "agent": "critic",
+          "t": 156.48997960000997,
+          "event": "agent_start"
+        },
+        {
+          "agent": "critic",
+          "t": 171.16246330000286,
+          "event": "verify"
+        },
+        {
+          "agent": "scout",
+          "t": 171.16249790000438,
+          "event": "agent_start"
+        },
+        {
+          "agent": "answer",
+          "t": 213.87504890000855,
+          "event": "agent_start"
+        }
+      ]
+    },
+    {
+      "query_id": "1248",
+      "seconds": 237.1000314999983,
+      "correct": true,
+      "time_events": [
+        {
+          "agent": "scout",
+          "t": 210.45035680000728,
+          "reason": "time_budget",
+          "items": [
+            "侦探达到工具或轮次上限，按已有证据整理发现报告。"
+          ]
+        },
+        {
+          "agent": "planner",
+          "t": 233.26550470000075,
+          "reason": "time_budget",
+          "items": [
+            "软截止已过，不再开启新一轮审核。"
+          ]
+        }
+      ],
+      "last_stage": [
+        {
+          "agent": "critic",
+          "t": 189.79377410000598,
+          "event": "verify"
+        },
+        {
+          "agent": "scout",
+          "t": 189.79383540000708,
+          "event": "agent_start"
+        },
+        {
+          "agent": "writer",
+          "t": 219.93293650000123,
+          "event": "agent_start"
+        },
+        {
+          "agent": "answer",
+          "t": 233.26559530000668,
+          "event": "agent_start"
+        }
+      ]
+    },
+    {
+      "query_id": "972",
+      "seconds": 235.41251819999889,
+      "correct": true,
+      "time_events": [
+        {
+          "agent": "scout-3",
+          "t": 218.0920524999965,
+          "reason": "time_budget",
+          "items": [
+            "侦探达到工具或轮次上限，按已有证据整理发现报告。"
+          ]
+        },
+        {
+          "agent": "planner",
+          "t": 232.90250359999482,
+          "reason": "time_budget",
+          "items": [
+            "软截止已过，不再开启新一轮审核。"
+          ]
+        }
+      ],
+      "last_stage": [
+        {
+          "agent": "scout-2",
+          "t": 8.020661100003053,
+          "event": "agent_start"
+        },
+        {
+          "agent": "scout-3",
+          "t": 8.021772599997348,
+          "event": "agent_start"
+        },
+        {
+          "agent": "writer",
+          "t": 225.87631759999203,
+          "event": "agent_start"
+        },
+        {
+          "agent": "answer",
+          "t": 232.90255539999634,
+          "event": "agent_start"
+        }
+      ]
+    },
+    {
+      "query_id": "297",
+      "seconds": 234.97469009998895,
+      "correct": true,
+      "time_events": [
+        {
+          "agent": "scout",
+          "t": 212.6306889999978,
+          "reason": "time_budget",
+          "items": [
+            "侦探达到工具或轮次上限，按已有证据整理发现报告。"
+          ]
+        },
+        {
+          "agent": "planner",
+          "t": 231.27584309999656,
+          "reason": "time_budget",
+          "items": [
+            "软截止已过，不再开启新一轮审核。"
+          ]
+        }
+      ],
+      "last_stage": [
+        {
+          "agent": "critic",
+          "t": 182.61393439999665,
+          "event": "verify"
+        },
+        {
+          "agent": "scout",
+          "t": 182.61399050000182,
+          "event": "agent_start"
+        },
+        {
+          "agent": "writer",
+          "t": 219.4696033999935,
+          "event": "agent_start"
+        },
+        {
+          "agent": "answer",
+          "t": 231.27591279998887,
+          "event": "agent_start"
+        }
+      ]
+    },
+    {
+      "query_id": "1022",
+      "seconds": 215.5028003000043,
+      "correct": true,
+      "time_events": [
+        {
+          "agent": "scout",
+          "t": 210.82130260000122,
+          "reason": "time_budget",
+          "items": [
+            "侦探达到工具或轮次上限，按已有证据整理发现报告。"
+          ]
+        }
+      ],
+      "last_stage": [
+        {
+          "agent": "critic",
+          "t": 187.56363710000005,
+          "event": "agent_start"
+        },
+        {
+          "agent": "critic",
+          "t": 204.54349090000323,
+          "event": "verify"
+        },
+        {
+          "agent": "scout",
+          "t": 204.54354199999943,
+          "event": "agent_start"
+        },
+        {
+          "agent": "answer",
+          "t": 212.1035242999933,
+          "event": "agent_start"
+        }
+      ]
+    },
+    {
+      "query_id": "760",
+      "seconds": 230.25158500000543,
+      "correct": false,
+      "time_events": [],
+      "last_stage": [
+        {
+          "agent": "writer",
+          "t": 187.1620142000029,
+          "event": "agent_start"
+        },
+        {
+          "agent": "critic",
+          "t": 203.9550472999981,
+          "event": "agent_start"
+        },
+        {
+          "agent": "critic",
+          "t": 223.65883190000022,
+          "event": "verify"
+        },
+        {
+          "agent": "answer",
+          "t": 223.65890280000167,
+          "event": "agent_start"
+        }
+      ]
+    },
+    {
+      "query_id": "934",
+      "seconds": 241.59818499999528,
+      "correct": true,
+      "time_events": [
+        {
+          "agent": "scout",
+          "t": 213.10047429999395,
+          "reason": "time_budget",
+          "items": [
+            "侦探达到工具或轮次上限，按已有证据整理发现报告。"
+          ]
+        },
+        {
+          "agent": "planner",
+          "t": 237.65523759998905,
+          "reason": "time_budget",
+          "items": [
+            "软截止已过，不再开启新一轮审核。"
+          ]
+        }
+      ],
+      "last_stage": [
+        {
+          "agent": "critic",
+          "t": 189.44485869999335,
+          "event": "verify"
+        },
+        {
+          "agent": "scout",
+          "t": 189.4449151000008,
+          "event": "agent_start"
+        },
+        {
+          "agent": "writer",
+          "t": 223.8964288999996,
+          "event": "agent_start"
+        },
+        {
+          "agent": "answer",
+          "t": 237.65529850000166,
+          "event": "agent_start"
+        }
+      ]
+    }
+  ],
+  "config": {
+    "version": "v2.2",
+    "model": "qwen/qwen3.7-flash",
+    "dataset": "smoke20",
+    "llm_provider": "openrouter",
+    "llm_base_url": "https://openrouter.ai/api/v1",
+    "concurrency": 8,
+    "options": {
+      "max_iterations": 3,
+      "retries": 2,
+      "timeout_seconds": null,
+      "max_search_calls": null,
+      "planner": "constraints",
+      "expand": 2,
+      "analysis": "hypothesis",
+      "read_docs": true,
+      "max_searches": 50,
+      "max_reads": 8,
+      "doc_max_tokens": 8000,
+      "writer": "memo",
+      "critic": "constraints",
+      "scout": "react",
+      "scout_rounds": 6,
+      "k_per_query": 5,
+      "neardup": true,
+      "flow_fixes": true,
+      "scout_tool_calls": 12,
+      "index": "k25b1",
+      "scout_citation_repair": true,
+      "snippet": "passage",
+      "toolset": "pi",
+      "search_depth": 200,
+      "page_chars": 1200,
+      "title_ranks": 15,
+      "fact_dedup": "full_text",
+      "time_budget": 300,
+      "answer_reserve": 60
+    },
+    "git_sha": "bad9d2d524d91298a48269f0f91761f5cc6c6d12",
+    "max_tokens": 65536,
+    "budget": {
+      "seconds": 300,
+      "n_search": null
+    },
+    "search": {
+      "enabled": true,
+      "url": "http://localhost:8765",
+      "index": "k25b1",
+      "parameters": {
+        "k1": 25.0,
+        "b": 1.0,
+        "unit": "doc"
+      },
+      "docs": 100195,
+      "snippet": "passage"
+    },
+    "questions_sha256": "d0593d99b8ac2a1579102cac8685536de75b6be0a7eab45434b5f7113b013f28"
+  },
+  "hard_cutoff_ids": [
+    "486",
+    "226"
+  ],
+  "time_budget_correct": 7
+}
