@@ -10,9 +10,12 @@ from app.config import settings
 class SearchClient:
     """异步访问课程提供的 BM25 检索服务。"""
 
-    def __init__(self, index: str | None = None) -> None:
+    def __init__(self, index: str | None = None, snippet: str | None = None) -> None:
+        if snippet not in (None, 'head', 'passage'):
+            raise ValueError('未知片段模式')
         self.base_url = settings.search_url.rstrip("/")
         self.index = index
+        self.snippet = snippet
         self.client = httpx.AsyncClient(base_url=self.base_url, timeout=30.0)
 
     async def search(self, q: str, k: int = 5) -> dict[str, Any]:
@@ -20,6 +23,8 @@ class SearchClient:
         params = {"q": q, "k": k}
         if self.index is not None:
             params['index'] = self.index
+        if self.snippet is not None:
+            params['snippet'] = self.snippet
         response = await self.client.get("/search", params=params)
         response.raise_for_status()
         return response.json()

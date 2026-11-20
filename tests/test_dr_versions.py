@@ -96,3 +96,13 @@ def test_v191_adds_only_scout_citation_repair():
     version = get_version('v1.9.1')
     assert version.options == {**previous, 'scout_citation_repair': True}
     assert get_version('v1.9').options == previous
+
+
+def test_v20_adds_only_passage_snippet_to_v19():
+    """片段消融严格基于v1.9；引用修复补丁保留为独立对照，不混入本实验。"""
+    previous = deepcopy(get_version('v1.9').options)
+    version = get_version('v2.0')
+    assert version.options == {**previous, 'snippet': 'passage'}
+    assert 'scout_citation_repair' not in version.options
+    assert get_version('v1.9').options == previous
+    assert get_version('v1.9.1').options['scout_citation_repair'] is True

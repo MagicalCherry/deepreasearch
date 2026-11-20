@@ -89,9 +89,11 @@ def offline_clients(monkeypatch):
             closed.append("llm")
 
     class FakeSearch:
-        def __init__(self, index=None):
+        def __init__(self, index=None, snippet=None):
             if index is not None:
                 closed.append('search_index:' + index)
+            if snippet is not None:
+                closed.append('search_snippet:' + snippet)
 
         async def document(self, docid, max_tokens=None):
             return {"docid": docid, "title": "Demo", "text": "Fictional evidence"}
@@ -164,6 +166,10 @@ async def test_every_registered_version_completes(version, offline_clients):
     if version == 'v1.9':
         assert 'search_index:k25b1' in offline_clients
         assert any(e['event']=='stage_output' and e.get('kind')=='scout_report' for e in trace.events)
+    if version == 'v2.0':
+        assert 'search_index:k25b1' in offline_clients
+        assert 'search_snippet:passage' in offline_clients
+        assert not any(e.get('kind') == 'citation_validation' for e in trace.events)
 
 
 async def test_v17_pipeline_caps_confidence_with_unverified_evidence(monkeypatch, offline_clients):

@@ -42,8 +42,10 @@ def read_dataset(dataset: str) -> list[dict]:
     ).splitlines() if line.strip()]
 
 
-async def search_config(enabled: bool, index: str | None = None) -> dict:
+async def search_config(enabled: bool, index: str | None = None, snippet: str | None = None) -> dict:
     """读取实际选用索引的快照；未指定时仍使用服务默认索引，不静默回退。"""
+    if snippet not in (None, 'head', 'passage'):
+        raise ValueError('未知片段模式')
     client = SearchClient()
     try:
         health = await client.health()
@@ -58,6 +60,7 @@ async def search_config(enabled: bool, index: str | None = None) -> dict:
         "index": name,
         "parameters": {key: selected[key] for key in ("k1", "b", "unit")},
         "docs": health["docs"],
+        **({'snippet': snippet} if snippet is not None else {}),
     }
 
 
@@ -156,7 +159,7 @@ async def run_eval(dataset: str, version: str, concurrency: int, run_id: str) ->
         "budget": {"seconds": registered.options.get("timeout_seconds", 600),
                    "n_search": registered.options.get("max_search_calls", 50)},
         "search": await search_config(enabled=version != "v0-closedbook",
-            **({'index': registered.options['index']} if 'index' in registered.options else {})),
+            **{key: registered.options[key] for key in ('index', 'snippet') if key in registered.options}),
         "questions_sha256": hashlib.sha256(json.dumps(questions, sort_keys=True).encode()).hexdigest(),
     }
     directory = RUNS_DIR / run_id

@@ -80,7 +80,7 @@ async def main(pairs=PAIRS):
         if any(config[k] != v for k, v in expected.items()):
             raise ValueError('当前模型或版本配置与来源不同：' + source_id)
         snapshot = await search_config(config['version'] != 'v0-closedbook',
-            **({'index': config['options']['index']} if 'index' in config['options'] else {}))
+            **{key: config['options'][key] for key in ('index', 'snippet') if key in config['options']})
         if snapshot != config['search']:
             raise ValueError('检索索引配置与来源不同')
         results = latest_lines(source / 'results.jsonl')

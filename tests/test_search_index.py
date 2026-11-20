@@ -53,21 +53,67 @@ async def test_snapshot_uses_requested_index_without_default_fallback(monkeypatc
     assert closed == [True]
 
 
-async def test_eval_records_selected_index(monkeypatch, tmp_path):
+@pytest.mark.parametrize('snippet', [None, 'passage'])
+async def test_eval_records_selected_index(monkeypatch, tmp_path, snippet):
     requested = []
-    async def snapshot(enabled, index=None):
-        requested.append(index)
-        return {'enabled':enabled,'index':index,'parameters':{'k1':25,'b':1,'unit':'doc'}}
+    options = {'index':'k25b1', **({'snippet':snippet} if snippet else {})}
+    async def snapshot(enabled, index=None, snippet=None):
+        requested.append((index, snippet))
+        return {'enabled':enabled,'index':index,'parameters':{'k1':25,'b':1,'unit':'doc'},
+                **({'snippet':snippet} if snippet else {})}
     async def fake_run(question, trace, opts):
-        assert opts['index'] == 'k25b1'
+        assert opts == options
         return 'Explanation: Demo.\nExact Answer: Demo\nConfidence: 25%'
     monkeypatch.setattr(runner,'search_config',snapshot)
-    monkeypatch.setattr(runner,'get_version',lambda _:SimpleNamespace(run=fake_run,options={'index':'k25b1'}))
+    monkeypatch.setattr(runner,'get_version',lambda _:SimpleNamespace(run=fake_run,options=options))
     monkeypatch.setattr(runner,'RUNS_DIR',tmp_path)
     monkeypatch.setattr(runner,'git_sha',lambda:'fictional-commit')
     monkeypatch.setattr(runner,'load_questions',lambda _:[{'query_id':'1','query':'Fictional question'}])
     status = await runner.run_eval('smoke20','fictional',1,'index-test')
     assert status['status'] == 'completed'
     config = json.loads((tmp_path/'index-test/config.json').read_bytes())
-    assert requested == ['k25b1']
+    assert requested == [('k25b1', snippet)]
     assert config['search']['index'] == config['options']['index'] == 'k25b1'
+    if snippet:
+        assert config['search']['snippet'] == config['options']['snippet'] == snippet
+    else:
+        assert 'snippet' not in config['search']
+
+
+@pytest.mark.parametrize('snippet', [None, 'head', 'passage'])
+async def test_snippet_changes_search_only_not_document_request(monkeypatch, snippet):
+    requests = []
+    def handle(request):
+        requests.append(request)
+        return httpx.Response(200, json={'results':[], 'docid':'12', 'text':'Fictional text'})
+    original = httpx.AsyncClient
+    monkeypatch.setattr(search.httpx, 'AsyncClient', lambda **kwargs: original(
+        **kwargs, transport=httpx.MockTransport(handle)))
+    monkeypatch.setattr(search, 'settings', SimpleNamespace(search_url='http://offline.test'))
+    client = search.SearchClient(index='k25b1', snippet=snippet)
+    try:
+        await client.search('fictional query', k=5)
+        await client.document('12', max_tokens=100)
+    finally:
+        await client.close()
+    assert dict(requests[0].url.params) == {'q':'fictional query','k':'5','index':'k25b1',
+                                          **({'snippet':snippet} if snippet else {})}
+    assert dict(requests[1].url.params) == {'max_tokens':'100'}
+
+
+def test_unknown_snippet_rejected_before_client_creation():
+    with pytest.raises(ValueError, match='未知片段模式'):
+        search.SearchClient(snippet='invented')
+
+
+async def test_snapshot_records_snippet_and_preserves_index_parameters(monkeypatch):
+    class FakeSearch:
+        async def health(self):
+            return {'status':'ok','docs':10,'default_index':'default','indexes':[
+                {'name':'k25b1','status':'ready','k1':25,'b':1,'unit':'doc'}]}
+        async def close(self):
+            pass
+    monkeypatch.setattr(runner, 'SearchClient', FakeSearch)
+    config = await runner.search_config(True, index='k25b1', snippet='passage')
+    assert config['snippet'] == 'passage'
+    assert config['parameters'] == {'k1':25,'b':1,'unit':'doc'}

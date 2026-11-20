@@ -87,9 +87,9 @@ async def dr_run(question: str, trace: Trace, opts: dict[str, Any]) -> str:
     return await run(question, trace, opts)
 
 
-def dr_version(vid: str, label: str, description: str, **changes) -> None:
+def dr_version(vid: str, label: str, description: str, *, base: str | None = None, **changes) -> None:
     """新版本选项由上一迭代版深拷贝后只覆盖指定键，避免污染旧版本。"""
-    previous = next(reversed(_VERSIONS.values()))
+    previous = get_version(base) if base is not None else next(reversed(_VERSIONS.values()))
     options = deepcopy(previous.options)
     options.update(deepcopy(changes))
     register(Version(vid, label, description, dr_run, options))
@@ -124,3 +124,6 @@ dr_version('v1.9', 'BM25索引调参', '继承ReAct侦探，仅切换k25b1索引
 
 dr_version('v1.9.1', 'Scout引用交接修复', '使用实际文档编号，错误引用最多纠正一次并记录校验结果；保留v1.9其余配置。',
            scout_citation_repair=True)
+
+dr_version('v2.0', '查询相关片段实验', '以v1.9为基线，仅把开头摘要替换为查询相关片段；不混入v1.9.1引用修复。',
+           base='v1.9', snippet='passage')

@@ -285,7 +285,7 @@ async def run(question, trace, opts):
     llm = s4_port.LLM(trace=trace)
     search = None
     try:
-        search = s4_port.SearchClient(**({'index': opts['index']} if 'index' in opts else {}))
+        search = s4_port.SearchClient(**{key: opts[key] for key in ('index', 'snippet') if key in opts})
         sources = {}
         state = create_initial_state(question, uuid4().hex)
         state['max_iterations'] = opts.get('max_iterations', 3)
