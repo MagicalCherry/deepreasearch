@@ -1,0 +1,993 @@
+{
+  "_purpose": "S17正式dev100原始汇总、离线对照、工具统计与哈希；不调用模型或改写原运行。",
+  "summary_raw": "{\n  \"n\": 100,\n  \"correct\": 71,\n  \"accuracy\": 71.0,\n  \"recall\": 68.71,\n  \"calibration_error\": 29.52,\n  \"calib_beta\": 25,\n  \"avg_confidence\": 51.0,\n  \"runner_errors\": 0,\n  \"avg_search\": 23.87,\n  \"avg_read\": 6.52,\n  \"avg_prompt_tokens\": 595195,\n  \"avg_completion_tokens\": 18499,\n  \"avg_seconds\": 181.58,\n  \"confidence_source\": \"response_field_when_valid_else_original_judge\",\n  \"run\": \"s17-v21-qwen37-dev100-reuse20\",\n  \"version\": \"v2.1\",\n  \"dataset\": \"dev100\",\n  \"judge_model\": \"qwen/qwen3.7-flash\"\n}",
+  "summary": {
+    "n": 100,
+    "correct": 71,
+    "accuracy": 71.0,
+    "recall": 68.71,
+    "calibration_error": 29.52,
+    "calib_beta": 25,
+    "avg_confidence": 51.0,
+    "runner_errors": 0,
+    "avg_search": 23.87,
+    "avg_read": 6.52,
+    "avg_prompt_tokens": 595195,
+    "avg_completion_tokens": 18499,
+    "avg_seconds": 181.58,
+    "confidence_source": "response_field_when_valid_else_original_judge",
+    "run": "s17-v21-qwen37-dev100-reuse20",
+    "version": "v2.1",
+    "dataset": "dev100",
+    "judge_model": "qwen/qwen3.7-flash"
+  },
+  "config": {
+    "version": "v2.1",
+    "model": "qwen/qwen3.7-flash",
+    "dataset": "dev100",
+    "llm_provider": "openrouter",
+    "llm_base_url": "https://openrouter.ai/api/v1",
+    "concurrency": 8,
+    "options": {
+      "max_iterations": 3,
+      "retries": 2,
+      "timeout_seconds": null,
+      "max_search_calls": null,
+      "planner": "constraints",
+      "expand": 2,
+      "analysis": "hypothesis",
+      "read_docs": true,
+      "max_searches": 50,
+      "max_reads": 8,
+      "doc_max_tokens": 8000,
+      "writer": "memo",
+      "critic": "constraints",
+      "scout": "react",
+      "scout_rounds": 6,
+      "k_per_query": 5,
+      "neardup": true,
+      "flow_fixes": true,
+      "scout_tool_calls": 12,
+      "index": "k25b1",
+      "scout_citation_repair": true,
+      "snippet": "passage",
+      "toolset": "pi",
+      "search_depth": 200,
+      "page_chars": 1200,
+      "title_ranks": 15,
+      "fact_dedup": "full_text"
+    },
+    "git_sha": "7384628c9badf37afb9a93106e452c80bf0431e7",
+    "max_tokens": 65536,
+    "budget": {
+      "seconds": null,
+      "n_search": null
+    },
+    "search": {
+      "enabled": true,
+      "url": "http://localhost:8765",
+      "index": "k25b1",
+      "parameters": {
+        "k1": 25.0,
+        "b": 1.0,
+        "unit": "doc"
+      },
+      "docs": 100195,
+      "snippet": "passage"
+    },
+    "questions_sha256": "d117deee8d429bbbf36151c91fd14b3edd7317c989e684db4dc15920e4787bb8"
+  },
+  "comparisons": {
+    "s15-v19-qwen37-dev100-reuse20": {
+      "n": 100,
+      "improved": [
+        "15",
+        "61",
+        "132",
+        "171",
+        "193",
+        "324",
+        "356",
+        "392",
+        "422",
+        "486",
+        "497",
+        "501",
+        "583",
+        "593",
+        "670",
+        "724",
+        "836",
+        "944",
+        "959",
+        "996",
+        "1025",
+        "1103"
+      ],
+      "regressed": [
+        "802",
+        "1058",
+        "1217"
+      ]
+    },
+    "s16-v20-qwen37-dev100-reuse20": {
+      "n": 100,
+      "improved": [
+        "15",
+        "61",
+        "193",
+        "324",
+        "356",
+        "422",
+        "472",
+        "486",
+        "570",
+        "593",
+        "714",
+        "724",
+        "944",
+        "968",
+        "1025",
+        "1103"
+      ],
+      "regressed": [
+        "33",
+        "169",
+        "323",
+        "1058",
+        "1217"
+      ]
+    }
+  },
+  "comparison_output": "s15-v19-qwen37-dev100-reuse20 -> s17-v21-qwen37-dev100-reuse20 共同 100 题 +22 / -3\n改善: 15 61 132 171 193 324 356 392 422 486 497 501 583 593 670 724 836 944 959 996 1025 1103\n退步: 802 1058 1217\ns16-v20-qwen37-dev100-reuse20 -> s17-v21-qwen37-dev100-reuse20 共同 100 题 +16 / -5\n改善: 15 61 193 324 356 422 472 486 570 593 714 724 944 968 1025 1103\n退步: 33 169 323 1058 1217",
+  "tool_stats": {
+    "n": 100,
+    "totals": {
+      "search_calls": 2387,
+      "page_calls": 122,
+      "read_calls": 652,
+      "unique_read_documents": 340,
+      "title_only_read_documents": 80
+    },
+    "per_question": {
+      "search_calls": 23.87,
+      "page_calls": 1.22,
+      "read_calls": 6.52,
+      "unique_read_documents": 3.4,
+      "title_only_read_documents": 0.8
+    },
+    "questions_with_paging": 63,
+    "note": "read_calls是分块工具调用；unique_read_documents去重。标题直读按该Scout首次读前未展示片段判断，再按题去重。",
+    "items": [
+      {
+        "query_id": "331",
+        "search_calls": 11,
+        "page_calls": 0,
+        "read_calls": 7,
+        "unique_read_documents": 4,
+        "title_only_read_documents": 0
+      },
+      {
+        "query_id": "473",
+        "search_calls": 27,
+        "page_calls": 2,
+        "read_calls": 6,
+        "unique_read_documents": 5,
+        "title_only_read_documents": 1
+      },
+      {
+        "query_id": "132",
+        "search_calls": 27,
+        "page_calls": 0,
+        "read_calls": 12,
+        "unique_read_documents": 5,
+        "title_only_read_documents": 2
+      },
+      {
+        "query_id": "710",
+        "search_calls": 16,
+        "page_calls": 0,
+        "read_calls": 3,
+        "unique_read_documents": 2,
+        "title_only_read_documents": 0
+      },
+      {
+        "query_id": "226",
+        "search_calls": 30,
+        "page_calls": 2,
+        "read_calls": 12,
+        "unique_read_documents": 8,
+        "title_only_read_documents": 2
+      },
+      {
+        "query_id": "1025",
+        "search_calls": 28,
+        "page_calls": 1,
+        "read_calls": 6,
+        "unique_read_documents": 2,
+        "title_only_read_documents": 0
+      },
+      {
+        "query_id": "93",
+        "search_calls": 29,
+        "page_calls": 2,
+        "read_calls": 9,
+        "unique_read_documents": 4,
+        "title_only_read_documents": 1
+      },
+      {
+        "query_id": "972",
+        "search_calls": 15,
+        "page_calls": 1,
+        "read_calls": 14,
+        "unique_read_documents": 7,
+        "title_only_read_documents": 1
+      },
+      {
+        "query_id": "422",
+        "search_calls": 35,
+        "page_calls": 4,
+        "read_calls": 10,
+        "unique_read_documents": 7,
+        "title_only_read_documents": 3
+      },
+      {
+        "query_id": "486",
+        "search_calls": 42,
+        "page_calls": 3,
+        "read_calls": 2,
+        "unique_read_documents": 2,
+        "title_only_read_documents": 0
+      },
+      {
+        "query_id": "1248",
+        "search_calls": 17,
+        "page_calls": 1,
+        "read_calls": 3,
+        "unique_read_documents": 2,
+        "title_only_read_documents": 0
+      },
+      {
+        "query_id": "934",
+        "search_calls": 20,
+        "page_calls": 1,
+        "read_calls": 5,
+        "unique_read_documents": 4,
+        "title_only_read_documents": 2
+      },
+      {
+        "query_id": "253",
+        "search_calls": 19,
+        "page_calls": 0,
+        "read_calls": 7,
+        "unique_read_documents": 7,
+        "title_only_read_documents": 2
+      },
+      {
+        "query_id": "1020",
+        "search_calls": 22,
+        "page_calls": 1,
+        "read_calls": 6,
+        "unique_read_documents": 3,
+        "title_only_read_documents": 0
+      },
+      {
+        "query_id": "906",
+        "search_calls": 11,
+        "page_calls": 1,
+        "read_calls": 7,
+        "unique_read_documents": 4,
+        "title_only_read_documents": 2
+      },
+      {
+        "query_id": "297",
+        "search_calls": 24,
+        "page_calls": 0,
+        "read_calls": 3,
+        "unique_read_documents": 1,
+        "title_only_read_documents": 0
+      },
+      {
+        "query_id": "254",
+        "search_calls": 17,
+        "page_calls": 0,
+        "read_calls": 6,
+        "unique_read_documents": 3,
+        "title_only_read_documents": 0
+      },
+      {
+        "query_id": "1022",
+        "search_calls": 39,
+        "page_calls": 1,
+        "read_calls": 8,
+        "unique_read_documents": 2,
+        "title_only_read_documents": 1
+      },
+      {
+        "query_id": "1047",
+        "search_calls": 26,
+        "page_calls": 2,
+        "read_calls": 11,
+        "unique_read_documents": 6,
+        "title_only_read_documents": 1
+      },
+      {
+        "query_id": "760",
+        "search_calls": 26,
+        "page_calls": 2,
+        "read_calls": 6,
+        "unique_read_documents": 4,
+        "title_only_read_documents": 0
+      },
+      {
+        "query_id": "161",
+        "search_calls": 25,
+        "page_calls": 0,
+        "read_calls": 2,
+        "unique_read_documents": 2,
+        "title_only_read_documents": 0
+      },
+      {
+        "query_id": "571",
+        "search_calls": 20,
+        "page_calls": 2,
+        "read_calls": 11,
+        "unique_read_documents": 5,
+        "title_only_read_documents": 0
+      },
+      {
+        "query_id": "323",
+        "search_calls": 36,
+        "page_calls": 2,
+        "read_calls": 2,
+        "unique_read_documents": 1,
+        "title_only_read_documents": 1
+      },
+      {
+        "query_id": "570",
+        "search_calls": 17,
+        "page_calls": 0,
+        "read_calls": 4,
+        "unique_read_documents": 2,
+        "title_only_read_documents": 1
+      },
+      {
+        "query_id": "1103",
+        "search_calls": 25,
+        "page_calls": 1,
+        "read_calls": 7,
+        "unique_read_documents": 6,
+        "title_only_read_documents": 1
+      },
+      {
+        "query_id": "670",
+        "search_calls": 22,
+        "page_calls": 3,
+        "read_calls": 2,
+        "unique_read_documents": 1,
+        "title_only_read_documents": 0
+      },
+      {
+        "query_id": "865",
+        "search_calls": 31,
+        "page_calls": 0,
+        "read_calls": 6,
+        "unique_read_documents": 4,
+        "title_only_read_documents": 2
+      },
+      {
+        "query_id": "478",
+        "search_calls": 9,
+        "page_calls": 0,
+        "read_calls": 8,
+        "unique_read_documents": 4,
+        "title_only_read_documents": 0
+      },
+      {
+        "query_id": "650",
+        "search_calls": 19,
+        "page_calls": 0,
+        "read_calls": 3,
+        "unique_read_documents": 1,
+        "title_only_read_documents": 0
+      },
+      {
+        "query_id": "883",
+        "search_calls": 40,
+        "page_calls": 1,
+        "read_calls": 14,
+        "unique_read_documents": 7,
+        "title_only_read_documents": 2
+      },
+      {
+        "query_id": "1177",
+        "search_calls": 31,
+        "page_calls": 2,
+        "read_calls": 4,
+        "unique_read_documents": 3,
+        "title_only_read_documents": 0
+      },
+      {
+        "query_id": "724",
+        "search_calls": 23,
+        "page_calls": 1,
+        "read_calls": 2,
+        "unique_read_documents": 2,
+        "title_only_read_documents": 0
+      },
+      {
+        "query_id": "298",
+        "search_calls": 15,
+        "page_calls": 0,
+        "read_calls": 1,
+        "unique_read_documents": 1,
+        "title_only_read_documents": 1
+      },
+      {
+        "query_id": "1169",
+        "search_calls": 18,
+        "page_calls": 2,
+        "read_calls": 4,
+        "unique_read_documents": 2,
+        "title_only_read_documents": 2
+      },
+      {
+        "query_id": "1188",
+        "search_calls": 34,
+        "page_calls": 2,
+        "read_calls": 9,
+        "unique_read_documents": 7,
+        "title_only_read_documents": 3
+      },
+      {
+        "query_id": "836",
+        "search_calls": 20,
+        "page_calls": 2,
+        "read_calls": 8,
+        "unique_read_documents": 7,
+        "title_only_read_documents": 2
+      },
+      {
+        "query_id": "53",
+        "search_calls": 27,
+        "page_calls": 0,
+        "read_calls": 5,
+        "unique_read_documents": 1,
+        "title_only_read_documents": 0
+      },
+      {
+        "query_id": "483",
+        "search_calls": 14,
+        "page_calls": 1,
+        "read_calls": 7,
+        "unique_read_documents": 5,
+        "title_only_read_documents": 0
+      },
+      {
+        "query_id": "171",
+        "search_calls": 12,
+        "page_calls": 2,
+        "read_calls": 7,
+        "unique_read_documents": 4,
+        "title_only_read_documents": 0
+      },
+      {
+        "query_id": "472",
+        "search_calls": 34,
+        "page_calls": 0,
+        "read_calls": 6,
+        "unique_read_documents": 3,
+        "title_only_read_documents": 1
+      },
+      {
+        "query_id": "436",
+        "search_calls": 29,
+        "page_calls": 2,
+        "read_calls": 1,
+        "unique_read_documents": 1,
+        "title_only_read_documents": 1
+      },
+      {
+        "query_id": "392",
+        "search_calls": 14,
+        "page_calls": 0,
+        "read_calls": 5,
+        "unique_read_documents": 2,
+        "title_only_read_documents": 1
+      },
+      {
+        "query_id": "709",
+        "search_calls": 40,
+        "page_calls": 1,
+        "read_calls": 5,
+        "unique_read_documents": 2,
+        "title_only_read_documents": 0
+      },
+      {
+        "query_id": "961",
+        "search_calls": 31,
+        "page_calls": 1,
+        "read_calls": 9,
+        "unique_read_documents": 4,
+        "title_only_read_documents": 2
+      },
+      {
+        "query_id": "517",
+        "search_calls": 31,
+        "page_calls": 6,
+        "read_calls": 10,
+        "unique_read_documents": 6,
+        "title_only_read_documents": 1
+      },
+      {
+        "query_id": "944",
+        "search_calls": 22,
+        "page_calls": 1,
+        "read_calls": 8,
+        "unique_read_documents": 4,
+        "title_only_read_documents": 1
+      },
+      {
+        "query_id": "237",
+        "search_calls": 25,
+        "page_calls": 0,
+        "read_calls": 6,
+        "unique_read_documents": 2,
+        "title_only_read_documents": 0
+      },
+      {
+        "query_id": "1032",
+        "search_calls": 6,
+        "page_calls": 0,
+        "read_calls": 6,
+        "unique_read_documents": 2,
+        "title_only_read_documents": 0
+      },
+      {
+        "query_id": "593",
+        "search_calls": 29,
+        "page_calls": 1,
+        "read_calls": 8,
+        "unique_read_documents": 5,
+        "title_only_read_documents": 0
+      },
+      {
+        "query_id": "244",
+        "search_calls": 21,
+        "page_calls": 2,
+        "read_calls": 3,
+        "unique_read_documents": 2,
+        "title_only_read_documents": 0
+      },
+      {
+        "query_id": "500",
+        "search_calls": 22,
+        "page_calls": 1,
+        "read_calls": 7,
+        "unique_read_documents": 3,
+        "title_only_read_documents": 0
+      },
+      {
+        "query_id": "356",
+        "search_calls": 27,
+        "page_calls": 1,
+        "read_calls": 9,
+        "unique_read_documents": 2,
+        "title_only_read_documents": 2
+      },
+      {
+        "query_id": "738",
+        "search_calls": 31,
+        "page_calls": 0,
+        "read_calls": 5,
+        "unique_read_documents": 4,
+        "title_only_read_documents": 1
+      },
+      {
+        "query_id": "968",
+        "search_calls": 4,
+        "page_calls": 0,
+        "read_calls": 5,
+        "unique_read_documents": 3,
+        "title_only_read_documents": 0
+      },
+      {
+        "query_id": "673",
+        "search_calls": 9,
+        "page_calls": 0,
+        "read_calls": 11,
+        "unique_read_documents": 4,
+        "title_only_read_documents": 0
+      },
+      {
+        "query_id": "590",
+        "search_calls": 20,
+        "page_calls": 0,
+        "read_calls": 6,
+        "unique_read_documents": 4,
+        "title_only_read_documents": 0
+      },
+      {
+        "query_id": "1133",
+        "search_calls": 9,
+        "page_calls": 1,
+        "read_calls": 6,
+        "unique_read_documents": 4,
+        "title_only_read_documents": 0
+      },
+      {
+        "query_id": "61",
+        "search_calls": 22,
+        "page_calls": 6,
+        "read_calls": 15,
+        "unique_read_documents": 5,
+        "title_only_read_documents": 2
+      },
+      {
+        "query_id": "636",
+        "search_calls": 17,
+        "page_calls": 0,
+        "read_calls": 15,
+        "unique_read_documents": 2,
+        "title_only_read_documents": 0
+      },
+      {
+        "query_id": "942",
+        "search_calls": 27,
+        "page_calls": 0,
+        "read_calls": 7,
+        "unique_read_documents": 4,
+        "title_only_read_documents": 3
+      },
+      {
+        "query_id": "175",
+        "search_calls": 25,
+        "page_calls": 0,
+        "read_calls": 8,
+        "unique_read_documents": 4,
+        "title_only_read_documents": 2
+      },
+      {
+        "query_id": "193",
+        "search_calls": 13,
+        "page_calls": 3,
+        "read_calls": 11,
+        "unique_read_documents": 2,
+        "title_only_read_documents": 2
+      },
+      {
+        "query_id": "498",
+        "search_calls": 22,
+        "page_calls": 2,
+        "read_calls": 7,
+        "unique_read_documents": 4,
+        "title_only_read_documents": 0
+      },
+      {
+        "query_id": "603",
+        "search_calls": 21,
+        "page_calls": 1,
+        "read_calls": 5,
+        "unique_read_documents": 3,
+        "title_only_read_documents": 0
+      },
+      {
+        "query_id": "131",
+        "search_calls": 32,
+        "page_calls": 1,
+        "read_calls": 12,
+        "unique_read_documents": 5,
+        "title_only_read_documents": 1
+      },
+      {
+        "query_id": "324",
+        "search_calls": 20,
+        "page_calls": 0,
+        "read_calls": 6,
+        "unique_read_documents": 4,
+        "title_only_read_documents": 1
+      },
+      {
+        "query_id": "692",
+        "search_calls": 25,
+        "page_calls": 0,
+        "read_calls": 3,
+        "unique_read_documents": 1,
+        "title_only_read_documents": 1
+      },
+      {
+        "query_id": "1058",
+        "search_calls": 19,
+        "page_calls": 1,
+        "read_calls": 5,
+        "unique_read_documents": 2,
+        "title_only_read_documents": 1
+      },
+      {
+        "query_id": "599",
+        "search_calls": 9,
+        "page_calls": 0,
+        "read_calls": 4,
+        "unique_read_documents": 2,
+        "title_only_read_documents": 0
+      },
+      {
+        "query_id": "71",
+        "search_calls": 20,
+        "page_calls": 0,
+        "read_calls": 3,
+        "unique_read_documents": 2,
+        "title_only_read_documents": 0
+      },
+      {
+        "query_id": "661",
+        "search_calls": 8,
+        "page_calls": 1,
+        "read_calls": 3,
+        "unique_read_documents": 2,
+        "title_only_read_documents": 0
+      },
+      {
+        "query_id": "996",
+        "search_calls": 26,
+        "page_calls": 1,
+        "read_calls": 12,
+        "unique_read_documents": 6,
+        "title_only_read_documents": 0
+      },
+      {
+        "query_id": "826",
+        "search_calls": 16,
+        "page_calls": 2,
+        "read_calls": 8,
+        "unique_read_documents": 4,
+        "title_only_read_documents": 0
+      },
+      {
+        "query_id": "1052",
+        "search_calls": 40,
+        "page_calls": 0,
+        "read_calls": 7,
+        "unique_read_documents": 3,
+        "title_only_read_documents": 3
+      },
+      {
+        "query_id": "816",
+        "search_calls": 35,
+        "page_calls": 1,
+        "read_calls": 10,
+        "unique_read_documents": 4,
+        "title_only_read_documents": 0
+      },
+      {
+        "query_id": "583",
+        "search_calls": 17,
+        "page_calls": 2,
+        "read_calls": 11,
+        "unique_read_documents": 3,
+        "title_only_read_documents": 0
+      },
+      {
+        "query_id": "1212",
+        "search_calls": 16,
+        "page_calls": 1,
+        "read_calls": 6,
+        "unique_read_documents": 3,
+        "title_only_read_documents": 0
+      },
+      {
+        "query_id": "1217",
+        "search_calls": 28,
+        "page_calls": 12,
+        "read_calls": 7,
+        "unique_read_documents": 6,
+        "title_only_read_documents": 1
+      },
+      {
+        "query_id": "337",
+        "search_calls": 7,
+        "page_calls": 0,
+        "read_calls": 9,
+        "unique_read_documents": 4,
+        "title_only_read_documents": 1
+      },
+      {
+        "query_id": "1092",
+        "search_calls": 14,
+        "page_calls": 1,
+        "read_calls": 3,
+        "unique_read_documents": 2,
+        "title_only_read_documents": 1
+      },
+      {
+        "query_id": "501",
+        "search_calls": 31,
+        "page_calls": 0,
+        "read_calls": 9,
+        "unique_read_documents": 3,
+        "title_only_read_documents": 1
+      },
+      {
+        "query_id": "1038",
+        "search_calls": 17,
+        "page_calls": 0,
+        "read_calls": 1,
+        "unique_read_documents": 1,
+        "title_only_read_documents": 0
+      },
+      {
+        "query_id": "1253",
+        "search_calls": 24,
+        "page_calls": 0,
+        "read_calls": 3,
+        "unique_read_documents": 2,
+        "title_only_read_documents": 0
+      },
+      {
+        "query_id": "905",
+        "search_calls": 43,
+        "page_calls": 1,
+        "read_calls": 4,
+        "unique_read_documents": 4,
+        "title_only_read_documents": 1
+      },
+      {
+        "query_id": "671",
+        "search_calls": 34,
+        "page_calls": 0,
+        "read_calls": 2,
+        "unique_read_documents": 1,
+        "title_only_read_documents": 0
+      },
+      {
+        "query_id": "716",
+        "search_calls": 28,
+        "page_calls": 0,
+        "read_calls": 1,
+        "unique_read_documents": 1,
+        "title_only_read_documents": 1
+      },
+      {
+        "query_id": "714",
+        "search_calls": 16,
+        "page_calls": 1,
+        "read_calls": 3,
+        "unique_read_documents": 2,
+        "title_only_read_documents": 1
+      },
+      {
+        "query_id": "802",
+        "search_calls": 30,
+        "page_calls": 1,
+        "read_calls": 2,
+        "unique_read_documents": 1,
+        "title_only_read_documents": 0
+      },
+      {
+        "query_id": "1179",
+        "search_calls": 39,
+        "page_calls": 1,
+        "read_calls": 8,
+        "unique_read_documents": 5,
+        "title_only_read_documents": 0
+      },
+      {
+        "query_id": "497",
+        "search_calls": 29,
+        "page_calls": 5,
+        "read_calls": 10,
+        "unique_read_documents": 6,
+        "title_only_read_documents": 3
+      },
+      {
+        "query_id": "169",
+        "search_calls": 37,
+        "page_calls": 3,
+        "read_calls": 2,
+        "unique_read_documents": 2,
+        "title_only_read_documents": 0
+      },
+      {
+        "query_id": "15",
+        "search_calls": 17,
+        "page_calls": 0,
+        "read_calls": 4,
+        "unique_read_documents": 2,
+        "title_only_read_documents": 0
+      },
+      {
+        "query_id": "27",
+        "search_calls": 19,
+        "page_calls": 1,
+        "read_calls": 9,
+        "unique_read_documents": 4,
+        "title_only_read_documents": 2
+      },
+      {
+        "query_id": "8",
+        "search_calls": 34,
+        "page_calls": 2,
+        "read_calls": 11,
+        "unique_read_documents": 7,
+        "title_only_read_documents": 2
+      },
+      {
+        "query_id": "33",
+        "search_calls": 19,
+        "page_calls": 2,
+        "read_calls": 1,
+        "unique_read_documents": 1,
+        "title_only_read_documents": 1
+      },
+      {
+        "query_id": "742",
+        "search_calls": 32,
+        "page_calls": 0,
+        "read_calls": 6,
+        "unique_read_documents": 3,
+        "title_only_read_documents": 0
+      },
+      {
+        "query_id": "1049",
+        "search_calls": 33,
+        "page_calls": 2,
+        "read_calls": 4,
+        "unique_read_documents": 2,
+        "title_only_read_documents": 2
+      },
+      {
+        "query_id": "542",
+        "search_calls": 29,
+        "page_calls": 2,
+        "read_calls": 10,
+        "unique_read_documents": 5,
+        "title_only_read_documents": 1
+      },
+      {
+        "query_id": "959",
+        "search_calls": 40,
+        "page_calls": 1,
+        "read_calls": 7,
+        "unique_read_documents": 4,
+        "title_only_read_documents": 1
+      },
+      {
+        "query_id": "1076",
+        "search_calls": 34,
+        "page_calls": 3,
+        "read_calls": 13,
+        "unique_read_documents": 3,
+        "title_only_read_documents": 2
+      }
+    ]
+  },
+  "cost": {
+    "reported_cumulative_usd": 3.77,
+    "scope": "用户在dev100研究完成后、判分前报告的账户累计，不等于本次单独费用；未读取账单接口。"
+  },
+  "pytest_user_output": "237 passed in 2.14s",
+  "hashes": {
+    "config.json": "43f482bd7662fac7a5106e592fb2e3a34f4b785038a0020bc324e706d322b661",
+    "results.jsonl": "b7eae9ce7f5217c6d1e012149c6473f64fc69028d686ac71b4f83f85fce3037b",
+    "judged.jsonl": "ecbc03677bdfafc42e3c1870a1b8f5c4e110fd31b06a52dab979c4ff54b91dfb",
+    "summary.json": "9a6292489c04cb7641177de9a2585a802980bf8b24d1e114bf8027116bc0cf75"
+  },
+  "tutor_check": {
+    "course": "mas-practice",
+    "content_version": "v1-r1d8a1c1fc56d4a1a",
+    "result": "pass",
+    "summary": "侦探看得见第 6 到 20 名了。",
+    "missing": [],
+    "next_step_id": "S18",
+    "note": "告诉学员通过了，以及这一步证明了什么、还没证明什么。"
+  },
+  "learner_answer": "每次翻页都会重新搜索，所以要少翻页",
+  "correction": "翻页读取缓存，不重新搜索、不增加实际搜索次数，占一次工具额度；标题可直接挑文读，阅读还可能分块。",
+  "regression_diagnosis_vs_v20": {
+    "33": "证据召回8/8降至1/8，后者未读标注证据；候选与方向偏移。",
+    "169": "仍命中4/10证据，未读这些标注证据；弱候选方向反复，Unknown。",
+    "323": "证据召回1/4降至0/4，未形成具体候选，Unknown。",
+    "1058": "均命中3/5，v2.1读2篇标注证据；已找到Mukul Pal，因公司时间线未核实而放弃，属于已召回未解对。",
+    "1217": "证据召回9/12降至2/12，固着菲律宾/Cebu City，最终强猜未满足硬约束的候选。"
+  }
+}
