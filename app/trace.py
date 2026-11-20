@@ -50,7 +50,8 @@ class Trace:
         item = deepcopy(fields)
         item.update(event=event, t=self.seconds, agent=agent)
         if event == "search":
-            self.n_search += 1
+            if not item.get('cached'):
+                self.n_search += 1
             self.retrieved.update(str(result["docid"]) for result in item.get("results", []))
         elif event == "read":
             self.n_read += 1

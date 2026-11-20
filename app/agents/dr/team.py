@@ -111,6 +111,18 @@ class DRScout(s4_port.CorpusScout):
         from .react_scout import react_section
         return await react_section(self, state, section)
 
+    def scout_tools(self, state, lane):
+        """按版本选择工具，保留两个工具的历史版本行为。"""
+        from .react_scout import ScoutTools, PiScoutTools
+        cls = PiScoutTools if self.opts.get('toolset') == 'pi' else ScoutTools
+        return cls(self, state, lane)
+
+    def scout_prompt(self):
+        """三工具使用对应阅读策略，引用补丁由版本独立控制。"""
+        from .react_scout import SCOUT_PROMPT, PI_SCOUT_PROMPT, CITATION_RULES
+        prompt = PI_SCOUT_PROMPT if self.opts.get('toolset') == 'pi' else SCOUT_PROMPT
+        return prompt + (CITATION_RULES if self.opts.get('scout_citation_repair') else '')
+
     def _store_loop_facts(self, state, section, facts, documents):
         """只允许本章节真实搜索返回的文档作为来源，全文事实仍由read_docs校验原文。"""
         if not isinstance(facts, list):

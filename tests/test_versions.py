@@ -73,11 +73,19 @@ def offline_clients(monkeypatch):
             if tools and not any(m["role"] == "tool" for m in messages):
                 query = ('fictional evidence ' + json.loads(messages[1]['content'])['subquestion']['title']) if is_scout else 'demo'
                 call = SimpleNamespace(id="fake-call", function=SimpleNamespace(
-                    name="search", arguments=json.dumps({"query": query}),
+                    name="search", arguments=json.dumps({"query": query, **(
+                        {'reason': 'Find fictional evidence'} if any(
+                            t['function']['name'] == 'read_document' for t in tools) else {})}),
                 ))
                 return response(None, [call])
             if is_scout:
                 previous = [m for m in messages if m['role'] == 'tool']
+                if tools and previous and any(t['function']['name'] == 'read_document' for t in tools):
+                    last = json.loads(previous[-1]['content'])
+                    if isinstance(last, dict) and last.get('search_id'):
+                        return response(None, [SimpleNamespace(id='fake-pi-read', function=SimpleNamespace(
+                            name='read_document', arguments=json.dumps({'reason': 'Verify evidence',
+                                'docid': '1', 'offset': 1, 'limit': 10})))])
                 if tools and previous and isinstance(json.loads(previous[-1]['content']), list):
                     call = SimpleNamespace(id='fake-read', function=SimpleNamespace(
                         name='get_document', arguments=json.dumps({'docid':'1'})))
@@ -170,6 +178,11 @@ async def test_every_registered_version_completes(version, offline_clients):
         assert 'search_index:k25b1' in offline_clients
         assert 'search_snippet:passage' in offline_clients
         assert not any(e.get('kind') == 'citation_validation' for e in trace.events)
+    if version == 'v2.1':
+        assert 'search_snippet:passage' in offline_clients
+        assert any(e.get('kind') == 'citation_validation' for e in trace.events)
+        assert any(e.get('tool') == 'read_document' for e in trace.events)
+        assert any(e['event'] == 'fact' for e in trace.events)
 
 
 async def test_v17_pipeline_caps_confidence_with_unverified_evidence(monkeypatch, offline_clients):

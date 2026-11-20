@@ -43,6 +43,10 @@ class Tools:
         self.recover_document_404 = recover_document_404
         self.agent = agent
 
+    def definitions(self):
+        """返回当前工具集的模型接口，旧版仍使用两个工具。"""
+        return basic_tools(self.k)
+
     @staticmethod
     def truncate(text: str, limit: int) -> str:
         """与课程检索服务一致，使用cl100k_base按token截断。"""
@@ -90,6 +94,123 @@ class Tools:
         raise ValueError(f"未知工具：{name}")
 
 
+def doc_lines(text: str, words_per_line: int = 80) -> list[str]:
+    """打包短行并折叠长段，保留词序，提供稳定的一起始行号。"""
+    words = text.split()
+    return [' '.join(words[i:i + words_per_line]) for i in range(0, len(words), words_per_line)]
+
+
+class PiTools(Tools):
+    """深排缓存、按名次翻页与按行读文；缓存和标题不提前算作证据召回。"""
+
+    def __init__(self, search, trace, *, search_depth=200, page_chars=1200,
+                 title_ranks=15, **kwargs):
+        super().__init__(search, trace, **kwargs)
+        self.search_depth, self.page_chars, self.title_ranks = search_depth, page_chars, title_ranks
+        self.searches, self.visible, self.exposed, self.bodies = {}, {}, set(), {}
+
+    def definitions(self):
+        specs = [
+            ('search', 'Search short keywords; show five excerpts and the next fifteen titles.',
+             {'query': {'type': 'string'}}),
+            ('read_search_results', 'Page cached search results, with excerpts; offset is a one-based rank, limit at most 20.',
+             {'search_id': {'type': 'string'}, 'offset': {'type': 'integer', 'minimum': 1},
+              'limit': {'type': 'integer', 'minimum': 1, 'maximum': 20}}),
+            ('read_document', 'Read a visible document by one-based line numbers. Start at line 1; continue using next_offset.',
+             {'docid': {'type': 'string'}, 'offset': {'type': 'integer', 'minimum': 1},
+              'limit': {'type': 'integer', 'minimum': 1}}),
+        ]
+        return [{'type': 'function', 'function': {'name': name, 'description': desc,
+                 'parameters': {'type': 'object', 'properties': {'reason': {'type': 'string'}, **props},
+                                'required': ['reason', *props], 'additionalProperties': False}}}
+                for name, desc, props in specs]
+
+    @staticmethod
+    def valid_args(name, args):
+        if not isinstance(args.get('reason'), str) or not args['reason'].strip():
+            return False
+        if name == 'search':
+            return isinstance(args.get('query'), str) and bool(args['query'].strip())
+        key = 'search_id' if name == 'read_search_results' else 'docid'
+        return (name in {'read_search_results', 'read_document'}
+                and isinstance(args.get(key), str) and bool(args[key].strip())
+                and all(type(args.get(k)) is int and args[k] >= 1 for k in ('offset', 'limit')))
+
+    def _excerpts(self, rows, start, limit):
+        results = []
+        for rank, item in enumerate(rows[start - 1:start - 1 + limit], start):
+            docid = str(item['docid'])
+            result = {'rank': rank, 'docid': docid, 'title': item.get('title', ''),
+                      'score': item.get('score', 0), 'excerpt': item.get('snippet', '')[:self.page_chars]}
+            self.visible[docid] = result
+            self.exposed.add(docid)
+            results.append(result)
+        return results
+
+    async def call(self, name, args):
+        if not self.valid_args(name, args):
+            return {'error': 'Use a supported tool with a nonempty reason and valid parameters.'}
+        reason = args['reason']
+        if name == 'search':
+            data = await self.search.search(args['query'], k=self.search_depth)
+            rows = (data['results'] if isinstance(data, dict) else data)[:self.search_depth]
+            sid = f's{len(self.searches) + 1}'
+            self.searches[sid] = rows
+            results = self._excerpts(rows, 1, 5)
+            titles = []
+            for rank, item in enumerate(rows[5:5 + self.title_ranks], 6):
+                docid = str(item['docid'])
+                self.visible.setdefault(docid, {'docid': docid, 'title': item.get('title', '')})
+                titles.append(f"#{rank} [{docid}] {item.get('title', '')}")
+            self.trace.emit('search', agent=self.agent, query=args['query'], k=5,
+                            search_id=sid, reason=reason, results=results, more_titles=titles)
+            return {'search_id': sid, 'results': results, 'more_titles': titles,
+                    'hint': 'Scan titles, read a promising document from line 1, or page this search before rewriting.'}
+        if name == 'read_search_results':
+            sid, offset = args['search_id'], args['offset']
+            if sid not in self.searches:
+                return {'error': 'Unknown search_id; use an ID returned by search.'}
+            results = self._excerpts(self.searches[sid], offset, min(20, args['limit']))
+            end = offset + len(results)
+            self.trace.emit('search', agent=self.agent, query=f'翻看 {sid} 第 {offset} 名起',
+                            k=len(results), cached=True, search_id=sid, reason=reason, results=results)
+            return {'search_id': sid, 'results': results,
+                    'next_offset': end if end <= len(self.searches[sid]) else None}
+        docid, offset = args['docid'], args['offset']
+        if docid not in self.visible:
+            return {'error': 'Read only a docid visible in your search excerpts or title lists.'}
+        if docid not in self.bodies:
+            try:
+                self.bodies[docid] = await self.search.document(docid, max_tokens=None)
+            except httpx.HTTPStatusError as exc:
+                if not self.recover_document_404 or exc.response.status_code != 404:
+                    raise
+                return {'error': 'document_not_found', 'docid': docid, 'status_code': 404}
+        document = self.bodies[docid]
+        lines = doc_lines(document['text'])
+        if offset > len(lines):
+            return {'error': 'Offset past end of document.', 'total_lines': len(lines), 'next_offset': None}
+        encoding = tiktoken.get_encoding('cl100k_base')
+        selected, token_count = [], 0
+        for line in lines[offset - 1:offset - 1 + min(args['limit'], 100)]:
+            size = len(encoding.encode(line, disallowed_special=()))
+            if token_count + size + 1 > self.document_tokens:
+                break
+            selected.append(line)
+            token_count += size + 1
+        if not selected:
+            return {'error': 'One line exceeds the reading token cap; no text was read.'}
+        end = offset + len(selected)
+        title_only = docid not in self.exposed
+        self.exposed.add(docid)
+        self.trace.emit('read', agent=self.agent, docid=docid, title=document.get('title', ''),
+                        reason=reason, span=f'第{offset}–{end - 1}行', offset=offset,
+                        lines=len(selected), title_only=title_only, tool='read_document')
+        return {'docid': docid, 'url': document.get('url', ''), 'offset': offset,
+                'text': '\n'.join(selected), 'total_lines': len(lines),
+                'next_offset': end if end <= len(lines) else None}
+
+
 async def react_loop(llm: Any, messages: list[dict], tools: Tools,
                      max_tool_calls: int = 30, max_turns: int = 40,
                      shrink: Callable | None = None, raise_on_max_turns: bool = True) -> str:
@@ -103,7 +224,7 @@ async def react_loop(llm: Any, messages: list[dict], tools: Tools,
     for _ in range(max_turns):
         if used >= max_tool_calls:
             break
-        response = await llm.chat(history, tools=basic_tools(tools.k), **options)
+        response = await llm.chat(history, tools=tools.definitions(), **options)
         message = response.choices[0].message
         if message.content and message.content.strip():
             last_text = message.content

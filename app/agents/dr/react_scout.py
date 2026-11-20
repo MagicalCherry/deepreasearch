@@ -6,7 +6,7 @@ import json
 import re
 
 from app.agents import s4_port
-from app.agents.react import Tools, react_loop
+from app.agents.react import Tools, PiTools, react_loop
 from app.llm import LLMError
 
 
@@ -35,6 +35,16 @@ Do not use search rank, bibliography numbers, or peer citations as source IDs.
 End every Findings bullet with its actual source docid(s). Only cite documents YOU observed.
 If the question asks for a cultivar/variety, a general organism/species is not a complete answer.
 Quote the relevant source wording when claiming such a specific answer. Never fill it from memory.
+"""
+
+PI_SCOUT_PROMPT = SCOUT_PROMPT.replace('search/get_document', 'search/read_search_results/read_document') + """
+Tool workflow: use short concrete keyword queries in the original question's language (English for English questions).
+Each call MUST explain its evidence goal in reason. Search returns five excerpts and fifteen more titles.
+Scan those titles; open a promising title directly with read_document, starting at offset=1.
+Use read_search_results to inspect deeper cached ranks before inventing another search query.
+Read subsequent lines using next_offset when the evidence may continue. Rewrite queries only when a new clue
+or clearly irrelevant results justify a different angle. A title alone does not support a factual claim.
+Only text actually returned in an excerpt or read_document may support Findings.
 """
 
 
@@ -79,8 +89,9 @@ async def repair_citations(scout, context, report, lane):
     scout.trace.emit('stage_output', agent=lane, kind='scout_report_before_citation_repair', content=report)
     payload = {'question': tools.state['query'], 'report_to_correct': report, 'errors': issues,
                'observed_sources': list(tools.documents.values()),
-               'read_documents': {docid: scout._react_documents[docid]
-                                  for docid in tools.documents if docid in scout._react_documents}}
+               'read_documents': (tools.read_text if isinstance(tools, PiTools) else
+                                  {docid: scout._react_documents[docid]
+                                   for docid in tools.documents if docid in scout._react_documents})}
     try:
         response = await scout.llm.chat([
             {'role': 'system', 'content': (
@@ -210,6 +221,71 @@ class ScoutTools(Tools):
         return {'error': 'Unknown tool. Use search or get_document.'}
 
 
+class PiScoutTools(PiTools):
+    """三工具适配整题预算、来源登记与已读片段；初始研究和补搜复用同一入口。"""
+
+    def __init__(self, scout, state, lane):
+        super().__init__(scout.search, scout.trace, agent=lane, recover_document_404=True,
+                         document_tokens=scout.opts.get('doc_max_tokens', 8000),
+                         **{k: scout.opts[k] for k in ('search_depth', 'page_chars', 'title_ranks')})
+        self.scout, self.state, self.used = scout, state, 0
+        self.documents, self.read_text = {}, {}
+        # 原始全文只作内部缓存，不直接进入报告或引用纠错模型输入。
+        if not hasattr(scout, '_pi_bodies'):
+            scout._pi_bodies = {}
+        self.bodies = scout._pi_bodies
+
+    def _register(self, result):
+        docid = str(result['docid'])
+        document = {**result, 'source_url': 'corpus://' + docid}
+        self.documents[docid] = document
+        self.scout._available_docs[docid] = document
+        self.scout.sources[document['source_url']] = docid
+        if not any(str(r.get('docid')) == docid for r in self.state['raw_sources']):
+            self.state['raw_sources'].append(deepcopy(document))
+
+    async def call(self, name, args):
+        from .team import clean_query
+        self.used += 1
+        if not self.valid_args(name, args):
+            return {'error': 'Use a supported tool with reason and valid parameters.'}
+        budget, opts = self.scout._budget, self.scout.opts
+        if name == 'search':
+            query = clean_query(args['query'])
+            if not query:
+                return {'error': 'Resolve placeholders and use concrete keyword queries.'}
+            async with budget['lock']:
+                if budget['search_count'] >= opts['max_searches']:
+                    return {'error': 'Question search budget exhausted.'}
+                if query.casefold() in budget['queries'] or self.scout._near_duplicate(query):
+                    return {'error': 'Query already searched or near-duplicate. Read or page existing results.'}
+                budget['queries'].add(query.casefold())
+                budget['originals'].add(query.casefold())
+                budget['search_count'] += 1
+            result = await super().call(name, {**args, 'query': query})
+        elif name == 'read_document':
+            docid = args['docid']
+            if docid not in self.visible:
+                return {'error': 'Use a docid from your visible results or title list.'}
+            lock = self.scout._react_read_locks.setdefault(docid, asyncio.Lock())
+            async with lock:
+                async with budget['lock']:
+                    if docid not in budget['reads'] and len(budget['reads']) >= opts['max_reads']:
+                        return {'error': 'Question unique-document budget exhausted.'}
+                    budget['reads'].add(docid)
+                result = await super().call(name, args)
+            if not result.get('error'):
+                self.read_text.setdefault(docid, []).append(deepcopy(result))
+                self._register({**self.visible[docid], 'read_chunks': deepcopy(self.read_text[docid])})
+            return result
+        else:
+            result = await super().call(name, args)
+        if not result.get('error'):
+            for row in result.get('results', []):
+                self._register(row)
+        return result
+
+
 async def react_section(scout, state, section):
     """每个章节保留独立工具计数，重试不重置预算；成功报告才沉淀为可引用事实。"""
     lane = s4_port.CURRENT_AGENT.get()
@@ -220,7 +296,7 @@ async def react_section(scout, state, section):
             scout.trace.emit('plan', agent=lane, reason='search_budget', items=['整题搜索预算已用尽，跳过新侦探任务。'])
             section['status'] = 'researched'
             return
-        context = {'tools': ScoutTools(scout, state, lane),
+        context = {'tools': scout.scout_tools(state, lane),
                    'budget': min(scout.opts.get('scout_tool_calls', 12), max(2, remaining))}
         scout._react_sections[section['id']] = context
     tools = context['tools']
@@ -232,7 +308,7 @@ async def react_section(scout, state, section):
                'subquestion': {k:section.get(k) for k in ('title','description','search_queries')},
                'previously_observed_results': list(tools.documents.values())}
     try:
-        prompt = SCOUT_PROMPT + (CITATION_RULES if scout.opts.get('scout_citation_repair') else '')
+        prompt = scout.scout_prompt()
         report = await react_loop(scout.llm, [{'role':'system','content':prompt},
             {'role':'user','content':json.dumps(payload,ensure_ascii=False)}], tools,
             max_tool_calls=remaining_tools, max_turns=scout.opts.get('scout_tool_calls',12)+2,
