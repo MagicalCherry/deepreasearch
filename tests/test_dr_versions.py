@@ -72,3 +72,11 @@ def test_v17_adds_constraint_critic_and_preserves_flow_fixes():
     assert previous['flow_fixes'] is True
     assert version.options == {**previous, 'critic': 'constraints'}
     assert get_version('v1.6.1').options == previous
+
+
+def test_v18_adds_react_scout_with_twelve_tool_calls():
+    """v1.8仅替换ReAct侦探和工具调用预算，保留v1.7核查与流程修复。"""
+    previous = deepcopy(get_version('v1.7').options)
+    version = get_version('v1.8')
+    assert version.options == {**previous, 'scout': 'react', 'scout_tool_calls': 12}
+    assert get_version('v1.7').options == previous
