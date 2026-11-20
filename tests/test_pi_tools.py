@@ -116,6 +116,29 @@ def make_scout():
     return scout, create_initial_state('Fictional question', 'pi-test')
 
 
+def test_v21_distinct_english_facts_survive_and_repeated_text_is_deduplicated():
+    scout, state = make_scout()
+    documents = {str(i): {'docid':str(i), 'source_url':f'corpus://{i}'} for i in range(1, 5)}
+    scout._store_loop_facts(state, {'id':'demo'}, [
+        {'content':'Fictional claim', 'docid':'1'},
+        {'content':'Other fictional claim', 'docid':'2'},
+        {'content':'  FICTIONAL   claim  ', 'docid':'3'},
+        {'content':'Fictional claim is not supported', 'docid':'4'},
+    ], documents)
+    assert [fact['docid'] for fact in state['facts']] == ['1','2','4']
+    assert scout._compute_fact_fingerprint('Dose 10 mg') != scout._compute_fact_fingerprint('Dose 20 mg')
+
+
+@pytest.mark.parametrize('version', ['v1.9.1', 'v2.0'])
+def test_older_versions_keep_original_fact_fingerprint(version):
+    from app.agents.dr.flow_fixes import ResilientScout
+    from app.s4.deep_research_v2.agents.scout import DeepScout
+    from app.versions import get_version
+    scout = ResilientScout(None, Trace(), FakeSearch(), {}, get_version(version).options)
+    for text in ('Fictional claim', 'Other fictional claim', '中文事实 123'):
+        assert scout._compute_fact_fingerprint(text) == DeepScout._compute_fact_fingerprint(scout, text)
+
+
 async def test_pi_scout_shared_unique_budget_and_body_cache_preserve_chunk_events():
     import asyncio
     scout, state = make_scout()
@@ -130,7 +153,7 @@ async def test_pi_scout_shared_unique_budget_and_body_cache_preserve_chunk_event
     assert all(e['title_only'] for e in scout.trace.events if e['event'] == 'read')
     assert set(first.documents) == {'1','2','3','4','5','6'}
     assert 'word80' not in str(first.read_text)
-    assert '40' not in str(state['raw_sources'])
+    assert {str(source['docid']) for source in state['raw_sources']} == {'1','2','3','4','5','6'}
     scout.opts['max_reads'] = 1
     assert (await first.call('read_document', {**args, 'docid':'7'})).get('error')
     assert not (await first.call('read_document', {**args, 'offset':2})).get('error')

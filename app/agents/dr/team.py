@@ -123,6 +123,14 @@ class DRScout(s4_port.CorpusScout):
         prompt = PI_SCOUT_PROMPT if self.opts.get('toolset') == 'pi' else SCOUT_PROMPT
         return prompt + (CITATION_RULES if self.opts.get('scout_citation_repair') else '')
 
+    def _compute_fact_fingerprint(self, content):
+        """新版按完整事实文本去重，避免无数字英文全部变成同一指纹；旧版沿用原实现。"""
+        if self.opts.get('fact_dedup') != 'full_text':
+            return super()._compute_fact_fingerprint(content)
+        import hashlib
+        normalized = ' '.join(content.casefold().split())
+        return hashlib.sha256(normalized.encode('utf-8')).hexdigest()
+
     def _store_loop_facts(self, state, section, facts, documents):
         """只允许本章节真实搜索返回的文档作为来源，全文事实仍由read_docs校验原文。"""
         if not isinstance(facts, list):

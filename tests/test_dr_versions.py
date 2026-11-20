@@ -111,6 +111,9 @@ def test_v20_adds_only_passage_snippet_to_v19():
 def test_v21_keeps_citation_repair_and_adds_pi_tools_with_passage_snippets():
     previous = deepcopy(get_version('v1.9.1').options)
     assert get_version('v2.1').options == {**previous, 'snippet': 'passage',
-        'toolset': 'pi', 'search_depth': 200, 'page_chars': 1200, 'title_ranks': 15}
+        'toolset': 'pi', 'search_depth': 200, 'page_chars': 1200, 'title_ranks': 15,
+        'fact_dedup': 'full_text'}
     assert get_version('v1.9.1').options == previous
     assert 'toolset' not in get_version('v2.0').options
+    assert 'fact_dedup' not in get_version('v2.0').options
+    assert 'fact_dedup' not in get_version('v1.9.1').options

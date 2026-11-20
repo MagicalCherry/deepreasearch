@@ -130,4 +130,4 @@ dr_version('v2.0', '查询相关片段实验', '以v1.9为基线，仅把开头�
 
 dr_version('v2.1', '搜翻读三工具', '保留v1.9.1引用纠错与查询相关片段，深排缓存200条，按排名翻页、按行读文。',
            base='v1.9.1', snippet='passage', toolset='pi', search_depth=200,
-           page_chars=1200, title_ranks=15)
+           page_chars=1200, title_ranks=15, fact_dedup='full_text')
