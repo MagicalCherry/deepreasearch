@@ -105,6 +105,11 @@ export function EventCard({ e, queryId }: { e: Ev; queryId?: string }) {
         <div style={{ whiteSpace: 'pre-wrap', marginTop: 12 }}>{e.content || '本次写作未生成报告正文。'}</div>
         {Object.entries(e.sections ?? {}).map(([id, content]) => <details key={id}><summary>章节草稿：{id}</summary><div style={{ whiteSpace: 'pre-wrap' }}>{String(content)}</div></details>)}
       </div>}
+      {e.event === 'stage_output' && e.kind === 'scout_report' && <div className="lane-ev__body">
+        <b>侦探发现报告 · 工具调用 {e.tool_calls ?? 0} 次</b>
+        <div className="eval-muted">候选为待核实假设；只有通过来源检查的发现才进入事实库。</div>
+        <div style={{ whiteSpace: 'pre-wrap', marginTop: 12 }}>{e.content || '未生成可用的发现报告。'}</div>
+      </div>}
       {e.event === 'stage_output' && e.kind === 'stage_error' && <div className="lane-ev__body">
         <b>{e.will_retry ? '当前阶段失败，保留资料后重试' : '当前阶段失败，停止本次研究'}</b>
         <div>{e.message || '当前阶段执行失败'}（{e.error_type}，第 {e.attempt} 次尝试）</div>

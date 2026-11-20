@@ -68,11 +68,21 @@ def offline_clients(monkeypatch):
             await asyncio.sleep(0)
             self.trace.prompt_tokens += 10
             self.trace.completion_tokens += 5
+            is_scout = any('You are a research scout in a team.' in m.get('content', '')
+                           for m in messages if m['role'] == 'system')
             if tools and not any(m["role"] == "tool" for m in messages):
+                query = ('fictional evidence ' + json.loads(messages[1]['content'])['subquestion']['title']) if is_scout else 'demo'
                 call = SimpleNamespace(id="fake-call", function=SimpleNamespace(
-                    name="search", arguments=json.dumps({"query": "demo"}),
+                    name="search", arguments=json.dumps({"query": query}),
                 ))
                 return response(None, [call])
+            if is_scout:
+                previous = [m for m in messages if m['role'] == 'tool']
+                if tools and previous and isinstance(json.loads(previous[-1]['content']), list):
+                    call = SimpleNamespace(id='fake-read', function=SimpleNamespace(
+                        name='get_document', arguments=json.dumps({'docid':'1'})))
+                    return response(None, [call])
+                return response('Findings:\n- Fictional evidence [1]\nCandidates:\n- Demo')
             return response(json.dumps(universal_json()) if json_mode else ANSWER)
 
         async def close(self):
@@ -141,6 +151,12 @@ async def test_every_registered_version_completes(version, offline_clients):
     if version == 'v1.7':
         verification = [e for e in trace.events if e['event'] == 'verify'][-1]
         assert (verification['verified'], verification['total']) == (1, 1)
+    if version == 'v1.8':
+        assert any(e['event']=='stage_output' and e.get('kind')=='scout_report' for e in trace.events)
+        assert any(e['event']=='fact' and e['docid']=='1' for e in trace.events)
+        assert 1 <= trace.n_read <= 8
+        assert trace.n_search <= 50
+        assert all(e['agent'].startswith('scout') for e in trace.events if e['event'] in {'read','search'})
 
 
 async def test_v17_pipeline_caps_confidence_with_unverified_evidence(monkeypatch, offline_clients):

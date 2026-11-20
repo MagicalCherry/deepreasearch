@@ -115,3 +115,6 @@ dr_version('v1.6.1', '循环侦探流程修复', '保留状态重试，停止无
 
 dr_version('v1.7', '约束核对与置信度封顶', '逐条核对约束与来源，优先补搜替代候选，按验证比例限制置信度。',
            critic='constraints')
+
+dr_version('v1.8', 'ReAct侦探', '每个子问题用搜索和正文工具交替取证，最多12次工具调用，发现报告交给Writer。',
+           scout='react', scout_tool_calls=12)

@@ -85,7 +85,10 @@ class ResilientScout(DRScout):
 
     async def investigate(self, state, section):
         try:
-            await self.loop_section(state, section)
+            if self.opts.get('scout') == 'react':
+                await self.react_section(state, section)
+            else:
+                await self.loop_section(state, section)
         except BaseException:
             # 父类只调度pending章节；取消的并行章节也需要在有限重试时续上。
             section['status'] = 'pending'
@@ -240,8 +243,12 @@ class ResilientScout(DRScout):
     async def _supplementary_research(self, state):
         queries = state.get('pending_search_queries', [])
         if isinstance(queries, list) and queries:
-            await self.loop_section(state, {'id': f"supplementary_{state['iteration']}",
-                'title': '补充核查', 'description': '核查审核发现的证据缺口', 'search_queries': queries[:3]})
+            section = {'id': f"supplementary_{state['iteration']}",
+                'title': '补充核查', 'description': '核查审核发现的证据缺口', 'search_queries': queries[:3]}
+            if self.opts.get('scout') == 'react':
+                await self.react_section(state, section)
+            else:
+                await self.loop_section(state, section)
         state['pending_search_queries'] = []
         state['phase'] = ResearchPhase.WRITING.value
         return state

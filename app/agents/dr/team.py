@@ -86,6 +86,7 @@ class DRScout(s4_port.CorpusScout):
         self._constraints = []
         self._question = ''
         self._available_docs = {}
+        self._react_sections, self._react_documents, self._react_read_locks = {}, {}, {}
         # 状态挂在整题Trace上，章节并发、补搜及整题重试不会重置预算。
         if self.opts.get('max_searches') is not None:
             if not hasattr(trace, '_dr_budget'):
@@ -100,9 +101,15 @@ class DRScout(s4_port.CorpusScout):
 
     async def investigate(self, state, section):
         """仅v1.6启用逐轮搜索与重新规划；旧版本调用原章节研究流程。"""
+        if self.opts.get('scout') == 'react':
+            return await self.react_section(state, section)
         if self.opts.get('scout') != 'loop':
             return await super().investigate(state, section)
         await self.loop_section(state, section)
+
+    async def react_section(self, state, section):
+        from .react_scout import react_section
+        return await react_section(self, state, section)
 
     def _store_loop_facts(self, state, section, facts, documents):
         """只允许本章节真实搜索返回的文档作为来源，全文事实仍由read_docs校验原文。"""
@@ -424,12 +431,16 @@ class DRWriter(s4_port.CorpusWriter):
             section['status'] = 'drafted'
             return
         from .prompts import MEMO_WRITING
-        response = await self.call_llm(
-            system_prompt='Write factual answer memos from supplied evidence only. Return JSON.',
-            user_prompt=MEMO_WRITING + '\n' + json.dumps({
+        payload = {
                 'question': state['query'], 'constraints': state.get('_constraints', []),
                 'facts': state['facts'], 'data_points': state['data_points'],
-                'feedback': state['critic_feedback']}, ensure_ascii=False),
+                'feedback': state['critic_feedback']}
+        if self.opts.get('scout') == 'react':
+            payload['scout_reports'] = state.get('_scout_reports', {})
+            payload['report_usage_rule'] = 'Scout reports are exploratory notes, not independent evidence. Use only source-validated facts for factual claims; candidates remain hypotheses.'
+        response = await self.call_llm(
+            system_prompt='Write factual answer memos from supplied evidence only. Return JSON.',
+            user_prompt=MEMO_WRITING + '\n' + json.dumps(payload, ensure_ascii=False),
             json_mode=True, temperature=0.3, max_tokens=16000)
         result = self.parse_json_response(response)
         if not isinstance(result, dict) or not isinstance(result.get('content'), str) or not result['content'].strip():

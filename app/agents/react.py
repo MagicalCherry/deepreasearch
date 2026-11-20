@@ -1,6 +1,7 @@
 """定义官方搜索工具接口，执行搜索/阅读并记录事件，按工具预算运行ReAct循环。"""
 
 import json
+from collections.abc import Callable
 from typing import Any
 
 import tiktoken
@@ -33,13 +34,14 @@ class Tools:
 
     def __init__(self, search: Any, trace: Trace, k: int = 5,
                  snippet_tokens: int = 512, document_tokens: int = 8000,
-                 recover_document_404: bool = False) -> None:
+                 recover_document_404: bool = False, agent: str = 'agent') -> None:
         self.search = search
         self.trace = trace
         self.k = k
         self.snippet_tokens = snippet_tokens
         self.document_tokens = document_tokens
         self.recover_document_404 = recover_document_404
+        self.agent = agent
 
     @staticmethod
     def truncate(text: str, limit: int) -> str:
@@ -61,7 +63,7 @@ class Tools:
                  "snippet": self.truncate(item.get("snippet", ""), self.snippet_tokens)}
                 for item in candidates[:self.k]
             ]
-            self.trace.emit("search", query=query, k=self.k, results=[
+            self.trace.emit("search", agent=self.agent, query=query, k=self.k, results=[
                 {key: item[key] for key in ("docid", "title", "score")} for item in results
             ])
             return results
@@ -82,27 +84,34 @@ class Tools:
                             "Search again if necessary."
                         )}
             text = self.truncate(document["text"], self.document_tokens)
-            self.trace.emit("read", docid=str(document["docid"]),
+            self.trace.emit("read", agent=self.agent, docid=str(document["docid"]),
                             title=document.get("title", ""), span=f"前{self.document_tokens} token以内")
             return {"docid": str(document["docid"]), "url": document.get("url", ""), "text": text}
         raise ValueError(f"未知工具：{name}")
 
 
 async def react_loop(llm: Any, messages: list[dict], tools: Tools,
-                     max_tool_calls: int = 30, max_turns: int = 40) -> str:
+                     max_tool_calls: int = 30, max_turns: int = 40,
+                     shrink: Callable | None = None, raise_on_max_turns: bool = True) -> str:
     """循环追加工具结果，预算或轮次用尽后再进行一次不带工具的收尾调用。"""
     if max_tool_calls < 0 or max_turns < 1:
         raise ValueError("工具预算不能为负，轮次必须大于0")
     history = list(messages)
     used = 0
+    last_text = ''
+    options = {'truncate': shrink} if shrink is not None else {}
     for _ in range(max_turns):
         if used >= max_tool_calls:
             break
-        response = await llm.chat(history, tools=basic_tools(tools.k))
+        response = await llm.chat(history, tools=basic_tools(tools.k), **options)
         message = response.choices[0].message
+        if message.content and message.content.strip():
+            last_text = message.content
         calls = message.tool_calls or []
         if not calls:
             if not message.content or not message.content.strip():
+                if not raise_on_max_turns:
+                    return last_text
                 raise ValueError("模型未调用工具且返回空答案")
             return message.content
         history.append({
@@ -124,12 +133,20 @@ async def react_loop(llm: Any, messages: list[dict], tools: Tools,
             history.append({"role": "tool", "tool_call_id": call.id,
                             "content": json.dumps(result, ensure_ascii=False)})
 
-    tools.trace.stop_reason = "tool_budget" if used >= max_tool_calls else "max_turns"
+    reason = "tool_budget" if used >= max_tool_calls else "max_turns"
+    if not raise_on_max_turns:
+        tools.trace.emit('plan', agent=tools.agent, reason=reason,
+                         items=['侦探达到工具或轮次上限，按已有证据整理发现报告。'])
+        history.append({'role': 'user', 'content': 'No more tools. Finish the requested Findings / Candidates report using only collected evidence. Do not invent missing facts.'})
+        response = await llm.chat(history, **options)
+        message = response.choices[0].message
+        return message.content if not message.tool_calls and message.content and message.content.strip() else last_text
+    tools.trace.stop_reason = reason
     history.append({"role": "user", "content": (
         "Do not call any more tools. Give your best answer using the information collected. "
         "Use Explanation:, Exact Answer:, and Confidence: (0-100%) fields."
     )})
-    response = await llm.chat(history)
+    response = await llm.chat(history, **options)
     message = response.choices[0].message
     if message.tool_calls or not message.content or not message.content.strip():
         raise ValueError("收回工具后模型未返回有效答案")
