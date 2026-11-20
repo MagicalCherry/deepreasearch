@@ -1,0 +1,224 @@
+{
+  "_purpose": "S17冒烟原始汇总、离线同题对照与工具计数；不改写原运行，不调用模型。",
+  "summary": {
+    "n": 20,
+    "correct": 17,
+    "accuracy": 85.0,
+    "recall": 71.08,
+    "calibration_error": 35.47,
+    "calib_beta": 5,
+    "avg_confidence": 60.0,
+    "runner_errors": 0,
+    "avg_search": 24.05,
+    "avg_read": 7.15,
+    "avg_prompt_tokens": 599044,
+    "avg_completion_tokens": 18922,
+    "avg_seconds": 179.13,
+    "confidence_source": "response_field_when_valid_else_original_judge",
+    "run": "s17-v21-qwen37-smoke20",
+    "version": "v2.1",
+    "dataset": "smoke20",
+    "judge_model": "qwen/qwen3.7-flash"
+  },
+  "comparisons": {
+    "s15-v19-qwen37-smoke20": {
+      "improved": [
+        "132",
+        "422",
+        "486",
+        "1025"
+      ],
+      "regressed": []
+    },
+    "s16-v20-qwen37-smoke20": {
+      "improved": [
+        "422",
+        "486",
+        "1025"
+      ],
+      "regressed": []
+    }
+  },
+  "tool_stats": {
+    "n": 20,
+    "totals": {
+      "search_calls": 481,
+      "page_calls": 24,
+      "read_calls": 143,
+      "unique_read_documents": 82,
+      "title_only_read_documents": 18
+    },
+    "per_question": {
+      "search_calls": 24.05,
+      "page_calls": 1.2,
+      "read_calls": 7.15,
+      "unique_read_documents": 4.1,
+      "title_only_read_documents": 0.9
+    },
+    "questions_with_paging": 14,
+    "note": "read_calls是分块工具调用；unique_read_documents去重。标题直读按该Scout首次读前未展示片段判断，再按题去重。",
+    "items": [
+      {
+        "query_id": "331",
+        "search_calls": 11,
+        "page_calls": 0,
+        "read_calls": 7,
+        "unique_read_documents": 4,
+        "title_only_read_documents": 0
+      },
+      {
+        "query_id": "473",
+        "search_calls": 27,
+        "page_calls": 2,
+        "read_calls": 6,
+        "unique_read_documents": 5,
+        "title_only_read_documents": 1
+      },
+      {
+        "query_id": "132",
+        "search_calls": 27,
+        "page_calls": 0,
+        "read_calls": 12,
+        "unique_read_documents": 5,
+        "title_only_read_documents": 2
+      },
+      {
+        "query_id": "710",
+        "search_calls": 16,
+        "page_calls": 0,
+        "read_calls": 3,
+        "unique_read_documents": 2,
+        "title_only_read_documents": 0
+      },
+      {
+        "query_id": "226",
+        "search_calls": 30,
+        "page_calls": 2,
+        "read_calls": 12,
+        "unique_read_documents": 8,
+        "title_only_read_documents": 2
+      },
+      {
+        "query_id": "1025",
+        "search_calls": 28,
+        "page_calls": 1,
+        "read_calls": 6,
+        "unique_read_documents": 2,
+        "title_only_read_documents": 0
+      },
+      {
+        "query_id": "93",
+        "search_calls": 29,
+        "page_calls": 2,
+        "read_calls": 9,
+        "unique_read_documents": 4,
+        "title_only_read_documents": 1
+      },
+      {
+        "query_id": "972",
+        "search_calls": 15,
+        "page_calls": 1,
+        "read_calls": 14,
+        "unique_read_documents": 7,
+        "title_only_read_documents": 1
+      },
+      {
+        "query_id": "422",
+        "search_calls": 35,
+        "page_calls": 4,
+        "read_calls": 10,
+        "unique_read_documents": 7,
+        "title_only_read_documents": 3
+      },
+      {
+        "query_id": "486",
+        "search_calls": 42,
+        "page_calls": 3,
+        "read_calls": 2,
+        "unique_read_documents": 2,
+        "title_only_read_documents": 0
+      },
+      {
+        "query_id": "1248",
+        "search_calls": 17,
+        "page_calls": 1,
+        "read_calls": 3,
+        "unique_read_documents": 2,
+        "title_only_read_documents": 0
+      },
+      {
+        "query_id": "934",
+        "search_calls": 20,
+        "page_calls": 1,
+        "read_calls": 5,
+        "unique_read_documents": 4,
+        "title_only_read_documents": 2
+      },
+      {
+        "query_id": "253",
+        "search_calls": 19,
+        "page_calls": 0,
+        "read_calls": 7,
+        "unique_read_documents": 7,
+        "title_only_read_documents": 2
+      },
+      {
+        "query_id": "1020",
+        "search_calls": 22,
+        "page_calls": 1,
+        "read_calls": 6,
+        "unique_read_documents": 3,
+        "title_only_read_documents": 0
+      },
+      {
+        "query_id": "906",
+        "search_calls": 11,
+        "page_calls": 1,
+        "read_calls": 7,
+        "unique_read_documents": 4,
+        "title_only_read_documents": 2
+      },
+      {
+        "query_id": "297",
+        "search_calls": 24,
+        "page_calls": 0,
+        "read_calls": 3,
+        "unique_read_documents": 1,
+        "title_only_read_documents": 0
+      },
+      {
+        "query_id": "254",
+        "search_calls": 17,
+        "page_calls": 0,
+        "read_calls": 6,
+        "unique_read_documents": 3,
+        "title_only_read_documents": 0
+      },
+      {
+        "query_id": "1022",
+        "search_calls": 39,
+        "page_calls": 1,
+        "read_calls": 8,
+        "unique_read_documents": 2,
+        "title_only_read_documents": 1
+      },
+      {
+        "query_id": "1047",
+        "search_calls": 26,
+        "page_calls": 2,
+        "read_calls": 11,
+        "unique_read_documents": 6,
+        "title_only_read_documents": 1
+      },
+      {
+        "query_id": "760",
+        "search_calls": 26,
+        "page_calls": 2,
+        "read_calls": 6,
+        "unique_read_documents": 4,
+        "title_only_read_documents": 0
+      }
+    ]
+  },
+  "git_sha": "34f7eedb3151c119913b580f6235fb7e99f2af28"
+}
