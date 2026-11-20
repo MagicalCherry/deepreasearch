@@ -68,5 +68,21 @@
     "host_free_GiB_at_observation": 1.3,
     "docker_available_GiB": 7.653,
     "note": "离散资源采样，非构建峰值；未改系统配置或停止其他服务。"
-  }
+  },
+  "passage_index_success_after_resource_release": {
+    "name": "psg",
+    "k1": 0.9,
+    "b": 0.4,
+    "unit": "passage",
+    "status": "ready",
+    "started_at": 1795155496.6238477,
+    "win": 256,
+    "stride": 192,
+    "n_units": 2722165,
+    "vocab": 3488108,
+    "nnz": 330820303,
+    "seconds": 843
+  },
+  "replay_output": "100 题，平均每题 23.9 条搜索词\n     default  recall@5  27.5%（零召回 49 题）  recall@20  36.9%（零召回 28 题）  recall@100  48.5%（零召回 14 题）\n       k25b1  recall@5  43.2%（零召回 21 题）  recall@20  56.8%（零召回 9 题）  recall@100  68.6%（零召回 4 题）\n         psg  recall@5  40.8%（零召回 26 题）  recall@20  50.4%（零召回 13 题）  recall@100  63.9%（零召回 6 题）",
+  "source_note": "学员手动执行并粘贴原始索引ready状态及回放；第一次内存失败记录保留。"
 }
