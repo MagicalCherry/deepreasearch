@@ -1,0 +1,3862 @@
+{
+  "_purpose": "v1.7阶段交接离线诊断，只输出证据命中数量，不输出标准答案或金标编号。",
+  "run": "s13-v17-qwen37-dev100-reuse20",
+  "source_sha256": {
+    "results.jsonl": "36375e50574996314acafd7e73201460e9afbdc44656214b9e4bb918be90ac8c",
+    "judged.jsonl": "b7ba167e5e1647106d619f0772ad0df0ad7afbef03fdca608e6f435bd5c3a9a3",
+    "summary.json": "6ed3532f90575c6629e38a5bb2e78a128f56949a39bdb23d35d3ee5406f9ac8e",
+    "config.json": "39ca0c00de416c9c79f404810442f7464831bcba67a55b27b926ac086cd8b635"
+  },
+  "all": {
+    "n": 100,
+    "no_facts": 36,
+    "no_read": 42,
+    "zero_evidence_retrieved": 48,
+    "retrieved_evidence_but_read_none": 24,
+    "has_evidence_fact_source": 30,
+    "all_evidence_retrieved": 11,
+    "no_verified_constraints": 89,
+    "generic_normalized_checks": 156,
+    "total_checks": 727,
+    "all_checks_generic": 1,
+    "questions_with_invalid_seed": 58,
+    "chinese_searches": 0,
+    "unreviewed_final_report": 0,
+    "planner_restarts": 0,
+    "stop_reasons": {
+      "no_new_evidence": 64,
+      "search_budget": 29,
+      "review_budget": 6,
+      "completed": 1
+    }
+  },
+  "wrong": {
+    "n": 86,
+    "no_facts": 36,
+    "no_read": 42,
+    "zero_evidence_retrieved": 48,
+    "retrieved_evidence_but_read_none": 24,
+    "has_evidence_fact_source": 16,
+    "all_evidence_retrieved": 1,
+    "no_verified_constraints": 77,
+    "generic_normalized_checks": 93,
+    "total_checks": 627,
+    "all_checks_generic": 0,
+    "questions_with_invalid_seed": 53,
+    "chinese_searches": 0,
+    "unreviewed_final_report": 0,
+    "planner_restarts": 0,
+    "stop_reasons": {
+      "no_new_evidence": 58,
+      "search_budget": 23,
+      "review_budget": 5
+    }
+  },
+  "correct": {
+    "n": 14,
+    "no_facts": 0,
+    "no_read": 0,
+    "zero_evidence_retrieved": 0,
+    "retrieved_evidence_but_read_none": 0,
+    "has_evidence_fact_source": 14,
+    "all_evidence_retrieved": 10,
+    "no_verified_constraints": 12,
+    "generic_normalized_checks": 63,
+    "total_checks": 100,
+    "all_checks_generic": 1,
+    "questions_with_invalid_seed": 5,
+    "chinese_searches": 0,
+    "unreviewed_final_report": 0,
+    "planner_restarts": 0,
+    "stop_reasons": {
+      "review_budget": 1,
+      "completed": 1,
+      "search_budget": 6,
+      "no_new_evidence": 6
+    }
+  },
+  "cases": [
+    {
+      "query_id": "226",
+      "correct": false,
+      "constraints": 9,
+      "seed_queries": 6,
+      "invalid_seed_queries": 2,
+      "searches": 19,
+      "chinese_searches": 0,
+      "reads": 0,
+      "facts": 0,
+      "evidence_total": 7,
+      "evidence_retrieved": 0,
+      "evidence_read": 0,
+      "evidence_fact_sources": 0,
+      "all_evidence_retrieved": false,
+      "writer_candidates": [
+        "Unknown"
+      ],
+      "report_count": 1,
+      "review_count": 1,
+      "last_report_reviewed": true,
+      "checks": 9,
+      "verified": 0,
+      "normalized_generic_checks": 0,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 3,
+          "read": 0,
+          "fact": 0
+        }
+      ],
+      "stop_reason": "no_new_evidence",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "1025",
+      "correct": false,
+      "constraints": 7,
+      "seed_queries": 6,
+      "invalid_seed_queries": 2,
+      "searches": 15,
+      "chinese_searches": 0,
+      "reads": 0,
+      "facts": 0,
+      "evidence_total": 7,
+      "evidence_retrieved": 0,
+      "evidence_read": 0,
+      "evidence_fact_sources": 0,
+      "all_evidence_retrieved": false,
+      "writer_candidates": [
+        "Unknown"
+      ],
+      "report_count": 1,
+      "review_count": 1,
+      "last_report_reviewed": true,
+      "checks": 7,
+      "verified": 0,
+      "normalized_generic_checks": 0,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 5,
+          "read": 0,
+          "fact": 0
+        }
+      ],
+      "stop_reason": "no_new_evidence",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "486",
+      "correct": false,
+      "constraints": 7,
+      "seed_queries": 6,
+      "invalid_seed_queries": 0,
+      "searches": 50,
+      "chinese_searches": 0,
+      "reads": 5,
+      "facts": 4,
+      "evidence_total": 11,
+      "evidence_retrieved": 0,
+      "evidence_read": 0,
+      "evidence_fact_sources": 0,
+      "all_evidence_retrieved": false,
+      "writer_candidates": [
+        "Unknown"
+      ],
+      "report_count": 1,
+      "review_count": 1,
+      "last_report_reviewed": true,
+      "checks": 7,
+      "verified": 0,
+      "normalized_generic_checks": 1,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 0,
+          "read": 0,
+          "fact": 0
+        }
+      ],
+      "stop_reason": "search_budget",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "473",
+      "correct": false,
+      "constraints": 5,
+      "seed_queries": 6,
+      "invalid_seed_queries": 1,
+      "searches": 28,
+      "chinese_searches": 0,
+      "reads": 1,
+      "facts": 2,
+      "evidence_total": 2,
+      "evidence_retrieved": 0,
+      "evidence_read": 0,
+      "evidence_fact_sources": 0,
+      "all_evidence_retrieved": false,
+      "writer_candidates": [
+        "Unknown"
+      ],
+      "report_count": 1,
+      "review_count": 1,
+      "last_report_reviewed": true,
+      "checks": 5,
+      "verified": 0,
+      "normalized_generic_checks": 1,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 5,
+          "read": 0,
+          "fact": 0
+        }
+      ],
+      "stop_reason": "no_new_evidence",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "331",
+      "correct": false,
+      "constraints": 5,
+      "seed_queries": 6,
+      "invalid_seed_queries": 2,
+      "searches": 40,
+      "chinese_searches": 0,
+      "reads": 2,
+      "facts": 18,
+      "evidence_total": 5,
+      "evidence_retrieved": 3,
+      "evidence_read": 2,
+      "evidence_fact_sources": 2,
+      "all_evidence_retrieved": false,
+      "writer_candidates": [
+        "Unknown",
+        "Unknown"
+      ],
+      "report_count": 2,
+      "review_count": 2,
+      "last_report_reviewed": true,
+      "checks": 5,
+      "verified": 0,
+      "normalized_generic_checks": 4,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 2,
+          "read": 0,
+          "fact": 2
+        },
+        {
+          "search": 0,
+          "read": 0,
+          "fact": 0
+        }
+      ],
+      "stop_reason": "no_new_evidence",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "253",
+      "correct": false,
+      "constraints": 8,
+      "seed_queries": 6,
+      "invalid_seed_queries": 1,
+      "searches": 21,
+      "chinese_searches": 0,
+      "reads": 0,
+      "facts": 0,
+      "evidence_total": 8,
+      "evidence_retrieved": 0,
+      "evidence_read": 0,
+      "evidence_fact_sources": 0,
+      "all_evidence_retrieved": false,
+      "writer_candidates": [
+        "Unknown"
+      ],
+      "report_count": 1,
+      "review_count": 1,
+      "last_report_reviewed": true,
+      "checks": 8,
+      "verified": 0,
+      "normalized_generic_checks": 0,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 3,
+          "read": 0,
+          "fact": 0
+        }
+      ],
+      "stop_reason": "no_new_evidence",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "710",
+      "correct": false,
+      "constraints": 9,
+      "seed_queries": 6,
+      "invalid_seed_queries": 0,
+      "searches": 26,
+      "chinese_searches": 0,
+      "reads": 0,
+      "facts": 0,
+      "evidence_total": 4,
+      "evidence_retrieved": 0,
+      "evidence_read": 0,
+      "evidence_fact_sources": 0,
+      "all_evidence_retrieved": false,
+      "writer_candidates": [
+        "Unknown"
+      ],
+      "report_count": 1,
+      "review_count": 1,
+      "last_report_reviewed": true,
+      "checks": 9,
+      "verified": 0,
+      "normalized_generic_checks": 0,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 0,
+          "read": 0,
+          "fact": 0
+        }
+      ],
+      "stop_reason": "no_new_evidence",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "1248",
+      "correct": false,
+      "constraints": 8,
+      "seed_queries": 6,
+      "invalid_seed_queries": 1,
+      "searches": 50,
+      "chinese_searches": 0,
+      "reads": 2,
+      "facts": 24,
+      "evidence_total": 10,
+      "evidence_retrieved": 8,
+      "evidence_read": 2,
+      "evidence_fact_sources": 4,
+      "all_evidence_retrieved": false,
+      "writer_candidates": [
+        "Unknown"
+      ],
+      "report_count": 1,
+      "review_count": 1,
+      "last_report_reviewed": true,
+      "checks": 8,
+      "verified": 0,
+      "normalized_generic_checks": 4,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 0,
+          "read": 0,
+          "fact": 0
+        }
+      ],
+      "stop_reason": "search_budget",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "93",
+      "correct": true,
+      "constraints": 10,
+      "seed_queries": 6,
+      "invalid_seed_queries": 0,
+      "searches": 37,
+      "chinese_searches": 0,
+      "reads": 3,
+      "facts": 17,
+      "evidence_total": 4,
+      "evidence_retrieved": 4,
+      "evidence_read": 3,
+      "evidence_fact_sources": 3,
+      "all_evidence_retrieved": true,
+      "writer_candidates": [
+        "Unknown",
+        "AdenoPlus",
+        "Unknown"
+      ],
+      "report_count": 3,
+      "review_count": 3,
+      "last_report_reviewed": true,
+      "checks": 10,
+      "verified": 0,
+      "normalized_generic_checks": 8,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 7,
+          "read": 1,
+          "fact": 5
+        },
+        {
+          "search": 3,
+          "read": 0,
+          "fact": 1
+        }
+      ],
+      "stop_reason": "review_budget",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "132",
+      "correct": false,
+      "constraints": 6,
+      "seed_queries": 6,
+      "invalid_seed_queries": 2,
+      "searches": 48,
+      "chinese_searches": 0,
+      "reads": 2,
+      "facts": 7,
+      "evidence_total": 6,
+      "evidence_retrieved": 0,
+      "evidence_read": 0,
+      "evidence_fact_sources": 0,
+      "all_evidence_retrieved": false,
+      "writer_candidates": [
+        "Unknown"
+      ],
+      "report_count": 1,
+      "review_count": 1,
+      "last_report_reviewed": true,
+      "checks": 6,
+      "verified": 1,
+      "normalized_generic_checks": 0,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 20,
+          "read": 0,
+          "fact": 0
+        }
+      ],
+      "stop_reason": "no_new_evidence",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "297",
+      "correct": false,
+      "constraints": 7,
+      "seed_queries": 6,
+      "invalid_seed_queries": 0,
+      "searches": 50,
+      "chinese_searches": 0,
+      "reads": 1,
+      "facts": 8,
+      "evidence_total": 8,
+      "evidence_retrieved": 0,
+      "evidence_read": 0,
+      "evidence_fact_sources": 0,
+      "all_evidence_retrieved": false,
+      "writer_candidates": [
+        "Unknown"
+      ],
+      "report_count": 1,
+      "review_count": 1,
+      "last_report_reviewed": true,
+      "checks": 7,
+      "verified": 0,
+      "normalized_generic_checks": 2,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 0,
+          "read": 0,
+          "fact": 0
+        }
+      ],
+      "stop_reason": "search_budget",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "760",
+      "correct": false,
+      "constraints": 8,
+      "seed_queries": 6,
+      "invalid_seed_queries": 3,
+      "searches": 20,
+      "chinese_searches": 0,
+      "reads": 0,
+      "facts": 0,
+      "evidence_total": 7,
+      "evidence_retrieved": 1,
+      "evidence_read": 0,
+      "evidence_fact_sources": 0,
+      "all_evidence_retrieved": false,
+      "writer_candidates": [
+        "Unknown"
+      ],
+      "report_count": 1,
+      "review_count": 1,
+      "last_report_reviewed": true,
+      "checks": 8,
+      "verified": 0,
+      "normalized_generic_checks": 0,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 5,
+          "read": 0,
+          "fact": 0
+        }
+      ],
+      "stop_reason": "no_new_evidence",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "934",
+      "correct": false,
+      "constraints": 6,
+      "seed_queries": 6,
+      "invalid_seed_queries": 0,
+      "searches": 50,
+      "chinese_searches": 0,
+      "reads": 3,
+      "facts": 15,
+      "evidence_total": 7,
+      "evidence_retrieved": 0,
+      "evidence_read": 0,
+      "evidence_fact_sources": 0,
+      "all_evidence_retrieved": false,
+      "writer_candidates": [
+        "Unknown",
+        "\"Maude's Lover\""
+      ],
+      "report_count": 2,
+      "review_count": 2,
+      "last_report_reviewed": true,
+      "checks": 6,
+      "verified": 0,
+      "normalized_generic_checks": 5,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 10,
+          "read": 0,
+          "fact": 1
+        },
+        {
+          "search": 0,
+          "read": 0,
+          "fact": 0
+        }
+      ],
+      "stop_reason": "search_budget",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "1020",
+      "correct": true,
+      "constraints": 5,
+      "seed_queries": 6,
+      "invalid_seed_queries": 4,
+      "searches": 27,
+      "chinese_searches": 0,
+      "reads": 3,
+      "facts": 18,
+      "evidence_total": 3,
+      "evidence_retrieved": 3,
+      "evidence_read": 3,
+      "evidence_fact_sources": 3,
+      "all_evidence_retrieved": true,
+      "writer_candidates": [
+        "Lactose intolerance",
+        "Lactose intolerance"
+      ],
+      "report_count": 2,
+      "review_count": 2,
+      "last_report_reviewed": true,
+      "checks": 5,
+      "verified": 5,
+      "normalized_generic_checks": 0,
+      "review_has_substantive_note": true,
+      "supplements": [],
+      "stop_reason": "completed",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "1022",
+      "correct": false,
+      "constraints": 12,
+      "seed_queries": 6,
+      "invalid_seed_queries": 0,
+      "searches": 41,
+      "chinese_searches": 0,
+      "reads": 0,
+      "facts": 2,
+      "evidence_total": 7,
+      "evidence_retrieved": 0,
+      "evidence_read": 0,
+      "evidence_fact_sources": 0,
+      "all_evidence_retrieved": false,
+      "writer_candidates": [
+        "Unknown",
+        "Unknown"
+      ],
+      "report_count": 2,
+      "review_count": 2,
+      "last_report_reviewed": true,
+      "checks": 12,
+      "verified": 0,
+      "normalized_generic_checks": 0,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 7,
+          "read": 0,
+          "fact": 1
+        },
+        {
+          "search": 1,
+          "read": 0,
+          "fact": 0
+        }
+      ],
+      "stop_reason": "no_new_evidence",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "972",
+      "correct": true,
+      "constraints": 8,
+      "seed_queries": 6,
+      "invalid_seed_queries": 1,
+      "searches": 50,
+      "chinese_searches": 0,
+      "reads": 3,
+      "facts": 22,
+      "evidence_total": 8,
+      "evidence_retrieved": 8,
+      "evidence_read": 3,
+      "evidence_fact_sources": 3,
+      "all_evidence_retrieved": true,
+      "writer_candidates": [
+        "Unknown",
+        "Sister Wives",
+        "Sister Wives"
+      ],
+      "report_count": 3,
+      "review_count": 3,
+      "last_report_reviewed": true,
+      "checks": 8,
+      "verified": 0,
+      "normalized_generic_checks": 6,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 9,
+          "read": 0,
+          "fact": 2
+        },
+        {
+          "search": 3,
+          "read": 1,
+          "fact": 3
+        }
+      ],
+      "stop_reason": "search_budget",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "422",
+      "correct": false,
+      "constraints": 8,
+      "seed_queries": 6,
+      "invalid_seed_queries": 2,
+      "searches": 46,
+      "chinese_searches": 0,
+      "reads": 0,
+      "facts": 7,
+      "evidence_total": 10,
+      "evidence_retrieved": 0,
+      "evidence_read": 0,
+      "evidence_fact_sources": 0,
+      "all_evidence_retrieved": false,
+      "writer_candidates": [
+        "Unknown",
+        "Unknown"
+      ],
+      "report_count": 2,
+      "review_count": 2,
+      "last_report_reviewed": true,
+      "checks": 8,
+      "verified": 0,
+      "normalized_generic_checks": 2,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 17,
+          "read": 0,
+          "fact": 7
+        },
+        {
+          "search": 16,
+          "read": 0,
+          "fact": 0
+        }
+      ],
+      "stop_reason": "no_new_evidence",
+      "planner_restarts": 0,
+      "stage_retry_events": 1
+    },
+    {
+      "query_id": "1047",
+      "correct": false,
+      "constraints": 6,
+      "seed_queries": 6,
+      "invalid_seed_queries": 2,
+      "searches": 45,
+      "chinese_searches": 0,
+      "reads": 2,
+      "facts": 8,
+      "evidence_total": 7,
+      "evidence_retrieved": 3,
+      "evidence_read": 0,
+      "evidence_fact_sources": 1,
+      "all_evidence_retrieved": false,
+      "writer_candidates": [
+        "Unknown"
+      ],
+      "report_count": 1,
+      "review_count": 1,
+      "last_report_reviewed": true,
+      "checks": 6,
+      "verified": 0,
+      "normalized_generic_checks": 2,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 5,
+          "read": 0,
+          "fact": 0
+        }
+      ],
+      "stop_reason": "no_new_evidence",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "254",
+      "correct": false,
+      "constraints": 7,
+      "seed_queries": 7,
+      "invalid_seed_queries": 5,
+      "searches": 28,
+      "chinese_searches": 0,
+      "reads": 2,
+      "facts": 10,
+      "evidence_total": 6,
+      "evidence_retrieved": 2,
+      "evidence_read": 2,
+      "evidence_fact_sources": 2,
+      "all_evidence_retrieved": false,
+      "writer_candidates": [
+        "Unknown"
+      ],
+      "report_count": 1,
+      "review_count": 1,
+      "last_report_reviewed": true,
+      "checks": 7,
+      "verified": 0,
+      "normalized_generic_checks": 3,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 3,
+          "read": 0,
+          "fact": 0
+        }
+      ],
+      "stop_reason": "no_new_evidence",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "906",
+      "correct": false,
+      "constraints": 6,
+      "seed_queries": 6,
+      "invalid_seed_queries": 4,
+      "searches": 50,
+      "chinese_searches": 0,
+      "reads": 3,
+      "facts": 20,
+      "evidence_total": 5,
+      "evidence_retrieved": 4,
+      "evidence_read": 2,
+      "evidence_fact_sources": 2,
+      "all_evidence_retrieved": false,
+      "writer_candidates": [
+        "Hermann Buhl",
+        "Unknown"
+      ],
+      "report_count": 2,
+      "review_count": 2,
+      "last_report_reviewed": true,
+      "checks": 6,
+      "verified": 0,
+      "normalized_generic_checks": 3,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 9,
+          "read": 0,
+          "fact": 2
+        },
+        {
+          "search": 1,
+          "read": 0,
+          "fact": 0
+        }
+      ],
+      "stop_reason": "search_budget",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "1103",
+      "correct": false,
+      "constraints": 4,
+      "seed_queries": 6,
+      "invalid_seed_queries": 1,
+      "searches": 22,
+      "chinese_searches": 0,
+      "reads": 0,
+      "facts": 0,
+      "evidence_total": 5,
+      "evidence_retrieved": 0,
+      "evidence_read": 0,
+      "evidence_fact_sources": 0,
+      "all_evidence_retrieved": false,
+      "writer_candidates": [
+        "Unknown"
+      ],
+      "report_count": 1,
+      "review_count": 1,
+      "last_report_reviewed": true,
+      "checks": 4,
+      "verified": 0,
+      "normalized_generic_checks": 0,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 0,
+          "read": 0,
+          "fact": 0
+        }
+      ],
+      "stop_reason": "no_new_evidence",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "571",
+      "correct": false,
+      "constraints": 6,
+      "seed_queries": 6,
+      "invalid_seed_queries": 0,
+      "searches": 28,
+      "chinese_searches": 0,
+      "reads": 3,
+      "facts": 13,
+      "evidence_total": 4,
+      "evidence_retrieved": 0,
+      "evidence_read": 0,
+      "evidence_fact_sources": 0,
+      "all_evidence_retrieved": false,
+      "writer_candidates": [
+        "Unknown"
+      ],
+      "report_count": 1,
+      "review_count": 1,
+      "last_report_reviewed": true,
+      "checks": 6,
+      "verified": 3,
+      "normalized_generic_checks": 0,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 3,
+          "read": 0,
+          "fact": 0
+        }
+      ],
+      "stop_reason": "no_new_evidence",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "650",
+      "correct": false,
+      "constraints": 6,
+      "seed_queries": 6,
+      "invalid_seed_queries": 0,
+      "searches": 15,
+      "chinese_searches": 0,
+      "reads": 1,
+      "facts": 2,
+      "evidence_total": 4,
+      "evidence_retrieved": 0,
+      "evidence_read": 0,
+      "evidence_fact_sources": 0,
+      "all_evidence_retrieved": false,
+      "writer_candidates": [
+        "Unknown"
+      ],
+      "report_count": 1,
+      "review_count": 1,
+      "last_report_reviewed": true,
+      "checks": 6,
+      "verified": 0,
+      "normalized_generic_checks": 0,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 0,
+          "read": 0,
+          "fact": 0
+        }
+      ],
+      "stop_reason": "no_new_evidence",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "865",
+      "correct": false,
+      "constraints": 6,
+      "seed_queries": 6,
+      "invalid_seed_queries": 0,
+      "searches": 47,
+      "chinese_searches": 0,
+      "reads": 1,
+      "facts": 10,
+      "evidence_total": 10,
+      "evidence_retrieved": 0,
+      "evidence_read": 0,
+      "evidence_fact_sources": 0,
+      "all_evidence_retrieved": false,
+      "writer_candidates": [
+        "Unknown",
+        "Unknown"
+      ],
+      "report_count": 2,
+      "review_count": 2,
+      "last_report_reviewed": true,
+      "checks": 6,
+      "verified": 0,
+      "normalized_generic_checks": 0,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 15,
+          "read": 0,
+          "fact": 1
+        },
+        {
+          "search": 2,
+          "read": 0,
+          "fact": 0
+        }
+      ],
+      "stop_reason": "no_new_evidence",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "161",
+      "correct": false,
+      "constraints": 6,
+      "seed_queries": 6,
+      "invalid_seed_queries": 0,
+      "searches": 42,
+      "chinese_searches": 0,
+      "reads": 1,
+      "facts": 10,
+      "evidence_total": 6,
+      "evidence_retrieved": 0,
+      "evidence_read": 0,
+      "evidence_fact_sources": 0,
+      "all_evidence_retrieved": false,
+      "writer_candidates": [
+        "Unknown"
+      ],
+      "report_count": 1,
+      "review_count": 1,
+      "last_report_reviewed": true,
+      "checks": 6,
+      "verified": 0,
+      "normalized_generic_checks": 2,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 6,
+          "read": 0,
+          "fact": 0
+        }
+      ],
+      "stop_reason": "no_new_evidence",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "570",
+      "correct": false,
+      "constraints": 7,
+      "seed_queries": 6,
+      "invalid_seed_queries": 0,
+      "searches": 50,
+      "chinese_searches": 0,
+      "reads": 0,
+      "facts": 4,
+      "evidence_total": 8,
+      "evidence_retrieved": 1,
+      "evidence_read": 0,
+      "evidence_fact_sources": 0,
+      "all_evidence_retrieved": false,
+      "writer_candidates": [
+        "Unknown",
+        "Unknown"
+      ],
+      "report_count": 2,
+      "review_count": 2,
+      "last_report_reviewed": true,
+      "checks": 7,
+      "verified": 0,
+      "normalized_generic_checks": 4,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 8,
+          "read": 0,
+          "fact": 4
+        },
+        {
+          "search": 3,
+          "read": 0,
+          "fact": 0
+        }
+      ],
+      "stop_reason": "search_budget",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "323",
+      "correct": false,
+      "constraints": 7,
+      "seed_queries": 6,
+      "invalid_seed_queries": 4,
+      "searches": 50,
+      "chinese_searches": 0,
+      "reads": 2,
+      "facts": 9,
+      "evidence_total": 4,
+      "evidence_retrieved": 0,
+      "evidence_read": 0,
+      "evidence_fact_sources": 0,
+      "all_evidence_retrieved": false,
+      "writer_candidates": [
+        "Mainwaring",
+        "Mainwaring"
+      ],
+      "report_count": 2,
+      "review_count": 2,
+      "last_report_reviewed": true,
+      "checks": 7,
+      "verified": 3,
+      "normalized_generic_checks": 0,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 5,
+          "read": 0,
+          "fact": 1
+        },
+        {
+          "search": 0,
+          "read": 0,
+          "fact": 0
+        }
+      ],
+      "stop_reason": "search_budget",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "670",
+      "correct": false,
+      "constraints": 8,
+      "seed_queries": 6,
+      "invalid_seed_queries": 1,
+      "searches": 38,
+      "chinese_searches": 0,
+      "reads": 1,
+      "facts": 9,
+      "evidence_total": 6,
+      "evidence_retrieved": 1,
+      "evidence_read": 0,
+      "evidence_fact_sources": 0,
+      "all_evidence_retrieved": false,
+      "writer_candidates": [
+        "Unknown",
+        "Unknown",
+        "Unknown"
+      ],
+      "report_count": 3,
+      "review_count": 3,
+      "last_report_reviewed": true,
+      "checks": 8,
+      "verified": 0,
+      "normalized_generic_checks": 2,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 10,
+          "read": 1,
+          "fact": 6
+        },
+        {
+          "search": 8,
+          "read": 0,
+          "fact": 2
+        }
+      ],
+      "stop_reason": "review_budget",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "1177",
+      "correct": false,
+      "constraints": 5,
+      "seed_queries": 6,
+      "invalid_seed_queries": 2,
+      "searches": 21,
+      "chinese_searches": 0,
+      "reads": 0,
+      "facts": 0,
+      "evidence_total": 8,
+      "evidence_retrieved": 1,
+      "evidence_read": 0,
+      "evidence_fact_sources": 0,
+      "all_evidence_retrieved": false,
+      "writer_candidates": [
+        "Unknown"
+      ],
+      "report_count": 1,
+      "review_count": 1,
+      "last_report_reviewed": true,
+      "checks": 5,
+      "verified": 0,
+      "normalized_generic_checks": 0,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 2,
+          "read": 0,
+          "fact": 0
+        }
+      ],
+      "stop_reason": "no_new_evidence",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "883",
+      "correct": true,
+      "constraints": 7,
+      "seed_queries": 8,
+      "invalid_seed_queries": 0,
+      "searches": 50,
+      "chinese_searches": 0,
+      "reads": 4,
+      "facts": 31,
+      "evidence_total": 9,
+      "evidence_retrieved": 7,
+      "evidence_read": 4,
+      "evidence_fact_sources": 4,
+      "all_evidence_retrieved": false,
+      "writer_candidates": [
+        "Oscar",
+        "Oscar"
+      ],
+      "report_count": 2,
+      "review_count": 2,
+      "last_report_reviewed": true,
+      "checks": 7,
+      "verified": 0,
+      "normalized_generic_checks": 5,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 16,
+          "read": 2,
+          "fact": 16
+        },
+        {
+          "search": 0,
+          "read": 0,
+          "fact": 0
+        }
+      ],
+      "stop_reason": "search_budget",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "1188",
+      "correct": false,
+      "constraints": 5,
+      "seed_queries": 6,
+      "invalid_seed_queries": 0,
+      "searches": 31,
+      "chinese_searches": 0,
+      "reads": 0,
+      "facts": 0,
+      "evidence_total": 9,
+      "evidence_retrieved": 0,
+      "evidence_read": 0,
+      "evidence_fact_sources": 0,
+      "all_evidence_retrieved": false,
+      "writer_candidates": [
+        "Unknown"
+      ],
+      "report_count": 1,
+      "review_count": 1,
+      "last_report_reviewed": true,
+      "checks": 5,
+      "verified": 0,
+      "normalized_generic_checks": 0,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 1,
+          "read": 0,
+          "fact": 0
+        }
+      ],
+      "stop_reason": "no_new_evidence",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "53",
+      "correct": true,
+      "constraints": 6,
+      "seed_queries": 6,
+      "invalid_seed_queries": 2,
+      "searches": 36,
+      "chinese_searches": 0,
+      "reads": 2,
+      "facts": 12,
+      "evidence_total": 6,
+      "evidence_retrieved": 3,
+      "evidence_read": 2,
+      "evidence_fact_sources": 2,
+      "all_evidence_retrieved": false,
+      "writer_candidates": [
+        "Unknown"
+      ],
+      "report_count": 1,
+      "review_count": 1,
+      "last_report_reviewed": true,
+      "checks": 6,
+      "verified": 0,
+      "normalized_generic_checks": 4,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 3,
+          "read": 0,
+          "fact": 0
+        }
+      ],
+      "stop_reason": "no_new_evidence",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "724",
+      "correct": false,
+      "constraints": 7,
+      "seed_queries": 6,
+      "invalid_seed_queries": 1,
+      "searches": 50,
+      "chinese_searches": 0,
+      "reads": 0,
+      "facts": 1,
+      "evidence_total": 8,
+      "evidence_retrieved": 0,
+      "evidence_read": 0,
+      "evidence_fact_sources": 0,
+      "all_evidence_retrieved": false,
+      "writer_candidates": [
+        "Unknown"
+      ],
+      "report_count": 1,
+      "review_count": 1,
+      "last_report_reviewed": true,
+      "checks": 7,
+      "verified": 0,
+      "normalized_generic_checks": 2,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 0,
+          "read": 0,
+          "fact": 0
+        }
+      ],
+      "stop_reason": "search_budget",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "478",
+      "correct": false,
+      "constraints": 12,
+      "seed_queries": 6,
+      "invalid_seed_queries": 0,
+      "searches": 50,
+      "chinese_searches": 0,
+      "reads": 1,
+      "facts": 8,
+      "evidence_total": 5,
+      "evidence_retrieved": 0,
+      "evidence_read": 0,
+      "evidence_fact_sources": 0,
+      "all_evidence_retrieved": false,
+      "writer_candidates": [
+        "Unknown"
+      ],
+      "report_count": 1,
+      "review_count": 1,
+      "last_report_reviewed": true,
+      "checks": 12,
+      "verified": 0,
+      "normalized_generic_checks": 4,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 5,
+          "read": 0,
+          "fact": 0
+        }
+      ],
+      "stop_reason": "search_budget",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "836",
+      "correct": false,
+      "constraints": 7,
+      "seed_queries": 6,
+      "invalid_seed_queries": 2,
+      "searches": 39,
+      "chinese_searches": 0,
+      "reads": 0,
+      "facts": 1,
+      "evidence_total": 10,
+      "evidence_retrieved": 0,
+      "evidence_read": 0,
+      "evidence_fact_sources": 0,
+      "all_evidence_retrieved": false,
+      "writer_candidates": [
+        "Unknown"
+      ],
+      "report_count": 1,
+      "review_count": 1,
+      "last_report_reviewed": true,
+      "checks": 7,
+      "verified": 0,
+      "normalized_generic_checks": 0,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 10,
+          "read": 0,
+          "fact": 0
+        }
+      ],
+      "stop_reason": "no_new_evidence",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "472",
+      "correct": false,
+      "constraints": 9,
+      "seed_queries": 6,
+      "invalid_seed_queries": 4,
+      "searches": 29,
+      "chinese_searches": 0,
+      "reads": 0,
+      "facts": 0,
+      "evidence_total": 5,
+      "evidence_retrieved": 0,
+      "evidence_read": 0,
+      "evidence_fact_sources": 0,
+      "all_evidence_retrieved": false,
+      "writer_candidates": [
+        "Unknown"
+      ],
+      "report_count": 1,
+      "review_count": 1,
+      "last_report_reviewed": true,
+      "checks": 9,
+      "verified": 0,
+      "normalized_generic_checks": 0,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 3,
+          "read": 0,
+          "fact": 0
+        }
+      ],
+      "stop_reason": "no_new_evidence",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "436",
+      "correct": false,
+      "constraints": 8,
+      "seed_queries": 6,
+      "invalid_seed_queries": 0,
+      "searches": 19,
+      "chinese_searches": 0,
+      "reads": 0,
+      "facts": 0,
+      "evidence_total": 7,
+      "evidence_retrieved": 0,
+      "evidence_read": 0,
+      "evidence_fact_sources": 0,
+      "all_evidence_retrieved": false,
+      "writer_candidates": [
+        "Unknown"
+      ],
+      "report_count": 1,
+      "review_count": 1,
+      "last_report_reviewed": true,
+      "checks": 8,
+      "verified": 0,
+      "normalized_generic_checks": 0,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 0,
+          "read": 0,
+          "fact": 0
+        }
+      ],
+      "stop_reason": "no_new_evidence",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "171",
+      "correct": false,
+      "constraints": 6,
+      "seed_queries": 6,
+      "invalid_seed_queries": 1,
+      "searches": 18,
+      "chinese_searches": 0,
+      "reads": 0,
+      "facts": 0,
+      "evidence_total": 4,
+      "evidence_retrieved": 0,
+      "evidence_read": 0,
+      "evidence_fact_sources": 0,
+      "all_evidence_retrieved": false,
+      "writer_candidates": [
+        "Unknown"
+      ],
+      "report_count": 1,
+      "review_count": 1,
+      "last_report_reviewed": true,
+      "checks": 6,
+      "verified": 0,
+      "normalized_generic_checks": 0,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 0,
+          "read": 0,
+          "fact": 0
+        }
+      ],
+      "stop_reason": "no_new_evidence",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "483",
+      "correct": true,
+      "constraints": 5,
+      "seed_queries": 6,
+      "invalid_seed_queries": 0,
+      "searches": 50,
+      "chinese_searches": 0,
+      "reads": 2,
+      "facts": 10,
+      "evidence_total": 6,
+      "evidence_retrieved": 5,
+      "evidence_read": 1,
+      "evidence_fact_sources": 1,
+      "all_evidence_retrieved": false,
+      "writer_candidates": [
+        "Officina Profumo-Farmaceutica"
+      ],
+      "report_count": 1,
+      "review_count": 1,
+      "last_report_reviewed": true,
+      "checks": 5,
+      "verified": 0,
+      "normalized_generic_checks": 4,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 0,
+          "read": 0,
+          "fact": 0
+        }
+      ],
+      "stop_reason": "search_budget",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "298",
+      "correct": false,
+      "constraints": 4,
+      "seed_queries": 6,
+      "invalid_seed_queries": 0,
+      "searches": 50,
+      "chinese_searches": 0,
+      "reads": 1,
+      "facts": 12,
+      "evidence_total": 10,
+      "evidence_retrieved": 0,
+      "evidence_read": 0,
+      "evidence_fact_sources": 0,
+      "all_evidence_retrieved": false,
+      "writer_candidates": [
+        "Unknown"
+      ],
+      "report_count": 1,
+      "review_count": 1,
+      "last_report_reviewed": true,
+      "checks": 4,
+      "verified": 0,
+      "normalized_generic_checks": 1,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 0,
+          "read": 0,
+          "fact": 0
+        }
+      ],
+      "stop_reason": "search_budget",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "237",
+      "correct": false,
+      "constraints": 7,
+      "seed_queries": 6,
+      "invalid_seed_queries": 0,
+      "searches": 27,
+      "chinese_searches": 0,
+      "reads": 1,
+      "facts": 0,
+      "evidence_total": 3,
+      "evidence_retrieved": 0,
+      "evidence_read": 0,
+      "evidence_fact_sources": 0,
+      "all_evidence_retrieved": false,
+      "writer_candidates": [
+        "Unknown"
+      ],
+      "report_count": 1,
+      "review_count": 1,
+      "last_report_reviewed": true,
+      "checks": 7,
+      "verified": 0,
+      "normalized_generic_checks": 0,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 0,
+          "read": 0,
+          "fact": 0
+        }
+      ],
+      "stop_reason": "no_new_evidence",
+      "planner_restarts": 0,
+      "stage_retry_events": 1
+    },
+    {
+      "query_id": "517",
+      "correct": false,
+      "constraints": 8,
+      "seed_queries": 6,
+      "invalid_seed_queries": 0,
+      "searches": 50,
+      "chinese_searches": 0,
+      "reads": 4,
+      "facts": 22,
+      "evidence_total": 8,
+      "evidence_retrieved": 4,
+      "evidence_read": 1,
+      "evidence_fact_sources": 2,
+      "all_evidence_retrieved": false,
+      "writer_candidates": [
+        "Unknown"
+      ],
+      "report_count": 1,
+      "review_count": 1,
+      "last_report_reviewed": true,
+      "checks": 8,
+      "verified": 0,
+      "normalized_generic_checks": 2,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 0,
+          "read": 0,
+          "fact": 0
+        }
+      ],
+      "stop_reason": "search_budget",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "1169",
+      "correct": false,
+      "constraints": 6,
+      "seed_queries": 6,
+      "invalid_seed_queries": 3,
+      "searches": 29,
+      "chinese_searches": 0,
+      "reads": 2,
+      "facts": 11,
+      "evidence_total": 7,
+      "evidence_retrieved": 0,
+      "evidence_read": 0,
+      "evidence_fact_sources": 0,
+      "all_evidence_retrieved": false,
+      "writer_candidates": [
+        "Unknown",
+        "Unknown"
+      ],
+      "report_count": 2,
+      "review_count": 2,
+      "last_report_reviewed": true,
+      "checks": 6,
+      "verified": 0,
+      "normalized_generic_checks": 5,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 9,
+          "read": 0,
+          "fact": 2
+        },
+        {
+          "search": 0,
+          "read": 0,
+          "fact": 0
+        }
+      ],
+      "stop_reason": "no_new_evidence",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "944",
+      "correct": false,
+      "constraints": 7,
+      "seed_queries": 6,
+      "invalid_seed_queries": 1,
+      "searches": 22,
+      "chinese_searches": 0,
+      "reads": 0,
+      "facts": 0,
+      "evidence_total": 7,
+      "evidence_retrieved": 0,
+      "evidence_read": 0,
+      "evidence_fact_sources": 0,
+      "all_evidence_retrieved": false,
+      "writer_candidates": [
+        "Unknown"
+      ],
+      "report_count": 1,
+      "review_count": 1,
+      "last_report_reviewed": true,
+      "checks": 7,
+      "verified": 0,
+      "normalized_generic_checks": 0,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 0,
+          "read": 0,
+          "fact": 0
+        }
+      ],
+      "stop_reason": "no_new_evidence",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "738",
+      "correct": false,
+      "constraints": 8,
+      "seed_queries": 6,
+      "invalid_seed_queries": 4,
+      "searches": 31,
+      "chinese_searches": 0,
+      "reads": 1,
+      "facts": 6,
+      "evidence_total": 7,
+      "evidence_retrieved": 1,
+      "evidence_read": 0,
+      "evidence_fact_sources": 0,
+      "all_evidence_retrieved": false,
+      "writer_candidates": [
+        "Unknown"
+      ],
+      "report_count": 1,
+      "review_count": 1,
+      "last_report_reviewed": true,
+      "checks": 8,
+      "verified": 0,
+      "normalized_generic_checks": 1,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 0,
+          "read": 0,
+          "fact": 0
+        }
+      ],
+      "stop_reason": "no_new_evidence",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "961",
+      "correct": false,
+      "constraints": 10,
+      "seed_queries": 6,
+      "invalid_seed_queries": 0,
+      "searches": 41,
+      "chinese_searches": 0,
+      "reads": 2,
+      "facts": 21,
+      "evidence_total": 7,
+      "evidence_retrieved": 0,
+      "evidence_read": 0,
+      "evidence_fact_sources": 0,
+      "all_evidence_retrieved": false,
+      "writer_candidates": [
+        "Unknown",
+        "Vasco da Gama Pillar",
+        "Vasco da Gama Pillar"
+      ],
+      "report_count": 3,
+      "review_count": 3,
+      "last_report_reviewed": true,
+      "checks": 10,
+      "verified": 8,
+      "normalized_generic_checks": 0,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 4,
+          "read": 0,
+          "fact": 1
+        },
+        {
+          "search": 4,
+          "read": 0,
+          "fact": 1
+        }
+      ],
+      "stop_reason": "review_budget",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "244",
+      "correct": false,
+      "constraints": 10,
+      "seed_queries": 6,
+      "invalid_seed_queries": 0,
+      "searches": 20,
+      "chinese_searches": 0,
+      "reads": 0,
+      "facts": 0,
+      "evidence_total": 2,
+      "evidence_retrieved": 1,
+      "evidence_read": 0,
+      "evidence_fact_sources": 0,
+      "all_evidence_retrieved": false,
+      "writer_candidates": [
+        "Unknown"
+      ],
+      "report_count": 1,
+      "review_count": 1,
+      "last_report_reviewed": true,
+      "checks": 10,
+      "verified": 0,
+      "normalized_generic_checks": 0,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 5,
+          "read": 0,
+          "fact": 0
+        }
+      ],
+      "stop_reason": "no_new_evidence",
+      "planner_restarts": 0,
+      "stage_retry_events": 1
+    },
+    {
+      "query_id": "392",
+      "correct": false,
+      "constraints": 9,
+      "seed_queries": 6,
+      "invalid_seed_queries": 2,
+      "searches": 34,
+      "chinese_searches": 0,
+      "reads": 0,
+      "facts": 0,
+      "evidence_total": 10,
+      "evidence_retrieved": 1,
+      "evidence_read": 0,
+      "evidence_fact_sources": 0,
+      "all_evidence_retrieved": false,
+      "writer_candidates": [
+        "Unknown"
+      ],
+      "report_count": 1,
+      "review_count": 1,
+      "last_report_reviewed": true,
+      "checks": 9,
+      "verified": 0,
+      "normalized_generic_checks": 0,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 0,
+          "read": 0,
+          "fact": 0
+        }
+      ],
+      "stop_reason": "no_new_evidence",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "356",
+      "correct": true,
+      "constraints": 6,
+      "seed_queries": 6,
+      "invalid_seed_queries": 0,
+      "searches": 19,
+      "chinese_searches": 0,
+      "reads": 2,
+      "facts": 9,
+      "evidence_total": 2,
+      "evidence_retrieved": 2,
+      "evidence_read": 2,
+      "evidence_fact_sources": 2,
+      "all_evidence_retrieved": true,
+      "writer_candidates": [
+        "10.5812/ijpbs.62774",
+        "10.5812/ijpbs.62774"
+      ],
+      "report_count": 2,
+      "review_count": 2,
+      "last_report_reviewed": true,
+      "checks": 6,
+      "verified": 0,
+      "normalized_generic_checks": 4,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 8,
+          "read": 1,
+          "fact": 3
+        },
+        {
+          "search": 0,
+          "read": 0,
+          "fact": 0
+        }
+      ],
+      "stop_reason": "no_new_evidence",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "709",
+      "correct": false,
+      "constraints": 9,
+      "seed_queries": 6,
+      "invalid_seed_queries": 2,
+      "searches": 46,
+      "chinese_searches": 0,
+      "reads": 3,
+      "facts": 17,
+      "evidence_total": 9,
+      "evidence_retrieved": 3,
+      "evidence_read": 1,
+      "evidence_fact_sources": 1,
+      "all_evidence_retrieved": false,
+      "writer_candidates": [
+        "Unknown",
+        "Unknown",
+        "Unknown"
+      ],
+      "report_count": 3,
+      "review_count": 3,
+      "last_report_reviewed": true,
+      "checks": 9,
+      "verified": 0,
+      "normalized_generic_checks": 4,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 10,
+          "read": 0,
+          "fact": 1
+        },
+        {
+          "search": 11,
+          "read": 0,
+          "fact": 1
+        }
+      ],
+      "stop_reason": "review_budget",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "1032",
+      "correct": true,
+      "constraints": 9,
+      "seed_queries": 6,
+      "invalid_seed_queries": 0,
+      "searches": 31,
+      "chinese_searches": 0,
+      "reads": 2,
+      "facts": 7,
+      "evidence_total": 2,
+      "evidence_retrieved": 2,
+      "evidence_read": 2,
+      "evidence_fact_sources": 2,
+      "all_evidence_retrieved": true,
+      "writer_candidates": [
+        "Darlene Kittle"
+      ],
+      "report_count": 1,
+      "review_count": 1,
+      "last_report_reviewed": true,
+      "checks": 9,
+      "verified": 0,
+      "normalized_generic_checks": 6,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 6,
+          "read": 0,
+          "fact": 0
+        }
+      ],
+      "stop_reason": "no_new_evidence",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "593",
+      "correct": false,
+      "constraints": 5,
+      "seed_queries": 6,
+      "invalid_seed_queries": 2,
+      "searches": 42,
+      "chinese_searches": 0,
+      "reads": 2,
+      "facts": 10,
+      "evidence_total": 4,
+      "evidence_retrieved": 3,
+      "evidence_read": 2,
+      "evidence_fact_sources": 2,
+      "all_evidence_retrieved": false,
+      "writer_candidates": [
+        "Unknown",
+        "Unknown"
+      ],
+      "report_count": 2,
+      "review_count": 2,
+      "last_report_reviewed": true,
+      "checks": 5,
+      "verified": 0,
+      "normalized_generic_checks": 2,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 5,
+          "read": 0,
+          "fact": 1
+        },
+        {
+          "search": 2,
+          "read": 0,
+          "fact": 0
+        }
+      ],
+      "stop_reason": "no_new_evidence",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "500",
+      "correct": false,
+      "constraints": 5,
+      "seed_queries": 6,
+      "invalid_seed_queries": 0,
+      "searches": 40,
+      "chinese_searches": 0,
+      "reads": 0,
+      "facts": 0,
+      "evidence_total": 5,
+      "evidence_retrieved": 0,
+      "evidence_read": 0,
+      "evidence_fact_sources": 0,
+      "all_evidence_retrieved": false,
+      "writer_candidates": [
+        "Unknown"
+      ],
+      "report_count": 1,
+      "review_count": 1,
+      "last_report_reviewed": true,
+      "checks": 5,
+      "verified": 0,
+      "normalized_generic_checks": 0,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 2,
+          "read": 0,
+          "fact": 0
+        }
+      ],
+      "stop_reason": "no_new_evidence",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "942",
+      "correct": false,
+      "constraints": 7,
+      "seed_queries": 6,
+      "invalid_seed_queries": 4,
+      "searches": 16,
+      "chinese_searches": 0,
+      "reads": 0,
+      "facts": 0,
+      "evidence_total": 9,
+      "evidence_retrieved": 0,
+      "evidence_read": 0,
+      "evidence_fact_sources": 0,
+      "all_evidence_retrieved": false,
+      "writer_candidates": [
+        "Unknown"
+      ],
+      "report_count": 1,
+      "review_count": 1,
+      "last_report_reviewed": true,
+      "checks": 7,
+      "verified": 0,
+      "normalized_generic_checks": 0,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 0,
+          "read": 0,
+          "fact": 0
+        }
+      ],
+      "stop_reason": "no_new_evidence",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "636",
+      "correct": false,
+      "constraints": 9,
+      "seed_queries": 6,
+      "invalid_seed_queries": 0,
+      "searches": 36,
+      "chinese_searches": 0,
+      "reads": 2,
+      "facts": 19,
+      "evidence_total": 3,
+      "evidence_retrieved": 2,
+      "evidence_read": 1,
+      "evidence_fact_sources": 1,
+      "all_evidence_retrieved": false,
+      "writer_candidates": [
+        "Unknown"
+      ],
+      "report_count": 1,
+      "review_count": 1,
+      "last_report_reviewed": true,
+      "checks": 9,
+      "verified": 0,
+      "normalized_generic_checks": 7,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 3,
+          "read": 0,
+          "fact": 0
+        }
+      ],
+      "stop_reason": "no_new_evidence",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "590",
+      "correct": false,
+      "constraints": 9,
+      "seed_queries": 6,
+      "invalid_seed_queries": 3,
+      "searches": 23,
+      "chinese_searches": 0,
+      "reads": 0,
+      "facts": 0,
+      "evidence_total": 8,
+      "evidence_retrieved": 1,
+      "evidence_read": 0,
+      "evidence_fact_sources": 0,
+      "all_evidence_retrieved": false,
+      "writer_candidates": [
+        "Unknown"
+      ],
+      "report_count": 1,
+      "review_count": 1,
+      "last_report_reviewed": true,
+      "checks": 9,
+      "verified": 0,
+      "normalized_generic_checks": 0,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 2,
+          "read": 0,
+          "fact": 0
+        }
+      ],
+      "stop_reason": "no_new_evidence",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "673",
+      "correct": true,
+      "constraints": 5,
+      "seed_queries": 6,
+      "invalid_seed_queries": 0,
+      "searches": 50,
+      "chinese_searches": 0,
+      "reads": 3,
+      "facts": 24,
+      "evidence_total": 4,
+      "evidence_retrieved": 4,
+      "evidence_read": 3,
+      "evidence_fact_sources": 3,
+      "all_evidence_retrieved": true,
+      "writer_candidates": [
+        "Arinimaal"
+      ],
+      "report_count": 1,
+      "review_count": 1,
+      "last_report_reviewed": true,
+      "checks": 5,
+      "verified": 0,
+      "normalized_generic_checks": 5,
+      "review_has_substantive_note": false,
+      "supplements": [
+        {
+          "search": 0,
+          "read": 0,
+          "fact": 0
+        }
+      ],
+      "stop_reason": "search_budget",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "968",
+      "correct": true,
+      "constraints": 8,
+      "seed_queries": 6,
+      "invalid_seed_queries": 0,
+      "searches": 29,
+      "chinese_searches": 0,
+      "reads": 4,
+      "facts": 12,
+      "evidence_total": 4,
+      "evidence_retrieved": 4,
+      "evidence_read": 3,
+      "evidence_fact_sources": 2,
+      "all_evidence_retrieved": true,
+      "writer_candidates": [
+        "Unknown"
+      ],
+      "report_count": 1,
+      "review_count": 1,
+      "last_report_reviewed": true,
+      "checks": 8,
+      "verified": 0,
+      "normalized_generic_checks": 6,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 5,
+          "read": 0,
+          "fact": 0
+        }
+      ],
+      "stop_reason": "no_new_evidence",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "1133",
+      "correct": true,
+      "constraints": 9,
+      "seed_queries": 6,
+      "invalid_seed_queries": 2,
+      "searches": 50,
+      "chinese_searches": 0,
+      "reads": 3,
+      "facts": 12,
+      "evidence_total": 7,
+      "evidence_retrieved": 7,
+      "evidence_read": 3,
+      "evidence_fact_sources": 3,
+      "all_evidence_retrieved": true,
+      "writer_candidates": [
+        "Unknown"
+      ],
+      "report_count": 1,
+      "review_count": 1,
+      "last_report_reviewed": true,
+      "checks": 9,
+      "verified": 0,
+      "normalized_generic_checks": 6,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 0,
+          "read": 0,
+          "fact": 0
+        }
+      ],
+      "stop_reason": "search_budget",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "61",
+      "correct": false,
+      "constraints": 5,
+      "seed_queries": 6,
+      "invalid_seed_queries": 0,
+      "searches": 47,
+      "chinese_searches": 0,
+      "reads": 2,
+      "facts": 10,
+      "evidence_total": 4,
+      "evidence_retrieved": 4,
+      "evidence_read": 2,
+      "evidence_fact_sources": 2,
+      "all_evidence_retrieved": true,
+      "writer_candidates": [
+        "Unknown",
+        "Unknown",
+        "Unknown"
+      ],
+      "report_count": 3,
+      "review_count": 3,
+      "last_report_reviewed": true,
+      "checks": 5,
+      "verified": 2,
+      "normalized_generic_checks": 0,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 7,
+          "read": 0,
+          "fact": 1
+        },
+        {
+          "search": 2,
+          "read": 0,
+          "fact": 1
+        }
+      ],
+      "stop_reason": "review_budget",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "131",
+      "correct": false,
+      "constraints": 8,
+      "seed_queries": 6,
+      "invalid_seed_queries": 0,
+      "searches": 44,
+      "chinese_searches": 0,
+      "reads": 0,
+      "facts": 0,
+      "evidence_total": 6,
+      "evidence_retrieved": 0,
+      "evidence_read": 0,
+      "evidence_fact_sources": 0,
+      "all_evidence_retrieved": false,
+      "writer_candidates": [
+        "Unknown"
+      ],
+      "report_count": 1,
+      "review_count": 1,
+      "last_report_reviewed": true,
+      "checks": 8,
+      "verified": 0,
+      "normalized_generic_checks": 0,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 17,
+          "read": 0,
+          "fact": 0
+        }
+      ],
+      "stop_reason": "no_new_evidence",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "603",
+      "correct": false,
+      "constraints": 6,
+      "seed_queries": 6,
+      "invalid_seed_queries": 2,
+      "searches": 50,
+      "chinese_searches": 0,
+      "reads": 4,
+      "facts": 8,
+      "evidence_total": 7,
+      "evidence_retrieved": 4,
+      "evidence_read": 0,
+      "evidence_fact_sources": 2,
+      "all_evidence_retrieved": false,
+      "writer_candidates": [
+        "Unknown"
+      ],
+      "report_count": 1,
+      "review_count": 1,
+      "last_report_reviewed": true,
+      "checks": 6,
+      "verified": 0,
+      "normalized_generic_checks": 1,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 0,
+          "read": 0,
+          "fact": 0
+        }
+      ],
+      "stop_reason": "search_budget",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "193",
+      "correct": false,
+      "constraints": 5,
+      "seed_queries": 6,
+      "invalid_seed_queries": 0,
+      "searches": 34,
+      "chinese_searches": 0,
+      "reads": 2,
+      "facts": 15,
+      "evidence_total": 4,
+      "evidence_retrieved": 3,
+      "evidence_read": 2,
+      "evidence_fact_sources": 2,
+      "all_evidence_retrieved": false,
+      "writer_candidates": [
+        "Unknown",
+        "Journeys Out of The Body"
+      ],
+      "report_count": 2,
+      "review_count": 2,
+      "last_report_reviewed": true,
+      "checks": 5,
+      "verified": 0,
+      "normalized_generic_checks": 4,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 4,
+          "read": 0,
+          "fact": 1
+        },
+        {
+          "search": 0,
+          "read": 0,
+          "fact": 0
+        }
+      ],
+      "stop_reason": "no_new_evidence",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "1052",
+      "correct": false,
+      "constraints": 5,
+      "seed_queries": 6,
+      "invalid_seed_queries": 2,
+      "searches": 18,
+      "chinese_searches": 0,
+      "reads": 0,
+      "facts": 0,
+      "evidence_total": 7,
+      "evidence_retrieved": 1,
+      "evidence_read": 0,
+      "evidence_fact_sources": 0,
+      "all_evidence_retrieved": false,
+      "writer_candidates": [
+        "Unknown"
+      ],
+      "report_count": 1,
+      "review_count": 1,
+      "last_report_reviewed": true,
+      "checks": 5,
+      "verified": 0,
+      "normalized_generic_checks": 0,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 0,
+          "read": 0,
+          "fact": 0
+        }
+      ],
+      "stop_reason": "no_new_evidence",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "324",
+      "correct": false,
+      "constraints": 10,
+      "seed_queries": 6,
+      "invalid_seed_queries": 2,
+      "searches": 50,
+      "chinese_searches": 0,
+      "reads": 2,
+      "facts": 15,
+      "evidence_total": 9,
+      "evidence_retrieved": 6,
+      "evidence_read": 2,
+      "evidence_fact_sources": 2,
+      "all_evidence_retrieved": false,
+      "writer_candidates": [
+        "Lisa Hamilton",
+        "Unknown"
+      ],
+      "report_count": 2,
+      "review_count": 2,
+      "last_report_reviewed": true,
+      "checks": 10,
+      "verified": 0,
+      "normalized_generic_checks": 4,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 5,
+          "read": 0,
+          "fact": 2
+        },
+        {
+          "search": 3,
+          "read": 0,
+          "fact": 0
+        }
+      ],
+      "stop_reason": "search_budget",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "692",
+      "correct": false,
+      "constraints": 5,
+      "seed_queries": 6,
+      "invalid_seed_queries": 2,
+      "searches": 33,
+      "chinese_searches": 0,
+      "reads": 0,
+      "facts": 0,
+      "evidence_total": 2,
+      "evidence_retrieved": 0,
+      "evidence_read": 0,
+      "evidence_fact_sources": 0,
+      "all_evidence_retrieved": false,
+      "writer_candidates": [
+        "Unknown"
+      ],
+      "report_count": 1,
+      "review_count": 1,
+      "last_report_reviewed": true,
+      "checks": 5,
+      "verified": 0,
+      "normalized_generic_checks": 0,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 5,
+          "read": 0,
+          "fact": 0
+        }
+      ],
+      "stop_reason": "no_new_evidence",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "1058",
+      "correct": false,
+      "constraints": 5,
+      "seed_queries": 6,
+      "invalid_seed_queries": 3,
+      "searches": 46,
+      "chinese_searches": 0,
+      "reads": 0,
+      "facts": 0,
+      "evidence_total": 5,
+      "evidence_retrieved": 0,
+      "evidence_read": 0,
+      "evidence_fact_sources": 0,
+      "all_evidence_retrieved": false,
+      "writer_candidates": [
+        "Unknown"
+      ],
+      "report_count": 1,
+      "review_count": 1,
+      "last_report_reviewed": true,
+      "checks": 5,
+      "verified": 0,
+      "normalized_generic_checks": 0,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 9,
+          "read": 0,
+          "fact": 0
+        }
+      ],
+      "stop_reason": "no_new_evidence",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "175",
+      "correct": false,
+      "constraints": 6,
+      "seed_queries": 6,
+      "invalid_seed_queries": 2,
+      "searches": 50,
+      "chinese_searches": 0,
+      "reads": 0,
+      "facts": 0,
+      "evidence_total": 5,
+      "evidence_retrieved": 0,
+      "evidence_read": 0,
+      "evidence_fact_sources": 0,
+      "all_evidence_retrieved": false,
+      "writer_candidates": [
+        "Unknown"
+      ],
+      "report_count": 1,
+      "review_count": 1,
+      "last_report_reviewed": true,
+      "checks": 6,
+      "verified": 0,
+      "normalized_generic_checks": 0,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 0,
+          "read": 0,
+          "fact": 0
+        }
+      ],
+      "stop_reason": "search_budget",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "583",
+      "correct": false,
+      "constraints": 10,
+      "seed_queries": 6,
+      "invalid_seed_queries": 0,
+      "searches": 21,
+      "chinese_searches": 0,
+      "reads": 0,
+      "facts": 0,
+      "evidence_total": 3,
+      "evidence_retrieved": 0,
+      "evidence_read": 0,
+      "evidence_fact_sources": 0,
+      "all_evidence_retrieved": false,
+      "writer_candidates": [
+        "Unknown"
+      ],
+      "report_count": 1,
+      "review_count": 1,
+      "last_report_reviewed": true,
+      "checks": 10,
+      "verified": 0,
+      "normalized_generic_checks": 0,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 0,
+          "read": 0,
+          "fact": 0
+        }
+      ],
+      "stop_reason": "no_new_evidence",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "1217",
+      "correct": false,
+      "constraints": 5,
+      "seed_queries": 6,
+      "invalid_seed_queries": 4,
+      "searches": 46,
+      "chinese_searches": 0,
+      "reads": 2,
+      "facts": 6,
+      "evidence_total": 12,
+      "evidence_retrieved": 1,
+      "evidence_read": 1,
+      "evidence_fact_sources": 1,
+      "all_evidence_retrieved": false,
+      "writer_candidates": [
+        "Unknown"
+      ],
+      "report_count": 1,
+      "review_count": 1,
+      "last_report_reviewed": true,
+      "checks": 5,
+      "verified": 0,
+      "normalized_generic_checks": 0,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 15,
+          "read": 0,
+          "fact": 0
+        }
+      ],
+      "stop_reason": "no_new_evidence",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "816",
+      "correct": false,
+      "constraints": 9,
+      "seed_queries": 7,
+      "invalid_seed_queries": 2,
+      "searches": 38,
+      "chinese_searches": 0,
+      "reads": 0,
+      "facts": 2,
+      "evidence_total": 9,
+      "evidence_retrieved": 1,
+      "evidence_read": 0,
+      "evidence_fact_sources": 0,
+      "all_evidence_retrieved": false,
+      "writer_candidates": [
+        "Unknown"
+      ],
+      "report_count": 1,
+      "review_count": 1,
+      "last_report_reviewed": true,
+      "checks": 9,
+      "verified": 0,
+      "normalized_generic_checks": 0,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 3,
+          "read": 0,
+          "fact": 0
+        }
+      ],
+      "stop_reason": "no_new_evidence",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "996",
+      "correct": false,
+      "constraints": 6,
+      "seed_queries": 6,
+      "invalid_seed_queries": 4,
+      "searches": 50,
+      "chinese_searches": 0,
+      "reads": 3,
+      "facts": 14,
+      "evidence_total": 7,
+      "evidence_retrieved": 0,
+      "evidence_read": 0,
+      "evidence_fact_sources": 0,
+      "all_evidence_retrieved": false,
+      "writer_candidates": [
+        "Unknown",
+        "Unknown"
+      ],
+      "report_count": 2,
+      "review_count": 2,
+      "last_report_reviewed": true,
+      "checks": 6,
+      "verified": 0,
+      "normalized_generic_checks": 2,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 11,
+          "read": 0,
+          "fact": 4
+        },
+        {
+          "search": 0,
+          "read": 0,
+          "fact": 0
+        }
+      ],
+      "stop_reason": "search_budget",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "599",
+      "correct": true,
+      "constraints": 8,
+      "seed_queries": 6,
+      "invalid_seed_queries": 0,
+      "searches": 37,
+      "chinese_searches": 0,
+      "reads": 2,
+      "facts": 18,
+      "evidence_total": 3,
+      "evidence_retrieved": 3,
+      "evidence_read": 2,
+      "evidence_fact_sources": 2,
+      "all_evidence_retrieved": true,
+      "writer_candidates": [
+        "Unknown",
+        "Revista Română de Statistică"
+      ],
+      "report_count": 2,
+      "review_count": 2,
+      "last_report_reviewed": true,
+      "checks": 8,
+      "verified": 0,
+      "normalized_generic_checks": 4,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 11,
+          "read": 0,
+          "fact": 1
+        },
+        {
+          "search": 0,
+          "read": 0,
+          "fact": 0
+        }
+      ],
+      "stop_reason": "no_new_evidence",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "71",
+      "correct": false,
+      "constraints": 6,
+      "seed_queries": 6,
+      "invalid_seed_queries": 0,
+      "searches": 50,
+      "chinese_searches": 0,
+      "reads": 1,
+      "facts": 14,
+      "evidence_total": 5,
+      "evidence_retrieved": 0,
+      "evidence_read": 0,
+      "evidence_fact_sources": 0,
+      "all_evidence_retrieved": false,
+      "writer_candidates": [
+        "Unknown"
+      ],
+      "report_count": 1,
+      "review_count": 1,
+      "last_report_reviewed": true,
+      "checks": 6,
+      "verified": 3,
+      "normalized_generic_checks": 0,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 0,
+          "read": 0,
+          "fact": 0
+        }
+      ],
+      "stop_reason": "search_budget",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "1212",
+      "correct": false,
+      "constraints": 8,
+      "seed_queries": 6,
+      "invalid_seed_queries": 2,
+      "searches": 24,
+      "chinese_searches": 0,
+      "reads": 0,
+      "facts": 0,
+      "evidence_total": 5,
+      "evidence_retrieved": 1,
+      "evidence_read": 0,
+      "evidence_fact_sources": 0,
+      "all_evidence_retrieved": false,
+      "writer_candidates": [
+        "Unknown"
+      ],
+      "report_count": 1,
+      "review_count": 1,
+      "last_report_reviewed": true,
+      "checks": 8,
+      "verified": 0,
+      "normalized_generic_checks": 0,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 0,
+          "read": 0,
+          "fact": 0
+        }
+      ],
+      "stop_reason": "no_new_evidence",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "498",
+      "correct": false,
+      "constraints": 6,
+      "seed_queries": 6,
+      "invalid_seed_queries": 4,
+      "searches": 50,
+      "chinese_searches": 0,
+      "reads": 2,
+      "facts": 34,
+      "evidence_total": 5,
+      "evidence_retrieved": 1,
+      "evidence_read": 0,
+      "evidence_fact_sources": 0,
+      "all_evidence_retrieved": false,
+      "writer_candidates": [
+        "Unknown",
+        "Unknown"
+      ],
+      "report_count": 2,
+      "review_count": 2,
+      "last_report_reviewed": true,
+      "checks": 6,
+      "verified": 0,
+      "normalized_generic_checks": 3,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 14,
+          "read": 1,
+          "fact": 27
+        },
+        {
+          "search": 0,
+          "read": 0,
+          "fact": 0
+        }
+      ],
+      "stop_reason": "search_budget",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "826",
+      "correct": false,
+      "constraints": 9,
+      "seed_queries": 6,
+      "invalid_seed_queries": 0,
+      "searches": 37,
+      "chinese_searches": 0,
+      "reads": 0,
+      "facts": 0,
+      "evidence_total": 8,
+      "evidence_retrieved": 0,
+      "evidence_read": 0,
+      "evidence_fact_sources": 0,
+      "all_evidence_retrieved": false,
+      "writer_candidates": [
+        "Unknown"
+      ],
+      "report_count": 1,
+      "review_count": 1,
+      "last_report_reviewed": true,
+      "checks": 9,
+      "verified": 0,
+      "normalized_generic_checks": 0,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 6,
+          "read": 0,
+          "fact": 0
+        }
+      ],
+      "stop_reason": "no_new_evidence",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "905",
+      "correct": false,
+      "constraints": 5,
+      "seed_queries": 6,
+      "invalid_seed_queries": 2,
+      "searches": 50,
+      "chinese_searches": 0,
+      "reads": 0,
+      "facts": 0,
+      "evidence_total": 5,
+      "evidence_retrieved": 0,
+      "evidence_read": 0,
+      "evidence_fact_sources": 0,
+      "all_evidence_retrieved": false,
+      "writer_candidates": [
+        "Unknown"
+      ],
+      "report_count": 1,
+      "review_count": 1,
+      "last_report_reviewed": true,
+      "checks": 5,
+      "verified": 0,
+      "normalized_generic_checks": 0,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 0,
+          "read": 0,
+          "fact": 0
+        }
+      ],
+      "stop_reason": "search_budget",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "671",
+      "correct": false,
+      "constraints": 5,
+      "seed_queries": 6,
+      "invalid_seed_queries": 1,
+      "searches": 36,
+      "chinese_searches": 0,
+      "reads": 0,
+      "facts": 0,
+      "evidence_total": 3,
+      "evidence_retrieved": 0,
+      "evidence_read": 0,
+      "evidence_fact_sources": 0,
+      "all_evidence_retrieved": false,
+      "writer_candidates": [
+        "Unknown"
+      ],
+      "report_count": 1,
+      "review_count": 1,
+      "last_report_reviewed": true,
+      "checks": 5,
+      "verified": 0,
+      "normalized_generic_checks": 0,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 0,
+          "read": 0,
+          "fact": 0
+        }
+      ],
+      "stop_reason": "no_new_evidence",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "661",
+      "correct": true,
+      "constraints": 9,
+      "seed_queries": 6,
+      "invalid_seed_queries": 1,
+      "searches": 50,
+      "chinese_searches": 0,
+      "reads": 2,
+      "facts": 15,
+      "evidence_total": 7,
+      "evidence_retrieved": 7,
+      "evidence_read": 2,
+      "evidence_fact_sources": 2,
+      "all_evidence_retrieved": true,
+      "writer_candidates": [
+        "Ablade Glover",
+        "Ablade Glover"
+      ],
+      "report_count": 2,
+      "review_count": 2,
+      "last_report_reviewed": true,
+      "checks": 9,
+      "verified": 0,
+      "normalized_generic_checks": 5,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 7,
+          "read": 0,
+          "fact": 3
+        },
+        {
+          "search": 0,
+          "read": 0,
+          "fact": 0
+        }
+      ],
+      "stop_reason": "search_budget",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "337",
+      "correct": false,
+      "constraints": 6,
+      "seed_queries": 6,
+      "invalid_seed_queries": 2,
+      "searches": 30,
+      "chinese_searches": 0,
+      "reads": 0,
+      "facts": 1,
+      "evidence_total": 5,
+      "evidence_retrieved": 1,
+      "evidence_read": 0,
+      "evidence_fact_sources": 0,
+      "all_evidence_retrieved": false,
+      "writer_candidates": [
+        "Unknown"
+      ],
+      "report_count": 1,
+      "review_count": 1,
+      "last_report_reviewed": true,
+      "checks": 6,
+      "verified": 0,
+      "normalized_generic_checks": 0,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 0,
+          "read": 0,
+          "fact": 0
+        }
+      ],
+      "stop_reason": "no_new_evidence",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "501",
+      "correct": false,
+      "constraints": 9,
+      "seed_queries": 6,
+      "invalid_seed_queries": 1,
+      "searches": 50,
+      "chinese_searches": 0,
+      "reads": 2,
+      "facts": 17,
+      "evidence_total": 6,
+      "evidence_retrieved": 3,
+      "evidence_read": 1,
+      "evidence_fact_sources": 1,
+      "all_evidence_retrieved": false,
+      "writer_candidates": [
+        "Unknown",
+        "Unknown"
+      ],
+      "report_count": 2,
+      "review_count": 2,
+      "last_report_reviewed": true,
+      "checks": 9,
+      "verified": 3,
+      "normalized_generic_checks": 0,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 5,
+          "read": 0,
+          "fact": 2
+        },
+        {
+          "search": 5,
+          "read": 0,
+          "fact": 0
+        }
+      ],
+      "stop_reason": "search_budget",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "1038",
+      "correct": false,
+      "constraints": 8,
+      "seed_queries": 6,
+      "invalid_seed_queries": 0,
+      "searches": 37,
+      "chinese_searches": 0,
+      "reads": 3,
+      "facts": 30,
+      "evidence_total": 4,
+      "evidence_retrieved": 1,
+      "evidence_read": 0,
+      "evidence_fact_sources": 0,
+      "all_evidence_retrieved": false,
+      "writer_candidates": [
+        "Unknown",
+        "Unknown"
+      ],
+      "report_count": 2,
+      "review_count": 2,
+      "last_report_reviewed": true,
+      "checks": 8,
+      "verified": 0,
+      "normalized_generic_checks": 0,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 8,
+          "read": 2,
+          "fact": 7
+        },
+        {
+          "search": 0,
+          "read": 0,
+          "fact": 0
+        }
+      ],
+      "stop_reason": "no_new_evidence",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "169",
+      "correct": false,
+      "constraints": 7,
+      "seed_queries": 6,
+      "invalid_seed_queries": 0,
+      "searches": 50,
+      "chinese_searches": 0,
+      "reads": 0,
+      "facts": 0,
+      "evidence_total": 10,
+      "evidence_retrieved": 1,
+      "evidence_read": 0,
+      "evidence_fact_sources": 0,
+      "all_evidence_retrieved": false,
+      "writer_candidates": [
+        "Unknown"
+      ],
+      "report_count": 1,
+      "review_count": 1,
+      "last_report_reviewed": true,
+      "checks": 7,
+      "verified": 0,
+      "normalized_generic_checks": 0,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 0,
+          "read": 0,
+          "fact": 0
+        }
+      ],
+      "stop_reason": "search_budget",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "1253",
+      "correct": false,
+      "constraints": 7,
+      "seed_queries": 6,
+      "invalid_seed_queries": 0,
+      "searches": 21,
+      "chinese_searches": 0,
+      "reads": 0,
+      "facts": 0,
+      "evidence_total": 8,
+      "evidence_retrieved": 0,
+      "evidence_read": 0,
+      "evidence_fact_sources": 0,
+      "all_evidence_retrieved": false,
+      "writer_candidates": [
+        "Unknown"
+      ],
+      "report_count": 1,
+      "review_count": 1,
+      "last_report_reviewed": true,
+      "checks": 7,
+      "verified": 0,
+      "normalized_generic_checks": 0,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 2,
+          "read": 0,
+          "fact": 0
+        }
+      ],
+      "stop_reason": "no_new_evidence",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "1179",
+      "correct": false,
+      "constraints": 7,
+      "seed_queries": 6,
+      "invalid_seed_queries": 2,
+      "searches": 25,
+      "chinese_searches": 0,
+      "reads": 1,
+      "facts": 0,
+      "evidence_total": 7,
+      "evidence_retrieved": 2,
+      "evidence_read": 0,
+      "evidence_fact_sources": 0,
+      "all_evidence_retrieved": false,
+      "writer_candidates": [
+        "Unknown"
+      ],
+      "report_count": 1,
+      "review_count": 1,
+      "last_report_reviewed": true,
+      "checks": 7,
+      "verified": 0,
+      "normalized_generic_checks": 0,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 3,
+          "read": 0,
+          "fact": 0
+        }
+      ],
+      "stop_reason": "no_new_evidence",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "33",
+      "correct": false,
+      "constraints": 13,
+      "seed_queries": 6,
+      "invalid_seed_queries": 0,
+      "searches": 21,
+      "chinese_searches": 0,
+      "reads": 0,
+      "facts": 0,
+      "evidence_total": 8,
+      "evidence_retrieved": 2,
+      "evidence_read": 0,
+      "evidence_fact_sources": 0,
+      "all_evidence_retrieved": false,
+      "writer_candidates": [
+        "Unknown"
+      ],
+      "report_count": 1,
+      "review_count": 1,
+      "last_report_reviewed": true,
+      "checks": 13,
+      "verified": 0,
+      "normalized_generic_checks": 0,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 0,
+          "read": 0,
+          "fact": 0
+        }
+      ],
+      "stop_reason": "no_new_evidence",
+      "planner_restarts": 0,
+      "stage_retry_events": 2
+    },
+    {
+      "query_id": "8",
+      "correct": false,
+      "constraints": 5,
+      "seed_queries": 6,
+      "invalid_seed_queries": 0,
+      "searches": 21,
+      "chinese_searches": 0,
+      "reads": 0,
+      "facts": 0,
+      "evidence_total": 4,
+      "evidence_retrieved": 0,
+      "evidence_read": 0,
+      "evidence_fact_sources": 0,
+      "all_evidence_retrieved": false,
+      "writer_candidates": [
+        "Unknown"
+      ],
+      "report_count": 1,
+      "review_count": 1,
+      "last_report_reviewed": true,
+      "checks": 5,
+      "verified": 0,
+      "normalized_generic_checks": 0,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 0,
+          "read": 0,
+          "fact": 0
+        }
+      ],
+      "stop_reason": "no_new_evidence",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "716",
+      "correct": false,
+      "constraints": 8,
+      "seed_queries": 6,
+      "invalid_seed_queries": 4,
+      "searches": 50,
+      "chinese_searches": 0,
+      "reads": 1,
+      "facts": 14,
+      "evidence_total": 5,
+      "evidence_retrieved": 0,
+      "evidence_read": 0,
+      "evidence_fact_sources": 0,
+      "all_evidence_retrieved": false,
+      "writer_candidates": [
+        "Unknown",
+        "Unknown"
+      ],
+      "report_count": 2,
+      "review_count": 2,
+      "last_report_reviewed": true,
+      "checks": 8,
+      "verified": 0,
+      "normalized_generic_checks": 2,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 16,
+          "read": 0,
+          "fact": 2
+        },
+        {
+          "search": 0,
+          "read": 0,
+          "fact": 0
+        }
+      ],
+      "stop_reason": "search_budget",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "1092",
+      "correct": true,
+      "constraints": 5,
+      "seed_queries": 6,
+      "invalid_seed_queries": 0,
+      "searches": 43,
+      "chinese_searches": 0,
+      "reads": 3,
+      "facts": 22,
+      "evidence_total": 3,
+      "evidence_retrieved": 2,
+      "evidence_read": 2,
+      "evidence_fact_sources": 2,
+      "all_evidence_retrieved": false,
+      "writer_candidates": [
+        "Danny Graham",
+        "Unknown"
+      ],
+      "report_count": 2,
+      "review_count": 2,
+      "last_report_reviewed": true,
+      "checks": 5,
+      "verified": 4,
+      "normalized_generic_checks": 0,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 10,
+          "read": 1,
+          "fact": 10
+        },
+        {
+          "search": 3,
+          "read": 0,
+          "fact": 0
+        }
+      ],
+      "stop_reason": "no_new_evidence",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "714",
+      "correct": false,
+      "constraints": 8,
+      "seed_queries": 6,
+      "invalid_seed_queries": 3,
+      "searches": 37,
+      "chinese_searches": 0,
+      "reads": 2,
+      "facts": 12,
+      "evidence_total": 5,
+      "evidence_retrieved": 3,
+      "evidence_read": 1,
+      "evidence_fact_sources": 1,
+      "all_evidence_retrieved": false,
+      "writer_candidates": [
+        "Unknown",
+        "Kissiwa"
+      ],
+      "report_count": 2,
+      "review_count": 2,
+      "last_report_reviewed": true,
+      "checks": 8,
+      "verified": 4,
+      "normalized_generic_checks": 0,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 12,
+          "read": 1,
+          "fact": 3
+        },
+        {
+          "search": 0,
+          "read": 0,
+          "fact": 0
+        }
+      ],
+      "stop_reason": "no_new_evidence",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "802",
+      "correct": false,
+      "constraints": 10,
+      "seed_queries": 6,
+      "invalid_seed_queries": 2,
+      "searches": 24,
+      "chinese_searches": 0,
+      "reads": 1,
+      "facts": 11,
+      "evidence_total": 9,
+      "evidence_retrieved": 0,
+      "evidence_read": 0,
+      "evidence_fact_sources": 0,
+      "all_evidence_retrieved": false,
+      "writer_candidates": [
+        "Unknown",
+        "Unknown",
+        "Unknown"
+      ],
+      "report_count": 3,
+      "review_count": 3,
+      "last_report_reviewed": true,
+      "checks": 10,
+      "verified": 0,
+      "normalized_generic_checks": 4,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 5,
+          "read": 0,
+          "fact": 2
+        },
+        {
+          "search": 5,
+          "read": 0,
+          "fact": 1
+        }
+      ],
+      "stop_reason": "review_budget",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "497",
+      "correct": false,
+      "constraints": 11,
+      "seed_queries": 6,
+      "invalid_seed_queries": 1,
+      "searches": 26,
+      "chinese_searches": 0,
+      "reads": 2,
+      "facts": 29,
+      "evidence_total": 9,
+      "evidence_retrieved": 1,
+      "evidence_read": 0,
+      "evidence_fact_sources": 0,
+      "all_evidence_retrieved": false,
+      "writer_candidates": [
+        "Unknown"
+      ],
+      "report_count": 1,
+      "review_count": 1,
+      "last_report_reviewed": true,
+      "checks": 11,
+      "verified": 1,
+      "normalized_generic_checks": 0,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 0,
+          "read": 0,
+          "fact": 0
+        }
+      ],
+      "stop_reason": "no_new_evidence",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "742",
+      "correct": false,
+      "constraints": 6,
+      "seed_queries": 6,
+      "invalid_seed_queries": 2,
+      "searches": 32,
+      "chinese_searches": 0,
+      "reads": 0,
+      "facts": 0,
+      "evidence_total": 2,
+      "evidence_retrieved": 0,
+      "evidence_read": 0,
+      "evidence_fact_sources": 0,
+      "all_evidence_retrieved": false,
+      "writer_candidates": [
+        "Unknown"
+      ],
+      "report_count": 1,
+      "review_count": 1,
+      "last_report_reviewed": true,
+      "checks": 6,
+      "verified": 0,
+      "normalized_generic_checks": 0,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 3,
+          "read": 0,
+          "fact": 0
+        }
+      ],
+      "stop_reason": "no_new_evidence",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "959",
+      "correct": false,
+      "constraints": 9,
+      "seed_queries": 7,
+      "invalid_seed_queries": 3,
+      "searches": 29,
+      "chinese_searches": 0,
+      "reads": 0,
+      "facts": 0,
+      "evidence_total": 6,
+      "evidence_retrieved": 0,
+      "evidence_read": 0,
+      "evidence_fact_sources": 0,
+      "all_evidence_retrieved": false,
+      "writer_candidates": [
+        "Unknown"
+      ],
+      "report_count": 1,
+      "review_count": 1,
+      "last_report_reviewed": true,
+      "checks": 9,
+      "verified": 0,
+      "normalized_generic_checks": 0,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 3,
+          "read": 0,
+          "fact": 0
+        }
+      ],
+      "stop_reason": "no_new_evidence",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "15",
+      "correct": false,
+      "constraints": 8,
+      "seed_queries": 6,
+      "invalid_seed_queries": 0,
+      "searches": 33,
+      "chinese_searches": 0,
+      "reads": 0,
+      "facts": 1,
+      "evidence_total": 3,
+      "evidence_retrieved": 1,
+      "evidence_read": 0,
+      "evidence_fact_sources": 0,
+      "all_evidence_retrieved": false,
+      "writer_candidates": [
+        "Unknown"
+      ],
+      "report_count": 1,
+      "review_count": 1,
+      "last_report_reviewed": true,
+      "checks": 8,
+      "verified": 0,
+      "normalized_generic_checks": 0,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 3,
+          "read": 0,
+          "fact": 0
+        }
+      ],
+      "stop_reason": "no_new_evidence",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "542",
+      "correct": false,
+      "constraints": 8,
+      "seed_queries": 6,
+      "invalid_seed_queries": 4,
+      "searches": 50,
+      "chinese_searches": 0,
+      "reads": 0,
+      "facts": 0,
+      "evidence_total": 6,
+      "evidence_retrieved": 1,
+      "evidence_read": 0,
+      "evidence_fact_sources": 0,
+      "all_evidence_retrieved": false,
+      "writer_candidates": [
+        "Unknown"
+      ],
+      "report_count": 1,
+      "review_count": 1,
+      "last_report_reviewed": true,
+      "checks": 8,
+      "verified": 0,
+      "normalized_generic_checks": 0,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 2,
+          "read": 0,
+          "fact": 0
+        }
+      ],
+      "stop_reason": "search_budget",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "1049",
+      "correct": false,
+      "constraints": 9,
+      "seed_queries": 6,
+      "invalid_seed_queries": 2,
+      "searches": 16,
+      "chinese_searches": 0,
+      "reads": 2,
+      "facts": 5,
+      "evidence_total": 6,
+      "evidence_retrieved": 0,
+      "evidence_read": 0,
+      "evidence_fact_sources": 0,
+      "all_evidence_retrieved": false,
+      "writer_candidates": [
+        "Unknown"
+      ],
+      "report_count": 1,
+      "review_count": 1,
+      "last_report_reviewed": true,
+      "checks": 9,
+      "verified": 0,
+      "normalized_generic_checks": 1,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 4,
+          "read": 0,
+          "fact": 0
+        }
+      ],
+      "stop_reason": "no_new_evidence",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "1076",
+      "correct": false,
+      "constraints": 10,
+      "seed_queries": 6,
+      "invalid_seed_queries": 0,
+      "searches": 50,
+      "chinese_searches": 0,
+      "reads": 2,
+      "facts": 7,
+      "evidence_total": 8,
+      "evidence_retrieved": 5,
+      "evidence_read": 0,
+      "evidence_fact_sources": 0,
+      "all_evidence_retrieved": false,
+      "writer_candidates": [
+        "Unknown"
+      ],
+      "report_count": 1,
+      "review_count": 1,
+      "last_report_reviewed": true,
+      "checks": 10,
+      "verified": 0,
+      "normalized_generic_checks": 5,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 4,
+          "read": 0,
+          "fact": 0
+        }
+      ],
+      "stop_reason": "search_budget",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    },
+    {
+      "query_id": "27",
+      "correct": false,
+      "constraints": 8,
+      "seed_queries": 6,
+      "invalid_seed_queries": 1,
+      "searches": 40,
+      "chinese_searches": 0,
+      "reads": 2,
+      "facts": 15,
+      "evidence_total": 9,
+      "evidence_retrieved": 2,
+      "evidence_read": 0,
+      "evidence_fact_sources": 0,
+      "all_evidence_retrieved": false,
+      "writer_candidates": [
+        "Unknown"
+      ],
+      "report_count": 1,
+      "review_count": 1,
+      "last_report_reviewed": true,
+      "checks": 8,
+      "verified": 0,
+      "normalized_generic_checks": 4,
+      "review_has_substantive_note": true,
+      "supplements": [
+        {
+          "search": 4,
+          "read": 0,
+          "fact": 0
+        }
+      ],
+      "stop_reason": "no_new_evidence",
+      "planner_restarts": 0,
+      "stage_retry_events": 0
+    }
+  ]
+}
