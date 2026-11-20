@@ -1,0 +1,68 @@
+{
+  "_purpose": "S16完整dev100与回放原始证据、成本和来源哈希；不包含标准答案或标注编号。",
+  "dev100_summary": {
+    "n": 100,
+    "correct": 60,
+    "accuracy": 60.0,
+    "recall": 58.97,
+    "calibration_error": 32.28,
+    "calib_beta": 25,
+    "avg_confidence": 40.2,
+    "runner_errors": 0,
+    "avg_search": 21.38,
+    "avg_read": 1.55,
+    "avg_prompt_tokens": 405375,
+    "avg_completion_tokens": 15717,
+    "avg_seconds": 149.2,
+    "confidence_source": "response_field_when_valid_else_original_judge",
+    "run": "s16-v20-qwen37-dev100-reuse20",
+    "version": "v2.0",
+    "dataset": "dev100",
+    "judge_model": "qwen/qwen3.7-flash"
+  },
+  "baseline_summary": {
+    "n": 100,
+    "correct": 52,
+    "accuracy": 52.0,
+    "recall": 56.98,
+    "calibration_error": 22.64,
+    "calib_beta": 25,
+    "avg_confidence": 38.4,
+    "runner_errors": 0,
+    "avg_search": 21.84,
+    "avg_read": 1.6,
+    "avg_prompt_tokens": 493528,
+    "avg_completion_tokens": 15270,
+    "avg_seconds": 135.08,
+    "confidence_source": "response_field_when_valid_else_original_judge",
+    "run": "s15-v19-qwen37-dev100-reuse20",
+    "version": "v1.9",
+    "dataset": "dev100",
+    "judge_model": "qwen/qwen3.7-flash"
+  },
+  "compare_output": "s15-v19-qwen37-dev100-reuse20 → s16-v20-qwen37-dev100-reuse20  共同 100 题  A 对 52  B 对 60  +13 / -5\n改善: 132 323 670 836 171 392 583 996 501 497 33 959 169\n退步: 570 472 968 714 802",
+  "replay_output": "100 题，平均每题 23.9 条搜索词\n     default  recall@5  27.5%（零召回 49 题）  recall@20  36.9%（零召回 28 题）  recall@100  48.5%（零召回 14 题）\n       k25b1  recall@5  43.2%（零召回 21 题）  recall@20  56.8%（零召回 9 题）  recall@100  68.6%（零召回 4 题）\n         psg  recall@5  40.8%（零召回 26 题）  recall@20  50.4%（零召回 13 题）  recall@100  63.9%（零召回 6 题）",
+  "source_sha256": {
+    "results.jsonl": "38c23a7cd24c9051cbb67bc541272b32d8a11c098882bc0c7c9cdad659ed573c",
+    "judged.jsonl": "786654bffb58259e2460d7085e6686f3fdbd79b477045c2f951bd703512d1b91",
+    "summary.json": "82e6fa3a00a8fd7ca9362f7eb1b6ddbeb57fbdb7f196d40dc9c5cc8532ab75ee",
+    "config.json": "906515a96c47210992ecabb3b4f7469fef56f1eed83865368fc5607f6c226542"
+  },
+  "disk_bytes": {
+    "default": 785708898,
+    "k25b1": 785708899,
+    "psg": 2788819629
+  },
+  "cost": {
+    "reported_cumulative_before_usd": 1.55,
+    "reported_cumulative_after_usd": 2.29,
+    "difference_usd": 0.74,
+    "scope_uncertainty": "累计差，不是完整100题成本；账单覆盖范围未独立核验。"
+  },
+  "tutor_acceptance": {
+    "result": "pass",
+    "summary": "会用数据否决改动了。",
+    "missing": [],
+    "next_step_id": "S17"
+  }
+}
