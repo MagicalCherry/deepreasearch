@@ -11,6 +11,17 @@ from app.llm import LLMError
 from app.trace import Trace
 from app.s4.deep_research_v2.state import ResearchPhase, create_initial_state
 from .team import DRArchitect, DRScout, DRWriter, DRCritic
+from .confidence import rule_confidence, last_verification
+
+
+def final_confidence(answer, trace, opts):
+    """仅v2.3最终返回前应用规则，避免被旧版模型自报或封顶函数覆盖。"""
+    if opts.get('confidence') != 'rule':
+        return answer
+    counts = last_verification(trace.events)
+    if counts is None:
+        return answer
+    return rule_confidence(answer, *counts)
 
 
 async def _run_once(question: str, trace: Trace, opts: dict) -> str:
@@ -73,10 +84,10 @@ async def run(question: str, trace: Trace, opts: dict[str, Any]) -> str:
     """整题最多重试两次；欠费、内容审核和取消直接向上传播，全部尝试计入用量。"""
     if opts.get('flow_fixes'):
         from .flow_fixes import run as resilient_run
-        return await resilient_run(question, trace, deepcopy(opts))
+        return final_confidence(await resilient_run(question, trace, deepcopy(opts)), trace, opts)
     for attempt in range(opts.get("retries", 2) + 1):
         try:
-            return await _run_once(question, trace, deepcopy(opts))
+            return final_confidence(await _run_once(question, trace, deepcopy(opts)), trace, opts)
         except LLMError as exc:
             if exc.kind in {"arrearage", "content_filter"} or attempt >= opts.get("retries", 2):
                 raise
