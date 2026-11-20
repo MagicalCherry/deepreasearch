@@ -10,16 +10,17 @@ from app.config import settings
 class SearchClient:
     """异步访问课程提供的 BM25 检索服务。"""
 
-    def __init__(self) -> None:
+    def __init__(self, index: str | None = None) -> None:
         self.base_url = settings.search_url.rstrip("/")
+        self.index = index
         self.client = httpx.AsyncClient(base_url=self.base_url, timeout=30.0)
 
     async def search(self, q: str, k: int = 5) -> dict[str, Any]:
         """搜索语料，返回查询信息和带标题、片段的结果。"""
-        response = await self.client.get(
-            "/search",
-            params={"q": q, "k": k},
-        )
+        params = {"q": q, "k": k}
+        if self.index is not None:
+            params['index'] = self.index
+        response = await self.client.get("/search", params=params)
         response.raise_for_status()
         return response.json()
 

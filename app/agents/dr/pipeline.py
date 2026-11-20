@@ -17,7 +17,7 @@ async def _run_once(question: str, trace: Trace, opts: dict) -> str:
     llm = s4_port.LLM(trace=trace)
     search = None
     try:
-        search = s4_port.SearchClient()
+        search = s4_port.SearchClient(**({'index': opts['index']} if 'index' in opts else {}))
         sources: dict[str, str] = {}
         state = create_initial_state(question, uuid4().hex)
         state["max_iterations"] = opts.get("max_iterations", 3)

@@ -118,3 +118,6 @@ dr_version('v1.7', '约束核对与置信度封顶', '逐条核对约束与来�
 
 dr_version('v1.8', 'ReAct侦探', '每个子问题用搜索和正文工具交替取证，最多12次工具调用，发现报告交给Writer。',
            scout='react', scout_tool_calls=12)
+
+dr_version('v1.9', 'BM25索引调参', '继承ReAct侦探，仅切换k25b1索引（k1=25、b=1）。',
+           index='k25b1')

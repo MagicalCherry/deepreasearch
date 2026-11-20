@@ -42,21 +42,21 @@ def read_dataset(dataset: str) -> list[dict]:
     ).splitlines() if line.strip()]
 
 
-async def search_config(enabled: bool) -> dict:
-    """从服务健康接口读取索引快照；记录配置不等于向模型提供检索工具。"""
+async def search_config(enabled: bool, index: str | None = None) -> dict:
+    """读取实际选用索引的快照；未指定时仍使用服务默认索引，不静默回退。"""
     client = SearchClient()
     try:
         health = await client.health()
     finally:
         await client.close()
-    name = health["default_index"]
-    index = next((item for item in health["indexes"] if item["name"] == name), None)
-    if health.get("status") != "ok" or index is None or index.get("status") != "ready":
-        raise ValueError("默认检索索引未就绪，无法保存评测配置")
+    name = index if index is not None else health["default_index"]
+    selected = next((item for item in health["indexes"] if item["name"] == name), None)
+    if health.get("status") != "ok" or selected is None or selected.get("status") != "ready":
+        raise ValueError("检索索引未就绪，无法保存评测配置")
     return {
         "enabled": enabled, "url": settings.search_url,
         "index": name,
-        "parameters": {key: index[key] for key in ("k1", "b", "unit")},
+        "parameters": {key: selected[key] for key in ("k1", "b", "unit")},
         "docs": health["docs"],
     }
 
@@ -155,7 +155,8 @@ async def run_eval(dataset: str, version: str, concurrency: int, run_id: str) ->
         "git_sha": git_sha(), "max_tokens": settings.max_tokens,
         "budget": {"seconds": registered.options.get("timeout_seconds", 600),
                    "n_search": registered.options.get("max_search_calls", 50)},
-        "search": await search_config(enabled=version != "v0-closedbook"),
+        "search": await search_config(enabled=version != "v0-closedbook",
+            **({'index': registered.options['index']} if 'index' in registered.options else {})),
         "questions_sha256": hashlib.sha256(json.dumps(questions, sort_keys=True).encode()).hexdigest(),
     }
     directory = RUNS_DIR / run_id
