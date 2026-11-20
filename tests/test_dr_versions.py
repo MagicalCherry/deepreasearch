@@ -80,3 +80,11 @@ def test_v18_adds_react_scout_with_twelve_tool_calls():
     version = get_version('v1.8')
     assert version.options == {**previous, 'scout': 'react', 'scout_tool_calls': 12}
     assert get_version('v1.7').options == previous
+
+
+def test_v19_adds_only_bm25_index_option():
+    """v1.9仅选用k25b1索引，保留v1.8全部角色和工具预算配置。"""
+    previous = deepcopy(get_version('v1.8').options)
+    version = get_version('v1.9')
+    assert version.options == {**previous, 'index': 'k25b1'}
+    assert get_version('v1.8').options == previous
