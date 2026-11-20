@@ -1,0 +1,168 @@
+{
+  "_purpose": "S18 600秒smoke20原始汇总、与v2.1对照及离线耗时/证据诊断，不改写原运行。",
+  "summary": {
+    "n": 20,
+    "correct": 13,
+    "accuracy": 65.0,
+    "recall": 66.21,
+    "calibration_error": 16.1,
+    "calib_beta": 5,
+    "avg_confidence": 55.8,
+    "runner_errors": 0,
+    "avg_search": 22.4,
+    "avg_read": 6.2,
+    "avg_prompt_tokens": 577884,
+    "avg_completion_tokens": 18562,
+    "avg_seconds": 191.14,
+    "confidence_source": "response_field_when_valid_else_original_judge",
+    "run": "s18-v22-600-qwen37-smoke20",
+    "version": "v2.2",
+    "dataset": "smoke20",
+    "judge_model": "qwen/qwen3.7-flash"
+  },
+  "baseline_summary": {
+    "n": 20,
+    "correct": 17,
+    "accuracy": 85.0,
+    "recall": 71.08,
+    "calibration_error": 35.47,
+    "calib_beta": 5,
+    "avg_confidence": 60.0,
+    "runner_errors": 0,
+    "avg_search": 24.05,
+    "avg_read": 7.15,
+    "avg_prompt_tokens": 599044,
+    "avg_completion_tokens": 18922,
+    "avg_seconds": 179.13,
+    "confidence_source": "response_field_when_valid_else_original_judge",
+    "run": "s17-v21-qwen37-smoke20",
+    "version": "v2.1",
+    "dataset": "smoke20",
+    "judge_model": "qwen/qwen3.7-flash"
+  },
+  "latency": {
+    "n": 20,
+    "avg_seconds": 191.143,
+    "p90_seconds": 288.86668869999994,
+    "max_seconds": 420.25268599999254,
+    "time_budget_count": 0,
+    "time_budget_query_ids": [],
+    "runner_errors": 0,
+    "p90_method": "nearest_rank_ceil",
+    "scope": "每题最后记录，含错误题；不含被续跑替代的失败尝试耗时，不是批次吞吐或全部计费。"
+  },
+  "baseline_latency": {
+    "n": 20,
+    "avg_seconds": 179.132,
+    "p90_seconds": 263.9691934000002,
+    "max_seconds": 305.6609707000025,
+    "time_budget_count": 0,
+    "time_budget_query_ids": [],
+    "runner_errors": 0,
+    "p90_method": "nearest_rank_ceil",
+    "scope": "每题最后记录，含错误题；不含被续跑替代的失败尝试耗时，不是批次吞吐或全部计费。"
+  },
+  "improved": [],
+  "regressed": [
+    "422",
+    "1025",
+    "486",
+    "297"
+  ],
+  "regression_evidence": [
+    {
+      "query_id": "422",
+      "old_evidence_hit": 9,
+      "new_evidence_hit": 0,
+      "evidence_total": 10,
+      "new_stop_reason": "no_new_evidence",
+      "new_seconds": 223.23814069999207,
+      "time_budget_events": []
+    },
+    {
+      "query_id": "1025",
+      "old_evidence_hit": 6,
+      "new_evidence_hit": 1,
+      "evidence_total": 7,
+      "new_stop_reason": "review_budget",
+      "new_seconds": 226.34696640000038,
+      "time_budget_events": []
+    },
+    {
+      "query_id": "486",
+      "old_evidence_hit": 6,
+      "new_evidence_hit": 8,
+      "evidence_total": 11,
+      "new_stop_reason": "review_budget",
+      "new_seconds": 420.25268599999254,
+      "time_budget_events": []
+    },
+    {
+      "query_id": "297",
+      "old_evidence_hit": 1,
+      "new_evidence_hit": 1,
+      "evidence_total": 8,
+      "new_stop_reason": "review_budget",
+      "new_seconds": 296.3265065000014,
+      "time_budget_events": []
+    }
+  ],
+  "config": {
+    "version": "v2.2",
+    "model": "qwen/qwen3.7-flash",
+    "dataset": "smoke20",
+    "llm_provider": "openrouter",
+    "llm_base_url": "https://openrouter.ai/api/v1",
+    "concurrency": 8,
+    "options": {
+      "max_iterations": 3,
+      "retries": 2,
+      "timeout_seconds": null,
+      "max_search_calls": null,
+      "planner": "constraints",
+      "expand": 2,
+      "analysis": "hypothesis",
+      "read_docs": true,
+      "max_searches": 50,
+      "max_reads": 8,
+      "doc_max_tokens": 8000,
+      "writer": "memo",
+      "critic": "constraints",
+      "scout": "react",
+      "scout_rounds": 6,
+      "k_per_query": 5,
+      "neardup": true,
+      "flow_fixes": true,
+      "scout_tool_calls": 12,
+      "index": "k25b1",
+      "scout_citation_repair": true,
+      "snippet": "passage",
+      "toolset": "pi",
+      "search_depth": 200,
+      "page_chars": 1200,
+      "title_ranks": 15,
+      "fact_dedup": "full_text",
+      "time_budget": 600,
+      "answer_reserve": 60
+    },
+    "git_sha": "07cf78fbe5ee388da67a1f1781fa21e3fe9fc91b",
+    "max_tokens": 65536,
+    "budget": {
+      "seconds": 600,
+      "n_search": null
+    },
+    "search": {
+      "enabled": true,
+      "url": "http://localhost:8765",
+      "index": "k25b1",
+      "parameters": {
+        "k1": 25.0,
+        "b": 1.0,
+        "unit": "doc"
+      },
+      "docs": 100195,
+      "snippet": "passage"
+    },
+    "questions_sha256": "d0593d99b8ac2a1579102cac8685536de75b6be0a7eab45434b5f7113b013f28"
+  }
+}
