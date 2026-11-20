@@ -1,0 +1,648 @@
+{
+  "_purpose": "S18正式验收证据：两组原始汇总、逐题对照、耗时分布与错误尝试统计；只读历史结果，不调用模型或改写原运行。",
+  "summaries": {
+    "v21": {
+      "n": 100,
+      "correct": 71,
+      "accuracy": 71.0,
+      "recall": 68.71,
+      "calibration_error": 29.52,
+      "calib_beta": 25,
+      "avg_confidence": 51.0,
+      "runner_errors": 0,
+      "avg_search": 23.87,
+      "avg_read": 6.52,
+      "avg_prompt_tokens": 595195,
+      "avg_completion_tokens": 18499,
+      "avg_seconds": 181.58,
+      "confidence_source": "response_field_when_valid_else_original_judge",
+      "run": "s17-v21-qwen37-dev100-reuse20",
+      "version": "v2.1",
+      "dataset": "dev100",
+      "judge_model": "qwen/qwen3.7-flash"
+    },
+    "600": {
+      "n": 100,
+      "correct": 63,
+      "accuracy": 63.0,
+      "recall": 67.59,
+      "calibration_error": 21.02,
+      "calib_beta": 25,
+      "avg_confidence": 48.8,
+      "runner_errors": 0,
+      "avg_search": 21.92,
+      "avg_read": 5.89,
+      "avg_prompt_tokens": 557093,
+      "avg_completion_tokens": 18079,
+      "avg_seconds": 187.23,
+      "confidence_source": "response_field_when_valid_else_original_judge",
+      "run": "s18-v22-600-qwen37-dev100-reuse20",
+      "version": "v2.2",
+      "dataset": "dev100",
+      "judge_model": "qwen/qwen3.7-flash"
+    },
+    "300": {
+      "n": 100,
+      "correct": 65,
+      "accuracy": 65.0,
+      "recall": 64.75,
+      "calibration_error": 29.11,
+      "calib_beta": 25,
+      "avg_confidence": 48.2,
+      "runner_errors": 2,
+      "avg_search": 20.21,
+      "avg_read": 4.93,
+      "avg_prompt_tokens": 492541,
+      "avg_completion_tokens": 15531,
+      "avg_seconds": 184.28,
+      "confidence_source": "response_field_when_valid_else_original_judge",
+      "run": "s18-v22-300-qwen37-dev100-reuse20",
+      "version": "v2.2",
+      "dataset": "dev100",
+      "judge_model": "qwen/qwen3.7-flash"
+    }
+  },
+  "summary_raw": {
+    "v21": "{\n  \"n\": 100,\n  \"correct\": 71,\n  \"accuracy\": 71.0,\n  \"recall\": 68.71,\n  \"calibration_error\": 29.52,\n  \"calib_beta\": 25,\n  \"avg_confidence\": 51.0,\n  \"runner_errors\": 0,\n  \"avg_search\": 23.87,\n  \"avg_read\": 6.52,\n  \"avg_prompt_tokens\": 595195,\n  \"avg_completion_tokens\": 18499,\n  \"avg_seconds\": 181.58,\n  \"confidence_source\": \"response_field_when_valid_else_original_judge\",\n  \"run\": \"s17-v21-qwen37-dev100-reuse20\",\n  \"version\": \"v2.1\",\n  \"dataset\": \"dev100\",\n  \"judge_model\": \"qwen/qwen3.7-flash\"\n}",
+    "600": "{\n  \"n\": 100,\n  \"correct\": 63,\n  \"accuracy\": 63.0,\n  \"recall\": 67.59,\n  \"calibration_error\": 21.02,\n  \"calib_beta\": 25,\n  \"avg_confidence\": 48.8,\n  \"runner_errors\": 0,\n  \"avg_search\": 21.92,\n  \"avg_read\": 5.89,\n  \"avg_prompt_tokens\": 557093,\n  \"avg_completion_tokens\": 18079,\n  \"avg_seconds\": 187.23,\n  \"confidence_source\": \"response_field_when_valid_else_original_judge\",\n  \"run\": \"s18-v22-600-qwen37-dev100-reuse20\",\n  \"version\": \"v2.2\",\n  \"dataset\": \"dev100\",\n  \"judge_model\": \"qwen/qwen3.7-flash\"\n}",
+    "300": "{\n  \"n\": 100,\n  \"correct\": 65,\n  \"accuracy\": 65.0,\n  \"recall\": 64.75,\n  \"calibration_error\": 29.11,\n  \"calib_beta\": 25,\n  \"avg_confidence\": 48.2,\n  \"runner_errors\": 2,\n  \"avg_search\": 20.21,\n  \"avg_read\": 4.93,\n  \"avg_prompt_tokens\": 492541,\n  \"avg_completion_tokens\": 15531,\n  \"avg_seconds\": 184.28,\n  \"confidence_source\": \"response_field_when_valid_else_original_judge\",\n  \"run\": \"s18-v22-300-qwen37-dev100-reuse20\",\n  \"version\": \"v2.2\",\n  \"dataset\": \"dev100\",\n  \"judge_model\": \"qwen/qwen3.7-flash\"\n}"
+  },
+  "comparisons": {
+    "v21->600": {
+      "n": 100,
+      "plus": 4,
+      "minus": 12,
+      "improved": [
+        "161",
+        "169",
+        "436",
+        "1058"
+      ],
+      "regressed": [
+        "297",
+        "356",
+        "422",
+        "472",
+        "486",
+        "497",
+        "593",
+        "724",
+        "742",
+        "944",
+        "1025",
+        "1188"
+      ],
+      "regressed_runner_errors": [],
+      "regressed_time_budget": []
+    },
+    "v21->300": {
+      "n": 100,
+      "plus": 4,
+      "minus": 10,
+      "improved": [
+        "323",
+        "650",
+        "1076",
+        "1217"
+      ],
+      "regressed": [
+        "53",
+        "422",
+        "486",
+        "497",
+        "571",
+        "836",
+        "944",
+        "1025",
+        "1177",
+        "1188"
+      ],
+      "regressed_runner_errors": [
+        "53"
+      ],
+      "regressed_time_budget": [
+        "486",
+        "497",
+        "836",
+        "944",
+        "1177"
+      ]
+    },
+    "600->300": {
+      "n": 100,
+      "plus": 10,
+      "minus": 8,
+      "improved": [
+        "297",
+        "323",
+        "356",
+        "472",
+        "593",
+        "650",
+        "724",
+        "742",
+        "1076",
+        "1217"
+      ],
+      "regressed": [
+        "53",
+        "161",
+        "169",
+        "436",
+        "571",
+        "836",
+        "1058",
+        "1177"
+      ],
+      "regressed_runner_errors": [
+        "53"
+      ],
+      "regressed_time_budget": [
+        "161",
+        "169",
+        "436",
+        "836",
+        "1177"
+      ]
+    }
+  },
+  "latency": {
+    "v21": {
+      "n": 100,
+      "avg_seconds": 181.581,
+      "p90_seconds": 272.8964585999929,
+      "max_seconds": 360.6911405999999,
+      "time_budget_count": 0,
+      "time_budget_query_ids": [],
+      "runner_errors": 0,
+      "p90_method": "nearest_rank_ceil",
+      "scope": "每题最后记录，含错误题；不含被续跑替代的失败尝试耗时，不是批次吞吐或全部计费。"
+    },
+    "600": {
+      "n": 100,
+      "avg_seconds": 187.227,
+      "p90_seconds": 310.0865208000032,
+      "max_seconds": 532.1823788000038,
+      "time_budget_count": 2,
+      "time_budget_query_ids": [
+        "27",
+        "8"
+      ],
+      "runner_errors": 0,
+      "p90_method": "nearest_rank_ceil",
+      "scope": "每题最后记录，含错误题；不含被续跑替代的失败尝试耗时，不是批次吞吐或全部计费。"
+    },
+    "300": {
+      "n": 100,
+      "avg_seconds": 184.275,
+      "p90_seconds": 241.59818499999528,
+      "max_seconds": 294.0689682999946,
+      "time_budget_count": 50,
+      "time_budget_query_ids": [
+        "1022",
+        "1049",
+        "1052",
+        "1177",
+        "1179",
+        "1248",
+        "1253",
+        "131",
+        "161",
+        "169",
+        "171",
+        "193",
+        "226",
+        "244",
+        "27",
+        "297",
+        "33",
+        "356",
+        "436",
+        "472",
+        "473",
+        "483",
+        "486",
+        "497",
+        "500",
+        "501",
+        "517",
+        "593",
+        "603",
+        "636",
+        "650",
+        "671",
+        "709",
+        "71",
+        "710",
+        "738",
+        "760",
+        "8",
+        "802",
+        "836",
+        "865",
+        "905",
+        "93",
+        "934",
+        "942",
+        "944",
+        "959",
+        "961",
+        "972",
+        "996"
+      ],
+      "runner_errors": 2,
+      "p90_method": "nearest_rank_ceil",
+      "scope": "每题最后记录，含错误题；不含被续跑替代的失败尝试耗时，不是批次吞吐或全部计费。"
+    }
+  },
+  "extra": {
+    "600": {
+      "hard_cutoff_ids": [],
+      "hard_cutoff_count": 0,
+      "latest_errors": [],
+      "over_total_budget_ids": [],
+      "failed_attempts_saved": 18,
+      "failed_attempt_seconds_saved": 2594.3964225999953,
+      "time_budget_event_ids": [
+        "8",
+        "27"
+      ]
+    },
+    "300": {
+      "hard_cutoff_ids": [
+        "486",
+        "226",
+        "161",
+        "298",
+        "53",
+        "472",
+        "436",
+        "709"
+      ],
+      "hard_cutoff_count": 8,
+      "latest_errors": [
+        "298",
+        "53"
+      ],
+      "over_total_budget_ids": [],
+      "failed_attempts_saved": 4,
+      "failed_attempt_seconds_saved": 1168.5437579000136,
+      "time_budget_event_ids": [
+        "93",
+        "473",
+        "486",
+        "226",
+        "710",
+        "1248",
+        "972",
+        "297",
+        "1022",
+        "934",
+        "865",
+        "161",
+        "650",
+        "298",
+        "53",
+        "472",
+        "436",
+        "483",
+        "709",
+        "961",
+        "517",
+        "944",
+        "738",
+        "356",
+        "593",
+        "244",
+        "500",
+        "636",
+        "193",
+        "1052",
+        "71",
+        "501",
+        "1179",
+        "802",
+        "497",
+        "169",
+        "1253",
+        "33",
+        "959",
+        "1049",
+        "27"
+      ]
+    }
+  },
+  "error_details": [
+    {
+      "query_id": "298",
+      "attempt_count": 2,
+      "attempts": [
+        {
+          "attempt": 1,
+          "seconds": 292.08672400000796,
+          "error": "LLMError: other: Connection error.",
+          "stop_reason": "other",
+          "time_events": [
+            {
+              "reason": "time_budget",
+              "items": [
+                "侦探达到工具或轮次上限，按已有证据整理发现报告。"
+              ],
+              "event": "plan",
+              "t": 210.24971760000335,
+              "agent": "scout"
+            },
+            {
+              "reason": "time_budget",
+              "items": [
+                "研究硬截止已到，研究任务已取消；按已有事实作答，未完成审核不视为通过。"
+              ],
+              "event": "plan",
+              "t": 240.0007145999989,
+              "agent": "planner"
+            }
+          ],
+          "answer_errors": [
+            {
+              "kind": "stage_error",
+              "error_type": "LLMError",
+              "error_kind": "timeout",
+              "message": "当前阶段执行失败",
+              "attempt": 1,
+              "will_retry": true,
+              "event": "stage_output",
+              "t": 256.0255576000054,
+              "agent": "answer"
+            },
+            {
+              "kind": "stage_error",
+              "error_type": "LLMError",
+              "error_kind": "other",
+              "message": "当前阶段执行失败",
+              "attempt": 2,
+              "will_retry": true,
+              "event": "stage_output",
+              "t": 274.05239820000133,
+              "agent": "answer"
+            },
+            {
+              "kind": "stage_error",
+              "error_type": "LLMError",
+              "error_kind": "other",
+              "message": "当前阶段执行失败",
+              "attempt": 3,
+              "will_retry": false,
+              "event": "stage_output",
+              "t": 292.0863268000103,
+              "agent": "answer"
+            }
+          ]
+        },
+        {
+          "attempt": 2,
+          "seconds": 294.0689682999946,
+          "error": "LLMError: other: Connection error.",
+          "stop_reason": "other",
+          "time_events": [
+            {
+              "reason": "time_budget",
+              "items": [
+                "研究硬截止已到，研究任务已取消；按已有事实作答，未完成审核不视为通过。"
+              ],
+              "event": "plan",
+              "t": 239.99661099999503,
+              "agent": "planner"
+            }
+          ],
+          "answer_errors": [
+            {
+              "kind": "stage_error",
+              "error_type": "LLMError",
+              "error_kind": "other",
+              "message": "当前阶段执行失败",
+              "attempt": 1,
+              "will_retry": true,
+              "event": "stage_output",
+              "t": 258.01029829999607,
+              "agent": "answer"
+            },
+            {
+              "kind": "stage_error",
+              "error_type": "LLMError",
+              "error_kind": "timeout",
+              "message": "当前阶段执行失败",
+              "attempt": 2,
+              "will_retry": true,
+              "event": "stage_output",
+              "t": 276.03230880000046,
+              "agent": "answer"
+            },
+            {
+              "kind": "stage_error",
+              "error_type": "LLMError",
+              "error_kind": "other",
+              "message": "当前阶段执行失败",
+              "attempt": 3,
+              "will_retry": false,
+              "event": "stage_output",
+              "t": 294.0683646999969,
+              "agent": "answer"
+            }
+          ]
+        }
+      ],
+      "classification": "answer_api_connection_error_after_research_hard_cutoff",
+      "root_cause_status": "unknown; saved logs have no underlying transport exception chain"
+    },
+    {
+      "query_id": "53",
+      "attempt_count": 2,
+      "attempts": [
+        {
+          "attempt": 1,
+          "seconds": 292.0884956000082,
+          "error": "LLMError: other: Connection error.",
+          "stop_reason": "other",
+          "time_events": [
+            {
+              "reason": "time_budget",
+              "items": [
+                "侦探达到工具或轮次上限，按已有证据整理发现报告。"
+              ],
+              "event": "plan",
+              "t": 213.3715957999957,
+              "agent": "scout"
+            },
+            {
+              "reason": "time_budget",
+              "items": [
+                "研究硬截止已到，研究任务已取消；按已有事实作答，未完成审核不视为通过。"
+              ],
+              "event": "plan",
+              "t": 239.99877020000713,
+              "agent": "planner"
+            }
+          ],
+          "answer_errors": [
+            {
+              "kind": "stage_error",
+              "error_type": "LLMError",
+              "error_kind": "other",
+              "message": "当前阶段执行失败",
+              "attempt": 1,
+              "will_retry": true,
+              "event": "stage_output",
+              "t": 256.03358540000045,
+              "agent": "answer"
+            },
+            {
+              "kind": "stage_error",
+              "error_type": "LLMError",
+              "error_kind": "other",
+              "message": "当前阶段执行失败",
+              "attempt": 2,
+              "will_retry": true,
+              "event": "stage_output",
+              "t": 274.06014549999963,
+              "agent": "answer"
+            },
+            {
+              "kind": "stage_error",
+              "error_type": "LLMError",
+              "error_kind": "other",
+              "message": "当前阶段执行失败",
+              "attempt": 3,
+              "will_retry": false,
+              "event": "stage_output",
+              "t": 292.0882130999962,
+              "agent": "answer"
+            }
+          ]
+        },
+        {
+          "attempt": 2,
+          "seconds": 290.29957000000286,
+          "error": "LLMError: other: Connection error.",
+          "stop_reason": "other",
+          "time_events": [
+            {
+              "reason": "time_budget",
+              "items": [
+                "研究硬截止已到，研究任务已取消；按已有事实作答，未完成审核不视为通过。"
+              ],
+              "event": "plan",
+              "t": 240.01414490000752,
+              "agent": "planner"
+            }
+          ],
+          "answer_errors": [
+            {
+              "kind": "stage_error",
+              "error_type": "LLMError",
+              "error_kind": "other",
+              "message": "当前阶段执行失败",
+              "attempt": 1,
+              "will_retry": true,
+              "event": "stage_output",
+              "t": 254.24224110000068,
+              "agent": "answer"
+            },
+            {
+              "kind": "stage_error",
+              "error_type": "LLMError",
+              "error_kind": "other",
+              "message": "当前阶段执行失败",
+              "attempt": 2,
+              "will_retry": true,
+              "event": "stage_output",
+              "t": 272.25797299999977,
+              "agent": "answer"
+            },
+            {
+              "kind": "stage_error",
+              "error_type": "LLMError",
+              "error_kind": "other",
+              "message": "当前阶段执行失败",
+              "attempt": 3,
+              "will_retry": false,
+              "event": "stage_output",
+              "t": 290.2990443000017,
+              "agent": "answer"
+            }
+          ]
+        }
+      ],
+      "classification": "answer_api_connection_error_after_research_hard_cutoff",
+      "root_cause_status": "unknown; saved logs have no underlying transport exception chain"
+    }
+  ],
+  "pytest_user_output": "258 passed in 2.45s",
+  "hashes": {
+    "v21": {
+      "config.json": "43f482bd7662fac7a5106e592fb2e3a34f4b785038a0020bc324e706d322b661",
+      "results.jsonl": "b7eae9ce7f5217c6d1e012149c6473f64fc69028d686ac71b4f83f85fce3037b",
+      "judged.jsonl": "ecbc03677bdfafc42e3c1870a1b8f5c4e110fd31b06a52dab979c4ff54b91dfb",
+      "summary.json": "9a6292489c04cb7641177de9a2585a802980bf8b24d1e114bf8027116bc0cf75"
+    },
+    "600": {
+      "config.json": "57addbcc0e0612d3211c755cf3ca8a8f25ef0030657318e37982c13d6b88cbbc",
+      "results.jsonl": "5398763f15e04828bbe7cbbfbaacb51364108d7bd10f4b731cb5e2f951a6c0fe",
+      "judged.jsonl": "cdfbbb0cfff442cb003ffee848fd4e2fa86e8da1c70549d521c87e4f37b3cbbd",
+      "summary.json": "0d3af3b5fe5061f4520ddbc15ec353ab3f65708fa2c63fcd009923cde5684a4d"
+    },
+    "300": {
+      "config.json": "76d33091b06fbe3ca727aa92c5ec5aba4dd55553cdbb6269ee0428edff43fbb2",
+      "results.jsonl": "963ad9d00235301f3d2bdc7337ccabf732d2ad9bf08fd18b541bb1ca048c6cce",
+      "judged.jsonl": "4a7911bc93b07177241b56b58735ff6d6b0f81d9bbdbf484c893c9bb9e4494b9",
+      "summary.json": "b39d93cd6dbc6a09195569824cb43b09f688140e14f31b0f93cc645d97a67c7b"
+    }
+  },
+  "budget_choice": {
+    "time_budget": 300,
+    "answer_reserve": 60,
+    "status": "本阶段推荐运行覆盖，不修改v2.2注册默认600秒",
+    "reason": "300秒组P90比600秒缩短68.49秒、最长缩短238.11秒，100题均小于300秒；正确率65%对63%仅差2题，属于小差异不能声称优越或无损；保留两题真实接口错误，不把它们改成成功结果。"
+  },
+  "error_statistics": {
+    "latest_error_questions": 2,
+    "latest_successful_questions": 98,
+    "correct": 65,
+    "wrong_answers": 33,
+    "error_rate_pct": 2,
+    "final_error_types": {
+      "LLMError: other: Connection error.": 2
+    },
+    "stage": "answer after research hard cutoff",
+    "question_ids": [
+      "298",
+      "53"
+    ],
+    "failed_attempts_saved": 4,
+    "unknown_root_cause": "现有日志缺少底层异常链；可能连接/传输因素，不能确定是取消后连接池问题。其余6题同样硬截止后成功。",
+    "timer_vs_service_error": "240秒研究取消符合预算逻辑；290-294秒服务LLMError重试耗尽提前上抛，不等于300秒总超时；依据AC-10保留错误。"
+  },
+  "tutor_checks": [
+    {
+      "result": "partial",
+      "summary": "还差：选择理由。请把对应命令的原始输出或文件原文原样贴上来再提交一次，不要转述。",
+      "missing": [
+        "选择理由"
+      ],
+      "next_step_id": "S19"
+    },
+    {
+      "course": "mas-practice",
+      "content_version": "v1-r1d8a1c1fc56d4a1a",
+      "result": "pass",
+      "summary": "预算定了。",
+      "missing": [],
+      "next_step_id": "S19",
+      "note": "告诉学员通过了，以及这一步证明了什么、还没证明什么。"
+    }
+  ],
+  "cost": {
+    "latest_user_reported_cumulative_usd": 4.27,
+    "status": "最新完成后账户累计未再次提供，不能计算S18实际独立费用或宣称成本节省。",
+    "previous_estimate": "两组各新增80题曾粗估合计$2–3，无美元硬上限；失败重试额外请求存在，不是实际账单。"
+  }
+}
