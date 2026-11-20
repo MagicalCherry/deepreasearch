@@ -45,3 +45,23 @@ react_loop新增shrink与raise_on_max_turns=False可选参数，默认保持旧�
 ## 离线回归通过，准备smoke20
 
 2026-11-20学员原始全量输出：189 passed in 2.06s。研究实现提交26163ad。下一批为s14-v18-qwen37-smoke20，版本v1.8、题集smoke20、默认并发8；仍使用OpenRouter economy配置与qwen/qwen3.7-flash，不改变模型和思考开关。先运行20题、判分并查看token/耗时，再准备复用同配置20题结果补dev100。此记录不表示真实评测已经完成；没有新增模型调用，当前没有美元硬上限。
+
+## smoke20完成及离线对照
+
+运行s14-v18-qwen37-smoke20，来源提交4ad3cb6aa1d88e0b30f2b0479d6f11a1990a5e3e，20/20，运行错误0。
+
+原始summary：n=20，correct=7，accuracy=35.0，recall=34.67，calibration_error=19.84，calib_beta=5，avg_confidence=28.0，runner_errors=0，avg_search=25.8，avg_read=0.9，avg_prompt_tokens=653398，avg_completion_tokens=13980，avg_seconds=137.75，confidence_source=response_field_when_valid_else_original_judge，version=v1.8，dataset=smoke20，judge_model=qwen/qwen3.7-flash。
+
+对v1.7 smoke20：+4/-0，改善331、934、906、1047，退步无。召回分档（每版按自己的召回分档，不一定同一批题）：
+
+| 召回档 | v1.7题数/答对 | v1.8题数/答对 |
+|---|---:|---:|
+| 0 | 11/0 | 7/0 |
+| 非零且不足50% | 3/0 | 6/0 |
+| 至少50% | 6/3 | 7/7 |
+
+高召回档7/7仅为20题小样本观察，不当作稳定100%正确率。零召回题数11→7，但仍7题完全未命中标注证据。最终答案Confidence与judge字段不一致0题，最多搜索44次、最多阅读3篇，共保存85份侦探报告。
+
+相比v1.7，输入57737→653398 token/题，约11.32倍；输出13517→13980；耗时118.14→137.75秒，实际增加约16.6%，不能套用教案中“耗时反而下降”的预期。阅读1.6→0.9篇/题，不能把提升简单解释为读得更多。
+
+按本批均值线性外推，dev100剩余80题研究约52271840输入token、1118400输出token，不含判分及额外重试，实际会随题目分布和停机情况变化；没有美元硬上限。告知学员用量后先提供不调用模型的复用准备命令，不自动启动收费评测。当前S14未提交正式验收，尚未完成dev100。
