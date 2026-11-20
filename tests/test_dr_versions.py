@@ -88,3 +88,11 @@ def test_v19_adds_only_bm25_index_option():
     version = get_version('v1.9')
     assert version.options == {**previous, 'index': 'k25b1'}
     assert get_version('v1.8').options == previous
+
+
+def test_v191_adds_only_scout_citation_repair():
+    """补丁版单独启用引用校验纠错，冻结v1.9索引与全部旧行为。"""
+    previous = deepcopy(get_version('v1.9').options)
+    version = get_version('v1.9.1')
+    assert version.options == {**previous, 'scout_citation_repair': True}
+    assert get_version('v1.9').options == previous

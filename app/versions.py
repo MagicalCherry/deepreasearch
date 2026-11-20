@@ -121,3 +121,6 @@ dr_version('v1.8', 'ReAct侦探', '每个子问题用搜索和正文工具交替
 
 dr_version('v1.9', 'BM25索引调参', '继承ReAct侦探，仅切换k25b1索引（k1=25、b=1）。',
            index='k25b1')
+
+dr_version('v1.9.1', 'Scout引用交接修复', '使用实际文档编号，错误引用最多纠正一次并记录校验结果；保留v1.9其余配置。',
+           scout_citation_repair=True)

@@ -10,6 +10,7 @@ import pytest
 from app.agents import s4_port
 from app.agents.dr.flow_fixes import ResilientScout
 from app.agents.dr.react_scout import ScoutTools, parse_scout_report, shrink_tool_results
+from app.agents.dr.react_scout import citation_issues, CITATION_RULES
 from app.agents.dr.team import DRWriter
 from app.agents.react import Tools, react_loop
 from app.llm import LLMError
@@ -230,3 +231,93 @@ def test_recall_bands_boundaries_and_stale_judgement():
     judged['0']['response']='Old'
     with pytest.raises(ValueError):
         group_records(results,judged,questions)
+
+
+@pytest.mark.parametrize('report,invalid,uncited', [
+    ('Findings:\n- Demo [12]\nCandidates:\n- Demo', [], 0),
+    ('Findings:\n- Demo [1]\nCandidates:\n- Demo', ['1'], 0),
+    ('Findings:\n- Demo without source\nCandidates:\n- Demo', [], 1),
+    ('Findings:\n- Earlier [1], final [12]\nCandidates:\n- Demo', ['1'], 0),
+    ('Findings:\nNone\nCandidates:\n- Candidate [99]', [], 0),
+    ('**Findings:**\n- Multiline\n  finding [12].\n\n**Candidates:**\n- Demo', [], 0),
+])
+def test_citation_validation_checks_actual_findings_only(report, invalid, uncited):
+    assert citation_issues(report, {'12': {}}) == {
+        'invalid_docids': invalid, 'uncited_findings': uncited}
+
+
+async def test_v191_repairs_reference_number_using_read_evidence_and_stores_fact():
+    from app.agents.dr.flow_fixes import evidence_signature
+    model = Model([
+        reply(name='search', args={'query':'fictional cultivar evidence'}),
+        reply(name='get_document', args={'docid':'12'}),
+        reply('Findings:\n- Fictional evidence [1]\nCandidates:\n- Demo cultivar'),
+        reply('Findings:\n- Fictional evidence [12]\nCandidates:\n- Demo cultivar'),
+    ])
+    scout, state, section, search = setup_scout(model, scout_citation_repair=True)
+    before = evidence_signature(state)
+    await scout.investigate(state, section)
+    assert evidence_signature(state) != before
+    assert [f['docid'] for f in state['facts']] == ['12']
+    assert len(search.queries) == 1 and search.reads == ['12']
+    assert scout._react_sections['sec_1']['tools'].used == 2
+    assert CITATION_RULES in model.requests[0]['messages'][0]['content']
+    repair = model.requests[-1]
+    assert 'tools' not in repair and repair['max_tokens'] == 4096
+    payload = json.loads(repair['messages'][1]['content'])
+    assert payload['read_documents']['12']['text'] == 'Fictional evidence'
+    assert payload['errors']['invalid_docids'] == ['1']
+    assert '[12]' in state['_scout_reports']['sec_1']['report']
+    assert any(e.get('kind') == 'scout_report_before_citation_repair' and '[1]' in e['content']
+               for e in scout.trace.events)
+    validations = [e for e in scout.trace.events if e.get('kind') == 'citation_validation']
+    assert validations[-1]['valid'] and validations[-1]['repair_attempted']
+
+
+async def test_v191_valid_report_needs_no_extra_model_call():
+    model = Model([reply(name='search', args={'query':'fictional identity evidence'}),
+                   reply('Findings:\n- Supported [12]\nCandidates:\n- Demo')])
+    scout, state, section, _ = setup_scout(model, scout_citation_repair=True)
+    await scout.investigate(state, section)
+    assert len(model.requests) == 2 and len(state['facts']) == 1
+    assert not scout._react_sections['sec_1'].get('citation_repair_used')
+
+
+async def test_v191_never_guesses_id_and_limits_repair_across_retries():
+    invalid = 'Findings:\n- Unsupported mapping [1]\nCandidates:\n- Demo'
+    model = Model([reply(name='search', args={'query':'fictional identity evidence'}),
+                   reply(invalid), reply(invalid), reply(invalid)])
+    scout, state, section, _ = setup_scout(model, scout_citation_repair=True)
+    await scout.investigate(state, section)
+    await scout.investigate(state, section)
+    assert len(model.requests) == 4
+    assert not state['facts']
+    assert sum(e.get('repair_attempted') is True for e in scout.trace.events) == 1
+    assert scout.trace.events[-2]['kind'] == 'scout_report'
+
+
+async def test_v191_no_observed_source_cannot_be_repaired():
+    model = Model([reply('Findings:\n- Invented [1]\nCandidates:\n- Demo')])
+    scout, state, section, _ = setup_scout(model, scout_citation_repair=True)
+    await scout.investigate(state, section)
+    assert len(model.requests) == 1 and not state['facts']
+
+
+@pytest.mark.parametrize('error', [LLMError('arrearage','offline'), asyncio.CancelledError()])
+async def test_v191_repair_propagates_arrearage_and_cancellation(error):
+    model = Model([reply(name='search', args={'query':'fictional identity evidence'}),
+                   reply('Findings:\n- Demo [1]\nCandidates:\n- Demo'), error])
+    scout, state, section, _ = setup_scout(model, scout_citation_repair=True)
+    with pytest.raises(type(error)):
+        await scout.investigate(state, section)
+    assert scout._react_sections['sec_1']['citation_repair_used']
+
+
+async def test_v191_repair_filter_failure_keeps_valid_original_findings():
+    model = Model([reply(name='search', args={'query':'fictional identity evidence'}),
+                   reply('Findings:\n- Supported [12]\n- Bad [1]\nCandidates:\n- Demo'),
+                   LLMError('content_filter', 'offline')])
+    scout, state, section, _ = setup_scout(model, scout_citation_repair=True)
+    await scout.investigate(state, section)
+    assert [f['docid'] for f in state['facts']] == ['12']
+    assert any(e.get('reason') == 'citation_repair_failed' for e in scout.trace.events)
