@@ -41,3 +41,7 @@ react_loop新增shrink与raise_on_max_turns=False可选参数，默认保持旧�
 新增scripts/compare_recall_bands.py，避免旧单Agent分档脚本依赖max_tool_calls而无法分析多Agent；比较两版各自的召回分档，不暗示档内始终是同一批题目。
 
 虚构资料测试覆盖报告解析、无效来源、实际ReAct路径、工具事件、并发预算、阅读缓存、预算耗尽、内容审核、欠费/取消、上限收尾、重试和Writer报告交接；待学员执行专项与全量pytest。助手仅做Python语法检查，未运行pytest或真实评测；不提前承诺准确率或费用变化。
+
+## 离线回归通过，准备smoke20
+
+2026-11-20学员原始全量输出：189 passed in 2.06s。研究实现提交26163ad。下一批为s14-v18-qwen37-smoke20，版本v1.8、题集smoke20、默认并发8；仍使用OpenRouter economy配置与qwen/qwen3.7-flash，不改变模型和思考开关。先运行20题、判分并查看token/耗时，再准备复用同配置20题结果补dev100。此记录不表示真实评测已经完成；没有新增模型调用，当前没有美元硬上限。
