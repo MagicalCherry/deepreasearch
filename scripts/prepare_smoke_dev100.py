@@ -14,7 +14,7 @@ import sys
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 os.environ['LLM_PROVIDER'] = 'openrouter'
-os.environ['LLM_MODEL_PROFILE'] = 'economy'
+os.environ.setdefault('LLM_MODEL_PROFILE', 'economy')
 from app.config import settings
 from app.history import process_alive
 from app.runner import load_questions, search_config
