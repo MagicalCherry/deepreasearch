@@ -1,0 +1,105 @@
+{
+  "_purpose": "v2.3.5 smoke20原始汇总、逐题对照与文件哈希；不修改运行、不新增模型调用",
+  "pytest_output": "38 passed in 0.92s\n331 passed in 3.15s",
+  "summary": {
+    "n": 20,
+    "correct": 14,
+    "accuracy": 70.0,
+    "recall": 66.15,
+    "calibration_error": 3.56,
+    "calib_beta": 5,
+    "avg_confidence": 67.3,
+    "runner_errors": 0,
+    "avg_search": 19.85,
+    "avg_read": 5.8,
+    "avg_prompt_tokens": 668296,
+    "avg_completion_tokens": 20243,
+    "avg_seconds": 202.42,
+    "confidence_source": "response_field_when_valid_else_original_judge",
+    "run": "s20-v235-qwen37-smoke20",
+    "version": "v2.3.5",
+    "dataset": "smoke20",
+    "judge_model": "qwen/qwen3.7-flash"
+  },
+  "max_seconds": 372.2055076000106,
+  "over600": [],
+  "comparisons": {
+    "s19-v23-qwen37-smoke20": {
+      "improved": [],
+      "regressed": [
+        "1025",
+        "297"
+      ],
+      "both_correct": [
+        "132",
+        "331",
+        "422",
+        "1248",
+        "972",
+        "226",
+        "253",
+        "93",
+        "1020",
+        "934",
+        "1047",
+        "906",
+        "254",
+        "1022"
+      ],
+      "both_incorrect": [
+        "486",
+        "473",
+        "710",
+        "760"
+      ],
+      "identical_response_different_judgment": [],
+      "runner_errors_before": [],
+      "runner_errors_after": [],
+      "n": 20,
+      "flips": 2,
+      "mcnemar_exact_p": 0.5
+    },
+    "s20-v234-qwen37-smoke20": {
+      "improved": [
+        "422"
+      ],
+      "regressed": [
+        "473",
+        "297"
+      ],
+      "both_correct": [
+        "132",
+        "331",
+        "1248",
+        "253",
+        "93",
+        "226",
+        "1020",
+        "1047",
+        "934",
+        "254",
+        "972",
+        "906",
+        "1022"
+      ],
+      "both_incorrect": [
+        "1025",
+        "710",
+        "486",
+        "760"
+      ],
+      "identical_response_different_judgment": [],
+      "runner_errors_before": [],
+      "runner_errors_after": [],
+      "n": 20,
+      "flips": 3,
+      "mcnemar_exact_p": 1.0
+    }
+  },
+  "sha256": {
+    "config.json": "9b2f698055c66144726c8cfbc350c95257e97e24488c32b42ae172262861b228",
+    "results.jsonl": "7c4b5b13615b56133dce2f6a8bf88002fb6d94a4c900c81de2002b07578ee21a",
+    "judged.jsonl": "b9c117d857aa824a6a1abdffe0e250cbc1ec2cbab38d654d7d3d09bcdf29a2da",
+    "summary.json": "ca9dbf25874c46c9f6a507856225e9ce31eb090f524404c3875090e9ee17b8c2"
+  }
+}
