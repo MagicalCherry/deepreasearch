@@ -249,6 +249,157 @@ class PiScoutTools(PiTools):
     async def call(self, name, args):
         from .team import clean_query
         self.used += 1
+        try:
+            if self.scout.opts.get('adaptive_result_review'):
+                result = await self._adaptive_call(name, args)
+            else:
+                result = await self._dispatch(name, args)
+        except BaseException as exc:
+            self._audit(name, args, status='cancelled' if isinstance(exc, asyncio.CancelledError)
+                        else 'exception', error=type(exc).__name__)
+            raise
+        self._audit(name, args, status='rejected' if result.get('error') else 'success',
+                    error=result.get('error'), result_count=len(result.get('results', [])),
+                    cache_reused=bool(result.get('cache_reused')),
+                    search_id=result.get('search_id'), next_offset=result.get('next_offset'),
+                    text_returned=bool(result.get('text')),
+                    executed_tool='read_search_results' if result.get('redirected_from') else name,
+                    redirect_reason=result.get('redirect_reason'))
+        return result
+
+    async def _dispatch(self, name, args):
+        """保留精确查询共享入口，近似查询按旧执行路径处理。"""
+        from .team import clean_query
+        if (self.scout.opts.get('candidate_evidence_guard') and name == 'search'
+                and self.valid_args(name, args)):
+            from .evidence_guard import isolate_queries, validated_relationships
+            progress = self.state.get('_candidate_progress', [])
+            queries, rejected = isolate_queries([args['query']], progress, validated_relationships(progress))
+            if rejected:
+                self.trace.emit('stage_output', agent=self.agent, kind='candidate_query_guard', rejected=rejected)
+                return {'error': 'Independent candidates cannot be combined without observed relationship evidence. Check one candidate and one condition.',
+                        'suggested_queries': queries}
+        if (self.scout.opts.get('shared_search_cache') and name == 'search'
+                and self.valid_args(name, args) and clean_query(args['query'])
+                and not self.trace.past_deadline()):
+            return await self._shared_search(args)
+        return await self._call_impl(name, args)
+
+    def _review_target(self, query=None):
+        """只查看本Scout已有搜索第6–10名；优先相似查询，否则优先最近搜索。"""
+        from .team import clean_query
+        words = set(re.findall(r'\w+', clean_query(query).casefold())) if query else set()
+        candidates = []
+        for order, (sid, rows) in enumerate(self.searches.items()):
+            seen = self._reviewed_ranks.get(sid, set())
+            missing = [rank for rank in range(6, min(10, len(rows)) + 1) if rank not in seen]
+            if not missing:
+                continue
+            other = set(re.findall(r'\w+', self._review_queries.get(sid, '').casefold()))
+            similarity = len(words & other) / len(words | other) if words and other else 0
+            candidates.append((similarity, order, sid, missing[0]))
+        if not candidates:
+            return None
+        _, _, sid, offset = max(candidates)
+        return sid, offset
+
+    async def _review_page(self, args, target, reason):
+        sid, offset = target
+        result = await self._call_impl('read_search_results', {
+            'search_id': sid, 'offset': offset, 'limit': 11-offset,
+            'reason': f"Inspect existing ranks before another search: {args['reason']}"})
+        if not result.get('error'):
+            result.update(redirected_from='search', redirect_reason=reason,
+                          requested_query=args['query'],
+                          hint='Search was not executed. Inspect these existing excerpts; read a relevant document or submit another query.')
+        return result
+
+    async def _adaptive_call(self, name, args):
+        """两次连续搜索后先检查后排摘要；近似拒绝有本地结果时转为可用翻页。"""
+        from .team import clean_query
+        if not hasattr(self, '_search_streak'):
+            self._search_streak, self._reviewed_ranks, self._review_queries = 0, {}, {}
+        if not hasattr(self, '_auto_reviews'):
+            self._auto_reviews = 0
+        cap = self.scout.opts.get('max_auto_reviews')
+        allow_auto_review = cap is None or self._auto_reviews < cap
+        valid_search = (name == 'search' and self.valid_args(name, args)
+                        and bool(clean_query(args['query'])))
+        target = self._review_target() if valid_search and self._search_streak >= 2 and allow_auto_review else None
+        if target:
+            result = await self._review_page(args, target, 'two_searches_without_page_or_read')
+        else:
+            result = await self._dispatch(name, args)
+            if (allow_auto_review and valid_search and result.get('error') ==
+                    'Query already searched or near-duplicate. Read or page existing results.'):
+                target = self._review_target(args['query'])
+                if target:
+                    result = await self._review_page(args, target, 'near_duplicate_query')
+        if not result.get('error'):
+            if result.get('redirected_from'):
+                self._auto_reviews += 1
+            sid = result.get('search_id')
+            if sid:
+                self._reviewed_ranks.setdefault(sid, set()).update(
+                    row['rank'] for row in result.get('results', []))
+            if valid_search and not result.get('redirected_from'):
+                self._search_streak += 1
+                self._review_queries[sid] = clean_query(args['query'])
+            elif result.get('redirected_from') or name in {'read_search_results', 'read_document'}:
+                self._search_streak = 0
+        return result
+
+    def _audit(self, name, args, **details):
+        """只记录工具参数与返回状态，不存密钥、请求头或异常正文。"""
+        if self.scout.opts.get('tool_audit'):
+            self.trace.emit('stage_output', agent=self.agent, kind='tool_call',
+                            tool=name, arguments=deepcopy(args), attempt=self.used, **details)
+
+    async def _shared_search(self, args):
+        """同题精确查询串行合并；缓存原排名，接收者建立自己的搜索ID与可见集合。"""
+        from .team import clean_query
+        query = clean_query(args['query'])
+        key = query.casefold()
+        budget = self.scout._budget
+        cache = budget.setdefault('pi_search_cache', {})
+        locks = budget.setdefault('pi_search_locks', {})
+        lock = locks.setdefault(key, asyncio.Lock())
+        async with lock:
+            if self.trace.past_deadline():
+                return {'error': 'Time budget reached; finish with available evidence.'}
+            if key not in cache:
+                try:
+                    result = await self._call_impl('search', {**args, 'query': query})
+                except BaseException:
+                    # 失败或取消的预留不能永久封死同一查询；实际尝试预算仍保留。
+                    async with budget['lock']:
+                        budget['queries'].discard(key)
+                        budget['originals'].discard(key)
+                    raise
+                if not result.get('error'):
+                    cache[key] = deepcopy(self.searches[result['search_id']])
+                return result
+            rows = deepcopy(cache[key])
+            sid = f's{len(self.searches) + 1}'
+            self.searches[sid] = rows
+            results = self._excerpts(rows, 1, 5)
+            titles = []
+            for rank, item in enumerate(rows[5:5 + self.title_ranks], 6):
+                docid = str(item['docid'])
+                self.visible.setdefault(docid, {'docid': docid, 'title': item.get('title', '')})
+                titles.append(f"#{rank} [{docid}] {item.get('title', '')}")
+            for row in results:
+                self._register(row)
+            self.trace.emit('search', agent=self.agent, query=query, k=len(results),
+                            search_id=sid, reason=args['reason'], results=results,
+                            more_titles=titles, cached=True, cache_reused=True)
+            return {'search_id': sid, 'results': results, 'more_titles': titles,
+                    'cache_reused': True,
+                    'hint': 'Reused an identical query. Use this search_id to page, or read a visible docid.'}
+
+    async def _call_impl(self, name, args):
+        """Preserve the original Pi tool execution path on cache misses."""
+        from .team import clean_query
         if self.trace.past_deadline():
             return {'error': 'Time budget reached; finish with available evidence.'}
         if not self.valid_args(name, args):
@@ -314,8 +465,19 @@ async def react_section(scout, state, section):
                'peer_candidates': deepcopy(list(scout.candidates.values())),
                'subquestion': {k:section.get(k) for k in ('title','description','search_queries')},
                'previously_observed_results': list(tools.documents.values())}
+    if scout.opts.get('candidate_progress'):
+        payload['candidate_progress'] = deepcopy(state.get('_candidate_progress', []))
     try:
         prompt = scout.scout_prompt()
+        if scout.opts.get('candidate_progress'):
+            from .candidate_progress import PROGRESS_PROMPT
+            prompt += PROGRESS_PROMPT
+            if scout.opts.get('candidate_progress_v2'):
+                from .candidate_progress import PROGRESS_V2_PROMPT
+                prompt += PROGRESS_V2_PROMPT
+            if scout.opts.get('candidate_evidence_guard'):
+                from .evidence_guard import EVIDENCE_PROMPT
+                prompt += EVIDENCE_PROMPT
         report = await react_loop(scout.llm, [{'role':'system','content':prompt},
             {'role':'user','content':json.dumps(payload,ensure_ascii=False)}], tools,
             max_tool_calls=remaining_tools, max_turns=scout.opts.get('scout_tool_calls',12)+2,
@@ -326,6 +488,34 @@ async def react_section(scout, state, section):
         scout.trace.emit('plan', agent=lane, reason='content_filter', items=['当前子问题因内容审核停止；保留其他侦探的证据。'])
         section['status'] = 'researched'
         return
+    if scout.opts.get('candidate_progress'):
+        from .candidate_progress import parse_progress, split_progress, merge_progress
+        diagnostics = {}
+        if scout.opts.get('candidate_progress_v2'):
+            from .candidate_progress import inspect_progress
+            audit = inspect_progress(report)
+            updates = audit['updates']
+            diagnostics = {'parse_status': audit['status'], 'parse_error': audit['error'],
+                           'raw_progress': audit['raw']}
+        else:
+            updates = parse_progress(report)
+        if scout.opts.get('candidate_evidence_guard'):
+            from .evidence_guard import guard_progress
+            observed_text = {}
+            for docid, document in tools.documents.items():
+                chunks = tools.read_text.get(docid, []) if isinstance(tools, PiTools) else []
+                observed_text[docid] = '\n'.join([document.get('excerpt', ''), document.get('snippet', '')]
+                                                + [chunk.get('text', '') for chunk in chunks])
+            updates, evidence_issues = guard_progress(updates, observed_text)
+            diagnostics['evidence_issues'] = evidence_issues
+        report, _ = split_progress(report)
+        merge_progress(state, updates, set(tools.documents), section['id'],
+                       preserve_evidence=bool(scout.opts.get('candidate_progress_v2')))
+        scout.trace.emit('stage_output', agent=lane, kind='candidate_progress',
+                         section_id=section['id'], progress=deepcopy(state.get('_candidate_progress', [])),
+                         update_count=len(updates), **diagnostics)
+        for candidate in state.get('_candidate_progress', []):
+            scout.candidates[candidate['name']] = deepcopy(candidate)
     if scout.opts.get('scout_citation_repair'):
         report = await repair_citations(scout, context, report, lane)
     state.setdefault('_scout_reports', {})[section['id']] = {'agent':lane,'report':report,
@@ -335,7 +525,11 @@ async def react_section(scout, state, section):
     parsed = parse_scout_report(report)
     scout._store_loop_facts(state, section, parsed['facts'], tools.documents)
     for name in parsed['candidates']:
-        scout.candidates[name] = {'name':name, 'status':'hypothesis'}
+        if scout.opts.get('candidate_progress'):
+            if not re.match(r'^(none|unknown|n/a)\b', name.strip(), re.I):
+                scout.candidates.setdefault(name, {'name':name, 'status':'hypothesis'})
+        else:
+            scout.candidates[name] = {'name':name, 'status':'hypothesis'}
     scout.trace.emit('plan', agent=lane, items=parsed['candidates'],
                      candidates=deepcopy(list(scout.candidates.values())))
     section['status'] = 'researched'

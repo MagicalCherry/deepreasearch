@@ -137,3 +137,18 @@ dr_version('v2.2', '墙钟时间预算', '继承v2.1，软截止停止新研究�
 
 dr_version('v2.3', '规则置信度', '继承v2.2，仅按最后审核已验证比例计算20+75×比例，缺少有效审核时保留原置信度。',
            confidence='rule')
+
+dr_version('v2.3.1', 'Scout共享检索补丁', '继承v2.3，精确重复查询共享结果、并发合并，保存工具参数及执行状态；近似去重策略不变。',
+           shared_search_cache=True, tool_audit=True)
+
+dr_version('v2.3.2', 'Scout按需查看摘要', '继承v2.3.1，连续两次搜索后先查看已有第6–10名摘要，近似重复时优先返回可操作结果页。',
+           adaptive_result_review=True)
+
+dr_version('v2.3.3', 'Scout候选进度保存', '继承v2.3.2，跨补搜保留候选已查条件、来源、待查条件和下一查询；候选进度不自动成为事实。',
+           candidate_progress=True)
+
+dr_version('v2.3.4', '部分候选与翻页限额', '继承v2.3.3，记录候选解析原因、区分部分候选、保护旧证据和未解决条件，每子任务自动翻页最多2次。',
+           candidate_progress_v2=True, max_auto_reviews=2)
+
+dr_version('v2.3.5', '候选证据与关系核查', '继承v2.3.4，候选支持项附已观察原文，审核条件语义，隔离无关系证据的多候选组合查询。',
+           candidate_evidence_guard=True)

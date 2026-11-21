@@ -40,7 +40,7 @@ async def retry_operation(operation, trace, lane, retries, rollback=None):
 
 async def retry_stage(agent, state, lane, role, opts):
     """Writer/Critic失败时回滚半成品；事实、来源、Scout实例和Trace预算一直保留。"""
-    durable = {'facts', 'data_points', 'raw_sources', 'messages', 'logs', 'errors'}
+    durable = {'facts', 'data_points', 'raw_sources', 'messages', 'logs', 'errors', '_candidate_progress'}
     # Scout会把已完成的搜索/分析保存在实例中，不能回滚它的章节进度。
     saved = {k: deepcopy(v) for k, v in state.items() if k not in durable} if lane != 'scout' else None
 

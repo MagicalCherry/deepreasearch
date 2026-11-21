@@ -62,6 +62,10 @@ async def review(critic, state):
         draft_content=state.get('final_report', ''), facts=json.dumps(facts, ensure_ascii=False),
         data_points=json.dumps(state['data_points'], ensure_ascii=False))
     prompt += CONSTRAINT_REVIEW + '\nOriginal constraints:\n' + json.dumps(constraints, ensure_ascii=False)
+    if critic.opts.get('candidate_evidence_guard'):
+        from .evidence_guard import CRITIC_EVIDENCE_PROMPT
+        prompt += CRITIC_EVIDENCE_PROMPT + '\nCandidate investigation log:\n' + json.dumps(
+            state.get('_candidate_progress', []), ensure_ascii=False)
     response = await critic.call_llm(system_prompt='Audit the supplied evidence. Return JSON only.',
                                     user_prompt=prompt, json_mode=True, temperature=.2, max_tokens=16000)
     result = critic.parse_json_response(response)
@@ -90,6 +94,22 @@ async def review(critic, state):
     alternative = result.get('alternative_candidate')
     if isinstance(alternative, str) and alternative.strip() and constraints:
         result['missing_aspects'].insert(0, alternative.strip() + ' ' + str(constraints[0]))
+    if critic.opts.get('candidate_evidence_guard'):
+        from .evidence_guard import isolate_queries, validated_relationships
+        progress = state.get('_candidate_progress', [])
+        relationships = validated_relationships(progress)
+        replacement, rejected = isolate_queries(result['missing_aspects'], progress, relationships)
+        result['missing_aspects'] = replacement
+        for issue in result.get('issues') or []:
+            if issue.get('requires_new_search') and issue.get('search_query'):
+                safe, audit = isolate_queries([issue['search_query']], progress, relationships)
+                rejected.extend(audit)
+                if audit:
+                    issue['search_query'] = ''
+                    issue['requires_new_search'] = False
+                    result['missing_aspects'].extend(safe)
+        if rejected:
+            critic.trace.emit('stage_output', agent='critic', kind='candidate_query_guard', rejected=rejected)
     assessment = result.get('overall_assessment')
     if isinstance(assessment, dict) and assessment.get('verdict') == 'pass' and (not checks or any(c['status'] != 'verified' for c in checks)):
         assessment['verdict'] = 'needs_revision'
