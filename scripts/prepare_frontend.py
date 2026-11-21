@@ -3,8 +3,11 @@
 from pathlib import Path
 import secrets
 import shutil
+import sys
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
+from scripts.apply_frontend_overrides import apply_overrides
 SOURCE = ROOT.parent / "MAS实操课程" / "02-前端成品"
 TARGET = ROOT / "frontend_runtime"
 
@@ -15,6 +18,7 @@ def main():
         raise SystemExit("frontend_runtime已存在，未覆盖；请使用已有运行副本。")
     shutil.copytree(SOURCE, TARGET, ignore=shutil.ignore_patterns(
         ".env", ".env.*", ".git", "node_modules", ".venv", "__pycache__", "*.pyc"))
+    apply_overrides(TARGET)
     compose = TARGET / "docker-compose.yml"
     compose.write_text(compose.read_text(encoding="utf-8").replace(
         "name: deepresearch", "name: mas-s06-preview"), encoding="utf-8")

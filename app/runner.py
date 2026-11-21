@@ -37,7 +37,16 @@ def dataset_path(dataset: str) -> Path:
 
 def read_dataset(dataset: str) -> list[dict]:
     """读取完整评测标注，仅供题集页面和评测代码；Agent 使用 load_questions。"""
-    return [json.loads(line) for line in dataset_path(dataset).read_text(
+    path = dataset_path(dataset)
+    configured = os.getenv("DATASET_DIR", "").strip()
+    if configured:
+        directory = Path(configured).expanduser()
+        if not directory.is_absolute():
+            directory = PROJECT_ROOT / directory
+        path = directory / f"{dataset}.jsonl"
+        if path.resolve().parent != directory.resolve():
+            raise ValueError("题集路径超出指定目录")
+    return [json.loads(line) for line in path.read_text(
         encoding="utf-8-sig"
     ).splitlines() if line.strip()]
 

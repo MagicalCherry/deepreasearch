@@ -1,0 +1,16 @@
+{
+  "_purpose": "S22归档已有评测页面；hash校验课程原版与当前修复版，不包含运行数据或凭证。",
+  "files": [
+    {
+      "path": "frontend/src/pages/eval/Lanes.tsx",
+      "base_sha256": "bb22bb9f4538fd6135f6c2579e6f8a813f26636013f39031cb52003049e23e0a",
+      "sha256": "9505311197f9980390997c5ca472d33f3ede278153d781104f28dd33090777c9"
+    },
+    {
+      "path": "frontend/src/pages/eval/RunsPage.tsx",
+      "base_sha256": "373a782a0d6a6c9b8a290f7e65af037a499a4d687df927f09c500b8c5687bf36",
+      "sha256": "f0a0d7484f9602a8ee094f9615b222f72d494756c76ccbdfa1dd9f06f756833d"
+    }
+  ],
+  "hash_format": "sha256, CRLF normalized to LF"
+}

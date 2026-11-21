@@ -1,0 +1,438 @@
+{
+  "_purpose": "S22本地dev100四文件交付清单；仅大小与SHA256，无逐题内容或凭证。未上传运行文件。",
+  "final_run": "s19-v23-qwen37-dev100-reuse20",
+  "runs": [
+    {
+      "run_id": "s04-v0-closedbook-dev100",
+      "version": "v0-closedbook",
+      "n": 100,
+      "files": [
+        {
+          "name": "config.json",
+          "bytes": 996,
+          "sha256": "dc963c6d3228e2f24c0f40df1c22c53ff2f54cfbbc34f866c99a539e5a560718"
+        },
+        {
+          "name": "results.jsonl",
+          "bytes": 4457025,
+          "sha256": "e0ac941f64a9796e21ce8ad21c7d5451632e5544a2fc5c3f993a1c94a5120f60"
+        },
+        {
+          "name": "judged.jsonl",
+          "bytes": 2234123,
+          "sha256": "021a3ba2ea02fca52eedc053577df7adb0d0b7886ba1280300d3e6d3a72831b1"
+        },
+        {
+          "name": "summary.json",
+          "bytes": 431,
+          "sha256": "c2694c59abd18ea0b4d21c5f3339ea960d485b38ff2b2e566070b68f674cff9a"
+        }
+      ]
+    },
+    {
+      "run_id": "s05-openrouter-single-404fix-dev100",
+      "version": "v0-single-404fix",
+      "n": 100,
+      "files": [
+        {
+          "name": "config.json",
+          "bytes": 822,
+          "sha256": "96f9e18bcc2883d99c50a0584c19c0b315f5d3d6c731860130ded73ed415f25a"
+        },
+        {
+          "name": "results.jsonl",
+          "bytes": 2084171,
+          "sha256": "b883a26c2bc15842c2a51d2bcaa9f00db1d1def0cfa5ebe53b804c8d037434e9"
+        },
+        {
+          "name": "judged.jsonl",
+          "bytes": 316172,
+          "sha256": "985493b19a1ebf1206a951754bb7569e0a3ea4b900515787538085caecf412c9"
+        },
+        {
+          "name": "summary.json",
+          "bytes": 460,
+          "sha256": "cfbed0d2f9cb501b5c3e86bf4224dc04cd1da62f59d77c4603ebce87f43d246c"
+        }
+      ]
+    },
+    {
+      "run_id": "s08-qwen37-closedbook-dev100-reuse20",
+      "version": "v0-closedbook",
+      "n": 100,
+      "files": [
+        {
+          "name": "config.json",
+          "bytes": 687,
+          "sha256": "3be8e5a6c3422c541a2e72a429c955d47591b14b407af52552dda12eadc8d1df"
+        },
+        {
+          "name": "results.jsonl",
+          "bytes": 2662300,
+          "sha256": "1c56251fb7b93e8b0c92e1d6d366490f0e29788ee83da86d9d0bc5c4daf9bd98"
+        },
+        {
+          "name": "judged.jsonl",
+          "bytes": 1352916,
+          "sha256": "764a4620e178818ab876e4bd88514fd483a5cc85a67320dbd98ffc72c84db3d9"
+        },
+        {
+          "name": "summary.json",
+          "bytes": 448,
+          "sha256": "b7c52391425b0e1676a5461591ecf9bfa8e30164b203120a062d6c2207501bc1"
+        }
+      ]
+    },
+    {
+      "run_id": "s08-qwen37-s4-dev100-reuse20",
+      "version": "v1.0",
+      "n": 100,
+      "files": [
+        {
+          "name": "config.json",
+          "bytes": 763,
+          "sha256": "f82c76fb36c602387a0de77075fd42e6f674f0506e35bbd9843994b6f8013090"
+        },
+        {
+          "name": "results.jsonl",
+          "bytes": 6432998,
+          "sha256": "6ec264d1b2759a7244490967ca0b9fbea1d59115de0bd50a007bee7ca73b16c6"
+        },
+        {
+          "name": "judged.jsonl",
+          "bytes": 321281,
+          "sha256": "1dedb8ece2f38e7f8c75e4b1188726432370dd03d5c2651bae17d4f61bf2cc78"
+        },
+        {
+          "name": "summary.json",
+          "bytes": 440,
+          "sha256": "522c4a3574a43e946ca804641b1d00eae485a0575c2e571969c152fb533709ca"
+        }
+      ]
+    },
+    {
+      "run_id": "s08-qwen37-single-dev100-reuse20",
+      "version": "v0-single",
+      "n": 100,
+      "files": [
+        {
+          "name": "config.json",
+          "bytes": 814,
+          "sha256": "dd2ed3acd1091bd67e6a6c2ecf09c6592a6e22af7aec7e07468d463af86da568"
+        },
+        {
+          "name": "results.jsonl",
+          "bytes": 2712492,
+          "sha256": "676b22385a64ed29ab9aca2419beb58f29974ac03a8f3e473073551db9e2a061"
+        },
+        {
+          "name": "judged.jsonl",
+          "bytes": 936329,
+          "sha256": "e3d22b36e8479e005e68d318ea5ef41fc9b0202cc57543cec75215f2cddbf075"
+        },
+        {
+          "name": "summary.json",
+          "bytes": 448,
+          "sha256": "029a5684d363a1bc95e1be8d0b580a84bb648cdeeca929d615e929f245a0b3c1"
+        }
+      ]
+    },
+    {
+      "run_id": "s12-v16-qwen37-dev100-reuse20",
+      "version": "v1.6",
+      "n": 100,
+      "files": [
+        {
+          "name": "config.json",
+          "bytes": 1083,
+          "sha256": "482cab6000163e6bf3b553fec29db12b9e816d79fba900903f5144f0fe2b1a59"
+        },
+        {
+          "name": "results.jsonl",
+          "bytes": 19737919,
+          "sha256": "678041bcb19c9fd10e9fb73df1bb6033da88d4d8b21d5a92601c8ff55dd595a5"
+        },
+        {
+          "name": "judged.jsonl",
+          "bytes": 254606,
+          "sha256": "42c30fecc14833b38a8103e97491892391cbd66685f94dfbc2e764b6c99de4fc"
+        },
+        {
+          "name": "summary.json",
+          "bytes": 444,
+          "sha256": "1e44eeb97afd2f4aef014442389fc7938163f51025b3515151fdc931979a673c"
+        }
+      ]
+    },
+    {
+      "run_id": "s13-v17-qwen37-dev100-reuse20",
+      "version": "v1.7",
+      "n": 100,
+      "files": [
+        {
+          "name": "config.json",
+          "bytes": 1111,
+          "sha256": "39ca0c00de416c9c79f404810442f7464831bcba67a55b27b926ac086cd8b635"
+        },
+        {
+          "name": "results.jsonl",
+          "bytes": 8816672,
+          "sha256": "36375e50574996314acafd7e73201460e9afbdc44656214b9e4bb918be90ac8c"
+        },
+        {
+          "name": "judged.jsonl",
+          "bytes": 247494,
+          "sha256": "b7ba167e5e1647106d619f0772ad0df0ad7afbef03fdca608e6f435bd5c3a9a3"
+        },
+        {
+          "name": "summary.json",
+          "bytes": 515,
+          "sha256": "6ed3532f90575c6629e38a5bb2e78a128f56949a39bdb23d35d3ee5406f9ac8e"
+        }
+      ]
+    },
+    {
+      "run_id": "s14-v18-qwen37-dev100-reuse20",
+      "version": "v1.8",
+      "n": 100,
+      "files": [
+        {
+          "name": "config.json",
+          "bytes": 1141,
+          "sha256": "617437fdc55f7bc1928e84e88b36cfe432fa598fca349dbf878eb9d3744be706"
+        },
+        {
+          "name": "results.jsonl",
+          "bytes": 5756091,
+          "sha256": "d79068e108b76abee44cf6bcd3677eb9a82ea001d044ae2c9d5fc837caac7a9f"
+        },
+        {
+          "name": "judged.jsonl",
+          "bytes": 227289,
+          "sha256": "ed8d2a54f28585277ab8af173bbd0a59d57807fe2e9b10641f3e2ebeb2cadfaa"
+        },
+        {
+          "name": "summary.json",
+          "bytes": 515,
+          "sha256": "ef528fab10052f1f38c608d14a51410b2f332bab23738c492de42bf4680d3f2d"
+        }
+      ]
+    },
+    {
+      "run_id": "s15-v19-qwen37-dev100-reuse20",
+      "version": "v1.9",
+      "n": 100,
+      "files": [
+        {
+          "name": "config.json",
+          "bytes": 1163,
+          "sha256": "73989eaa89b53f920a20a8bdef2f663fc4036971affe3d77ff5eb65f6f49b4b1"
+        },
+        {
+          "name": "results.jsonl",
+          "bytes": 6191466,
+          "sha256": "c4d0a823ad824c63f8b62f6ca88ca54aeb81c4ee6dc124f4fa85b5928d255ca7"
+        },
+        {
+          "name": "judged.jsonl",
+          "bytes": 232210,
+          "sha256": "6c784803ba8c246663ef2cb1341b5664291dbb4044584769dff6c939b86dd03d"
+        },
+        {
+          "name": "summary.json",
+          "bytes": 516,
+          "sha256": "f2480bd0048cd63bae7b973d9b8b59d5bd17237b069d06f41764dd673bd060cd"
+        }
+      ]
+    },
+    {
+      "run_id": "s16-v20-qwen37-dev100-reuse20",
+      "version": "v2.0",
+      "n": 100,
+      "files": [
+        {
+          "name": "config.json",
+          "bytes": 1217,
+          "sha256": "906515a96c47210992ecabb3b4f7469fef56f1eed83865368fc5607f6c226542"
+        },
+        {
+          "name": "results.jsonl",
+          "bytes": 6295802,
+          "sha256": "38c23a7cd24c9051cbb67bc541272b32d8a11c098882bc0c7c9cdad659ed573c"
+        },
+        {
+          "name": "judged.jsonl",
+          "bytes": 220469,
+          "sha256": "786654bffb58259e2460d7085e6686f3fdbd79b477045c2f951bd703512d1b91"
+        },
+        {
+          "name": "summary.json",
+          "bytes": 516,
+          "sha256": "82e6fa3a00a8fd7ca9362f7eb1b6ddbeb57fbdb7f196d40dc9c5cc8532ab75ee"
+        }
+      ]
+    },
+    {
+      "run_id": "s17-v21-qwen37-dev100-reuse20",
+      "version": "v2.1",
+      "n": 100,
+      "files": [
+        {
+          "name": "config.json",
+          "bytes": 1382,
+          "sha256": "43f482bd7662fac7a5106e592fb2e3a34f4b785038a0020bc324e706d322b661"
+        },
+        {
+          "name": "results.jsonl",
+          "bytes": 26529032,
+          "sha256": "b7eae9ce7f5217c6d1e012149c6473f64fc69028d686ac71b4f83f85fce3037b"
+        },
+        {
+          "name": "judged.jsonl",
+          "bytes": 234256,
+          "sha256": "ecbc03677bdfafc42e3c1870a1b8f5c4e110fd31b06a52dab979c4ff54b91dfb"
+        },
+        {
+          "name": "summary.json",
+          "bytes": 517,
+          "sha256": "9a6292489c04cb7641177de9a2585a802980bf8b24d1e114bf8027116bc0cf75"
+        }
+      ]
+    },
+    {
+      "run_id": "s18-v22-300-qwen37-dev100-reuse20",
+      "version": "v2.2",
+      "n": 100,
+      "files": [
+        {
+          "name": "config.json",
+          "bytes": 1433,
+          "sha256": "76d33091b06fbe3ca727aa92c5ec5aba4dd55553cdbb6269ee0428edff43fbb2"
+        },
+        {
+          "name": "results.jsonl",
+          "bytes": 22894628,
+          "sha256": "963ad9d00235301f3d2bdc7337ccabf732d2ad9bf08fd18b541bb1ca048c6cce"
+        },
+        {
+          "name": "judged.jsonl",
+          "bytes": 220043,
+          "sha256": "4a7911bc93b07177241b56b58735ff6d6b0f81d9bbdbf484c893c9bb9e4494b9"
+        },
+        {
+          "name": "summary.json",
+          "bytes": 521,
+          "sha256": "b39d93cd6dbc6a09195569824cb43b09f688140e14f31b0f93cc645d97a67c7b"
+        }
+      ]
+    },
+    {
+      "run_id": "s18-v22-600-qwen37-dev100-reuse20",
+      "version": "v2.2",
+      "n": 100,
+      "files": [
+        {
+          "name": "config.json",
+          "bytes": 1433,
+          "sha256": "57addbcc0e0612d3211c755cf3ca8a8f25ef0030657318e37982c13d6b88cbbc"
+        },
+        {
+          "name": "results.jsonl",
+          "bytes": 25812080,
+          "sha256": "5398763f15e04828bbe7cbbfbaacb51364108d7bd10f4b731cb5e2f951a6c0fe"
+        },
+        {
+          "name": "judged.jsonl",
+          "bytes": 227332,
+          "sha256": "cdfbbb0cfff442cb003ffee848fd4e2fa86e8da1c70549d521c87e4f37b3cbbd"
+        },
+        {
+          "name": "summary.json",
+          "bytes": 521,
+          "sha256": "0d3af3b5fe5061f4520ddbc15ec353ab3f65708fa2c63fcd009923cde5684a4d"
+        }
+      ]
+    },
+    {
+      "run_id": "s19-v23-qwen37-dev100-reuse20",
+      "version": "v2.3",
+      "n": 100,
+      "files": [
+        {
+          "name": "config.json",
+          "bytes": 1460,
+          "sha256": "295c9593b2a8535a7e3f3a696891019546e448edeb347ea7c6913933b68047ac"
+        },
+        {
+          "name": "results.jsonl",
+          "bytes": 25394209,
+          "sha256": "d46edc21c6367be40d5a813c9bef9630a49202ec0b4064f739a0e3b010f3b7ad"
+        },
+        {
+          "name": "judged.jsonl",
+          "bytes": 227612,
+          "sha256": "e8165940b7e006296a088917f7029ba385e1ca642cd76023cff945a23bd81dcf"
+        },
+        {
+          "name": "summary.json",
+          "bytes": 516,
+          "sha256": "2be20dc515c857b2f2c388fa0aa8b286579d077d5aad52cde75e8d9248046cf9"
+        }
+      ]
+    },
+    {
+      "run_id": "s20-v23-qwen37-rerun-dev100",
+      "version": "v2.3",
+      "n": 100,
+      "files": [
+        {
+          "name": "config.json",
+          "bytes": 1460,
+          "sha256": "295c9593b2a8535a7e3f3a696891019546e448edeb347ea7c6913933b68047ac"
+        },
+        {
+          "name": "results.jsonl",
+          "bytes": 27231578,
+          "sha256": "e652ac5a546d3f254ec9221a4c339aea68a0bd4618fc975d565b8bbf9549268f"
+        },
+        {
+          "name": "judged.jsonl",
+          "bytes": 234000,
+          "sha256": "057a0763ff5661bc892211ab4e5e49c96f56a53585f4b63ab1d6c01c7725d108"
+        },
+        {
+          "name": "summary.json",
+          "bytes": 513,
+          "sha256": "59f8d2433c763a0be63517e68f0965485365f992e9c48db82422007e6f02dea4"
+        }
+      ]
+    },
+    {
+      "run_id": "s20-v235-qwen37-dev100-reuse20",
+      "version": "v2.3.5",
+      "n": 100,
+      "files": [
+        {
+          "name": "config.json",
+          "bytes": 1694,
+          "sha256": "666cceeb2ea997439f12374e857c9ed06d78c7fc88b96f013db1f3016b68ab93"
+        },
+        {
+          "name": "results.jsonl",
+          "bytes": 35510805,
+          "sha256": "62c547631d11c65d63f8d74aa1e0e6f5d15c85dd9989d1ccf25f52cfd6a2105b"
+        },
+        {
+          "name": "judged.jsonl",
+          "bytes": 240634,
+          "sha256": "d4ed7dfda490491f81d802e7903bfe8ec3900077cb35c7f825e98338fbbe9ac9"
+        },
+        {
+          "name": "summary.json",
+          "bytes": 520,
+          "sha256": "319e30619b447a463d37178977c8630010ecb23338813ded61f3f4a95dddbe5c"
+        }
+      ]
+    }
+  ]
+}

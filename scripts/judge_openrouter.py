@@ -21,6 +21,18 @@ judge = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(judge)
 
 
+def load_grading_dataset(dataset):
+    """外部题集与研究端共用目录解析；未配置时保留课程判分器的加载方式。"""
+    if os.getenv("DATASET_DIR", "").strip():
+        from app.runner import read_dataset
+        items = read_dataset(dataset)
+        questions = {str(item["query_id"]): item for item in items}
+        if len(questions) != len(items):
+            raise ValueError("题集中存在重复编号")
+        return questions
+    return judge.load_dataset(dataset)
+
+
 def main():
     """默认仅统计待判输入；--execute才调用模型，标注只进入评测提示词。"""
     parser = argparse.ArgumentParser()
@@ -37,7 +49,7 @@ def main():
     config = json.loads((directory / 'config.json').read_bytes())
     if config.get('dataset') != args.dataset:
         parser.error('dataset与运行配置不一致')
-    questions = judge.load_dataset(args.dataset)
+    questions = load_grading_dataset(args.dataset)
     if args.recalculate:
         summary, changed = recalculate(directory, questions, judge.summarize, judge.load_jsonl)
         print(json.dumps({'model_calls': 0, 'changed_confidences': changed, 'summary': summary}, ensure_ascii=False, indent=2))
